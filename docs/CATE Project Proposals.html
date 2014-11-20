@@ -1,0 +1,54 @@
+<!DOCTYPE html
+	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+<head>
+<title>CATE Project Proposals</title>
+<link type="image/gif" rel="SHORTCUT ICON" href="icons/favcate3.gif" />
+<link rel="stylesheet" type="text/css" href="projects.css" />
+<script type="text/javascript">//<![CDATA[
+var newwindow;
+
+function poptastic(url,name)
+{
+    newwindow=window.open(url,name,"width=850,height=600,top=20,left=120,scrollbars=yes");
+    newwindow.focus();
+}
+
+//]]></script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+
+  <table border="0" width="100%">
+  <tr>
+  <td align="top" width="25%">
+  <table border="0" width="100%">
+    <tr><td valign="top"><b style="font-family: sans-serif;letter-spacing: -2px;color: #3377AA;font-size: 180%">Imperial College</b></td></tr>
+    <tr><td valign="top"><b style="font-family: sans-serif;letter-spacing: -2px;color: #95B9D0;font-size: 180%">London</b></td></tr>
+  </table>
+  </td>
+  <td align="top" width="50%">
+  <table border="0" width="100%">
+    <tr><td align="center" valign="top"><b style="font-family: sans-serif;letter-spacing: -2px;color: #3377AA;font-size: 180%">Department of Computing</b></td></tr>
+    <tr><td align="center" valign="top"><b style="font-family: sans-serif;letter-spacing: -2px;color: #95B9D0;font-size: 180%">UG Individual Project &nbsp;-&nbsp; 2014-2015</b></td></tr>
+    <tr><td align="center"><i>Page created on: Fri Oct 31 19:37:54 GMT 2014</i></td></tr>
+  </table>
+  </td>
+  <td width="25%" valign="center" align="right">
+  <img src="icons/tiger.jpg" title="downloaded from U.S. Fish & Wildlife Service">
+  </td>
+  </tr>
+  </table>
+  <br><hr>
+<center>
+           <h1>Project Proposal</h1>
+           </center><b>Proposer:</b> Pietzuch, Peter (prp) - Academic
+           <p>
+           <b>Title:</b> Packet Processing in Java
+           <p>
+           <b>Offered to:</b><br><font color="blue"><b>301</b></font> - Individual Project BEng<br><font color="blue"><b>301I</b></font> - Individual Project BEng - EIE<br><font color="blue"><b>301J</b></font> - Individual Project BEng - JMC<br><font color="blue"><b>401</b></font> - Individual Project MEng<br><font color="blue"><b>401I</b></font> - Individual Project MEng - EIE<br><font color="blue"><b>401J</b></font> - Computing Individual Project MEng - JMC
+           <hr>
+           <b>Description:</b> <br>Joint supervision with Abdul Alim<br><br>As middleboxes are widely widely used in the Internet, a number of programmable<br>middlebox platforms have been developed over the last few years. Since middleboxes <br>mainly process network packets, programmable middleboxes requires high speed packet<br>I/O to process packets at line rate. Several high speed packet I/O systems (e.g., <br>netmap, DPDK, Packet Shader) have been emerged that can receive/transmit network <br>packets directly from/to the user-space bypassing the OS kernel. These systems <br>provides C APIs for writing middlebox applications and are not usable from Java<br>applications.<br><br>However, many high performance computing projects have been using Java and achieved <br>comparable performance to C/C++ based systems. So it is also possible to write <br>middlebox applications in Java that could run at line rate. The main obstacle <br>to high speed packet processing in Java is that there is no packet I/O system <br>that can send/receive network packets directly from/to JVM memory. Once we have<br>such a packet I/O system, middlebox applications can be written in Java that <br>will run at line rate.<br><br>Project Goals<br><br>The main objective of this project is to implement a high speed packet I/O system<br>in Java on top of netmap/DPDK. <br><br>Roadmap<br><br>In order to implement such a system, we have to exploit two features of Java: <br>off heap Java memory using Unsafe class or ByteBuffer's allocate direct and <br>Java Native Interface (JNI) to interact with netmap/DPDK system. Implement <br>a few middlebox applications such as a firewall and a NAT in Java and compare<br>their performance with their C/C++ counter part.<br><br>Skills<br><br>1. Strong Java and C programming experience including network programming.<br>2. Good understanding of networking protocols.<br><br>Reading list<br><br>1. Luigi Rizzo, netmap: a novel framework for fast packet I/O. Usenix ATC'12, June 2012.<br>2. Intel Data Plane Development Kit Programmer's Guide. June 2014.<br>3. Java in the High Performance Computing arena: Research, practice and experience. <br>   http://www.sciencedirect.com/science/article/pii/S0167642311001420<br>4. Patrick Stuedi, Bernard Metzler, Animesh Trivedi, jVerbs: Ultra-low Latency <br>   for Data Center Applications. ACM SoCC'13, Santa Clara, CA, October 2013.<br><br>Information Meeting<br><br>If you are interested in this project, you have to attend one of the <a href="http://www.doc.ic.ac.uk/~prp/indv_proj_meetings">information meetings</a> that I run.<br><hr /> <p> <center><a href="javascript:self.close()" title="Close this window"> <img src="icons/close.gif" border="0"> </a></center>
+</body>
+</html>
