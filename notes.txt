@@ -1,0 +1,5 @@
+-generate off heap memory using byte buffer direct access
+-pass pointer to init method
+-use jni to wrap init, block read and write methods from dpdk
+-write a packet forwarding program to change destination ip address
+-then write a NAT and ip firewall
