@@ -1,2 +1,8 @@
+# C
 *.class
+
+# java
 *.jnilib
+
+# iso images
+*.iso
