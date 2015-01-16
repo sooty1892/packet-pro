@@ -66,49 +66,49 @@
 #define	NB_TX_DESC 256
 
 static struct rte_eth_conf eth_conf = { 
-   .rxmode = { 
-    .mq_mode = ETH_MQ_RX_RSS,
-     .split_hdr_size = 0, 
-     .header_split = 0, 
-     .hw_ip_checksum = 1, 
-     .hw_vlan_filter = 0, 
-     .jumbo_frame = 0,
-     .hw_strip_crc = 0, 
-   }, 
-   .rx_adv_conf = {
-     .rss_conf = {
-       .rss_key = NULL,
-       .rss_hf = ETH_RSS_IP,
-     },
-   },
-   .txmode = { 
-     .mq_mode = ETH_MQ_TX_NONE, 
-   }, 
+    .rxmode = { 
+        .mq_mode = ETH_MQ_RX_RSS,
+        .split_hdr_size = 0, 
+        .header_split = 0, 
+        .hw_ip_checksum = 1, 
+        .hw_vlan_filter = 0, 
+        .jumbo_frame = 0,
+        .hw_strip_crc = 0, 
+    }, 
+    .rx_adv_conf = {
+        .rss_conf = {
+            .rss_key = NULL,
+            .rss_hf = ETH_RSS_IP,
+        },
+    },
+    .txmode = { 
+        .mq_mode = ETH_MQ_TX_NONE, 
+    }, 
  }; 
 
 static struct rte_eth_txconf tx_conf = {
-  .tx_thresh = {
-    .pthresh = 36,
-    .hthresh = 0,
-    .wthresh = 0,
-  },
-  .tx_rs_thresh = 0,
-  .tx_free_thresh = 0,
-  //.txq_flags = (ETH_TXQ_FLAGS_NOMULTSEGS |
-  //		ETH_TXQ_FLAGS_NOVLANOFFL |
-  //		ETH_TXQ_FLAGS_NOXSUMSCTP |
-  //		ETH_TXQ_FLAGS_NOXSUMUDP  |
-  //		ETH_TXQ_FLAGS_NOXSUMTCP)
+    .tx_thresh = {
+        .pthresh = 36,
+        .hthresh = 0,
+        .wthresh = 0,
+    },
+    .tx_rs_thresh = 0,
+    .tx_free_thresh = 0,
+    //.txq_flags = (ETH_TXQ_FLAGS_NOMULTSEGS |
+    //		ETH_TXQ_FLAGS_NOVLANOFFL |
+    //		ETH_TXQ_FLAGS_NOXSUMSCTP |
+    //		ETH_TXQ_FLAGS_NOXSUMUDP  |
+    //		ETH_TXQ_FLAGS_NOXSUMTCP)
 };
 
 static struct rte_eth_rxconf rx_conf = {
-  .rx_thresh = {
-    .pthresh = 8,
-    .hthresh = 8,
-    .wthresh = 4,
-  },
-  .rx_free_thresh = 64,
-  .rx_drop_en = 0,
+    .rx_thresh = {
+        .pthresh = 8,
+        .hthresh = 8,
+        .wthresh = 4,
+    },
+    .rx_free_thresh = 64,
+    .rx_drop_en = 0,
 };
 
 /* static int */
@@ -122,86 +122,85 @@ static struct rte_eth_rxconf rx_conf = {
 
 static struct rte_mempool *rx_pool;
 
-int MAIN(int argc, char **argv)
-{
-  int i, ret, recv_cnt, ifidx = 0;
-  //unsigned lcore_id;
-  uint8_t count;
-  struct rte_eth_link link;
-  struct rte_mbuf *rx_mbufs[MAX_PKT_BURST];
-  //struct rte_eth_conf eth_conf;
+int MAIN(int argc, char **argv) {
+    int i, ret, recv_cnt, ifidx = 0;
+    //unsigned lcore_id;
+    uint8_t count;
+    struct rte_eth_link link;
+    struct rte_mbuf *rx_mbufs[MAX_PKT_BURST];
+    //struct rte_eth_conf eth_conf;
 
-  ret = rte_eal_init(argc, argv);
-  if (ret < 0) rte_panic("Cannot init EAL\n");
-  count = rte_eth_dev_count();
-  printf("# of eth ports = %d\n", count);
-  memset(&eth_conf, 0, sizeof eth_conf);
-  ret = rte_eth_dev_configure(ifidx, NB_RX_QUEUE, NB_TX_QUEUE, &eth_conf);
-  if (ret < 0) {
-    rte_exit(EXIT_FAILURE, "Cannot configure device: error=%d, port=%d\n",
-	     ret, ifidx);
-  }
-  printf("If %d rte_eth_dev_configure() successful\n", ifidx);
-  unsigned cpu = rte_lcore_id();
-  unsigned socketid = rte_lcore_to_socket_id(cpu);
-
-  rx_pool = rte_mempool_create("rx_pool", 8*1024, MAX_PKT_SIZE, 0,
-			       sizeof (struct rte_pktmbuf_pool_private),
-			       rte_pktmbuf_pool_init, NULL,
-			       rte_pktmbuf_init, NULL, socketid, 0);
-  if (rx_pool == NULL) {
-    rte_exit(EXIT_FAILURE, "rte_mempool_create(): error\n");
-  }
-  ret = rte_eth_rx_queue_setup(ifidx, 0, NB_RX_DESC, socketid, &rx_conf, rx_pool);
-  if (ret < -1) {
-    rte_exit(EXIT_FAILURE, "rte_eth_rx_dev_queue_setup(): error=%d, port=%d\n",
-	     ret, ifidx);
-  }
-  printf("If %d rte_eth_rx_queue_setup() successful\n", ifidx);
-
-  ret = rte_eth_tx_queue_setup(ifidx, 0, NB_TX_DESC, socketid, &tx_conf);
-  if (ret < 0) {
-    rte_exit(EXIT_FAILURE, "rte_eth_tx_queue_setup(): error=%d, port=%d\n",
-	       ret, ifidx);
-  }
-  printf("If %d rte_eth_tx_queue_setup() successful\n", ifidx);
-  ret = rte_eth_dev_start(ifidx);
-  if (ret < 0) {
-    rte_exit(EXIT_FAILURE, "rte_eth_dev_start(): error=%d, port=%d\n",
-	     ret, ifidx);
-  }
-  printf("If %d rte_eth_dev_start() successful\n", ifidx);
-  rte_eth_link_get(ifidx, &link);
-  if (link.link_status == 0) {
-    rte_exit(EXIT_FAILURE, "DPDK interface is down: %d\n", ifidx);
-  }
-  printf("If %d is UP and RUNNING\n", ifidx);
-  rte_eth_promiscuous_enable(ifidx);
-
-  /* call lcore_hello() on every slave lcore */
-  //RTE_LCORE_FOREACH_SLAVE(lcore_id) {
-  //	rte_eal_remote_launch(lcore_hello, NULL, lcore_id);
-  //}
-  long pktcount = 0;
-  /* call it on master lcore too */
-  while(1) {
-    recv_cnt = rte_eth_rx_burst(ifidx, 0, rx_mbufs, MAX_PKT_BURST);
-    if (recv_cnt < 0) {
-      if (errno != EAGAIN && errno != EINTR) {
-	perror("rte_eth_rx_burst()");
-	assert(0);
-      }
+    ret = rte_eal_init(argc, argv);
+    if (ret < 0) {
+        rte_panic("Cannot init EAL\n");
     }
-    if ( recv_cnt > 0) {
-      pktcount += recv_cnt;
-      for (i = 0 ; i < recv_cnt; i++)
-	/* drop packet */
-	rte_pktmbuf_free(rx_mbufs[i]);
+    count = rte_eth_dev_count();
+    printf("# of eth ports = %d\n", count);
+    memset(&eth_conf, 0, sizeof eth_conf);
+    ret = rte_eth_dev_configure(ifidx, NB_RX_QUEUE, NB_TX_QUEUE, &eth_conf);
+    if (ret < 0) {
+        rte_exit(EXIT_FAILURE, "Cannot configure device: error=%d, port=%d\n", ret, ifidx);
     }
-    if (pktcount == 10000000)
-      printf("Received %ld packets so far\n", pktcount);
-  } 
-  printf("Received %ld packets\n", pktcount);
-  //  rte_eal_mp_wait_lcore();
-  return 0;
+    printf("If %d rte_eth_dev_configure() successful\n", ifidx);
+    unsigned cpu = rte_lcore_id();
+    unsigned socketid = rte_lcore_to_socket_id(cpu);
+
+    rx_pool = rte_mempool_create("rx_pool", 8*1024, MAX_PKT_SIZE, 0,
+                                sizeof (struct rte_pktmbuf_pool_private),
+                                rte_pktmbuf_pool_init, NULL,
+                                rte_pktmbuf_init, NULL, socketid, 0);
+    if (rx_pool == NULL) {
+        rte_exit(EXIT_FAILURE, "rte_mempool_create(): error\n");
+    }
+    ret = rte_eth_rx_queue_setup(ifidx, 0, NB_RX_DESC, socketid, &rx_conf, rx_pool);
+    if (ret < -1) {
+        rte_exit(EXIT_FAILURE, "rte_eth_rx_dev_queue_setup(): error=%d, port=%d\n", ret, ifidx);
+    }
+    printf("If %d rte_eth_rx_queue_setup() successful\n", ifidx);
+
+    ret = rte_eth_tx_queue_setup(ifidx, 0, NB_TX_DESC, socketid, &tx_conf);
+    if (ret < 0) {
+        rte_exit(EXIT_FAILURE, "rte_eth_tx_queue_setup(): error=%d, port=%d\n", ret, ifidx);
+    }
+    printf("If %d rte_eth_tx_queue_setup() successful\n", ifidx);
+    ret = rte_eth_dev_start(ifidx);
+    if (ret < 0) {
+        rte_exit(EXIT_FAILURE, "rte_eth_dev_start(): error=%d, port=%d\n", ret, ifidx);
+    }
+    printf("If %d rte_eth_dev_start() successful\n", ifidx);
+    rte_eth_link_get(ifidx, &link);
+    if (link.link_status == 0) {
+        rte_exit(EXIT_FAILURE, "DPDK interface is down: %d\n", ifidx);
+    }
+    printf("If %d is UP and RUNNING\n", ifidx);
+    rte_eth_promiscuous_enable(ifidx);
+
+    /* call lcore_hello() on every slave lcore */
+    //RTE_LCORE_FOREACH_SLAVE(lcore_id) {
+    //	rte_eal_remote_launch(lcore_hello, NULL, lcore_id);
+    //}
+    long pktcount = 0;
+    /* call it on master lcore too */
+    while(1) {
+        recv_cnt = rte_eth_rx_burst(ifidx, 0, rx_mbufs, MAX_PKT_BURST);
+        if (recv_cnt < 0) {
+            if (errno != EAGAIN && errno != EINTR) {
+                perror("rte_eth_rx_burst()");
+                assert(0);
+            }
+        }
+        if ( recv_cnt > 0) {
+            pktcount += recv_cnt;
+            for (i = 0 ; i < recv_cnt; i++)
+                /* drop packet */
+                rte_pktmbuf_free(rx_mbufs[i]);
+            }
+            if (pktcount == 10000000)
+                printf("Received %ld packets so far\n", pktcount);
+            } 
+            printf("Received %ld packets\n", pktcount);
+        }
+        //  rte_eal_mp_wait_lcore();
+    }
+    return 0;
 }
