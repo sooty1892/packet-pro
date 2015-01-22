@@ -222,7 +222,7 @@ int MAIN(int argc, char **argv) {
         }
         if ( recv_cnt > 0) {
             pktcount += recv_cnt;
-            for (i = 0 ; i < recv_cnt; i++)
+            for (i = 0 ; i < recv_cnt; i++) {
                 /* drop packet */
                 // Free a packet mbuf back into its original mempool.
                 // Free an mbuf, and all its segments in case of chained
@@ -230,8 +230,7 @@ int MAIN(int argc, char **argv) {
                 rte_pktmbuf_free(rx_mbufs[i]);
             }
             if (pktcount == 10000000)
-                printf("Received %ld packets so far\n", pktcount);
-            } 
+                printf("Received %ld packets so far\n", pktcount); 
             printf("Received %ld packets\n", pktcount);
         }
         //  rte_eal_mp_wait_lcore();

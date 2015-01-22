@@ -12,3 +12,10 @@
 .cproject
 .project
 .settings/
+
+# dpdk make files
+/dpdk-1.7.1
+
+# build folders
+**/build/
+
