@@ -1,4 +1,13 @@
-public class Main {
+public class Capture {
+
+	private class Rte_eth_conf {
+		public Rte_eth_conf() {};
+		public Rte_eth_rxmode;
+	}
+
+	private class Rte_eth_rxmode {
+		public Rte_eth_rxmode() {};
+	}
 
 	private static int MAX_PKT_BURST = 512;
 	//private static int MAX_PKT_SIZE = ???
@@ -19,9 +28,7 @@ public class Main {
 		//structs here
 
 		//initialise eal
-		System.println.out("Before");
-		wrap_eal_init(args);
-		System.println.out("After");
+		Wrapper.wrap_eal_init(args);
 
 		//configure ethernet devices
 

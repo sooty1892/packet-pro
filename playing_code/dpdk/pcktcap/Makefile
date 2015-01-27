@@ -15,6 +15,7 @@ APP = pktcapture
 SRCS-y := Wrapper.c
 
 CFLAGS += -O3
-CFLAGS += $(WERROR_FLAGS)
+
+CFLAGS_Wrapper.o := -shared -fPIC -o libWrapper.so -I/usr/lib/jvm/java-7-openjdk-i386/include -I/usr/lib/jvm/java-7-openjdk-i386/include/linux
 
 include $(RTE_SDK)/mk/rte.extapp.mk
