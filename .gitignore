@@ -22,3 +22,8 @@
 *.so
 *.swp
 *.tmp
+
+# latex files
+*.log
+*.aux
+*.synctex.gz
