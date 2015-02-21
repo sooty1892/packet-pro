@@ -27,6 +27,8 @@
 *.log
 *.aux
 *.synctex.gz
+*.bak
+*.toc
 
 # course docs folder
 /course_docs
