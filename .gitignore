@@ -29,6 +29,7 @@
 *.synctex.gz
 *.bak
 *.toc
+*.tdo
 
 # course docs folder
 /course_docs
