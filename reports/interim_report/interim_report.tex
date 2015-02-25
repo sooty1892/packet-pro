@@ -6,7 +6,36 @@
 % more date and time options
 \usepackage{datetime}
 % for only month and year in title
-\newdateformat{monthyeardate}{\monthname[\THEMONTH] \THEYEAR}	
+\newdateformat{monthyeardate}{\monthname[\THEMONTH] \THEYEAR}
+% for code snippet
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+ 
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
 
 \title{Packet Processing in Java}
 \author{Ashley Hemingway}
@@ -14,7 +43,47 @@
 
 \begin{document}
 
-\maketitle
+\begin{titlepage}
+
+% Defines a new command for the horizontal lines, change thickness here
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+% Center everything on the page
+\center
+
+\textsc{\LARGE Imperial College London}\\[1.5cm]
+\textsc{\Large Individual Project}\\[0.5cm]
+\textsc{\large Computing - BEng}\\[0.5cm]
+
+\HRule \\[0.4cm]
+{ \huge \bfseries Packet Processing in Java}\\[0.4cm]
+\HRule \\[1.5cm]
+
+\textsc{\LARGE Ashley Hemingway}\\[1.5cm]
+
+\begin{minipage}{0.4\textwidth}
+\begin{flushleft} \large
+\emph{Supervisor:}\\
+Peter \textsc{Pietzuch}
+\end{flushleft}
+\end{minipage}
+~
+\begin{minipage}{0.4\textwidth}
+\begin{flushright} \large
+\emph{2nd Marker:} \\
+Wayne \textsc{Luk}
+\end{flushright}
+\end{minipage}\\[4cm]
+
+{\large \monthyeardate\today}\\[3cm]
+
+% Include a department/university logo - this will require the graphicx package
+%\includegraphics{Logo}\\[1cm]
+
+% Fill the rest of the page with whitespace
+\vfill
+
+\end{titlepage}
 
 %\todo{test1}
 %\todo[noline]{test2}
@@ -108,9 +177,118 @@ Within this project, the term 'firewall' is used for a network layer firewall wh
 
 \includegraphics[width=\textwidth]{images/firewall.png}
 
-\subsection{Java}
+\subsection{Java Features}
+As the Java language and the JVM implementation is known by most, this section will focus on the more specific sections related to this project, instead of discussing the overall implementation.
+
 \subsubsection{JVM Networking}
-\subsubsection{JNI}
+\subsubsection{Java Native Interface (JNI)}
+Provided by the Java Software Development Kit (SDK), the JNI is a native programming interface that lets Java applications use libraries written in other languages. The JNI also includes the invocation API which allows a JVM to be embedded into native applications. This project and therefore this overview will only focus on Java code using C libraries via the JNI on a linux based system\\
+\newline
+In order to call native libraries from Java applications a number of steps have to be undertaken as shown below, which are described in more detail later:
+\begin{enumerate}
+	\item Java code - load the shared library, declare the native method to be called and call the method
+	\item Compile Java code - compile the Java code into bytecode
+	\item Create C header file - the C header file will declare the native method signature and is created automatically via a terminal call
+	\item Write C code - write the corresponding C source file
+	\item Create shared library - create a shared library file (.so) from C code
+	\item Run Java program - run the Java program which calls the native code
+\end{enumerate}
+
+\begin{lstlisting}[language=Java]
+public class Hello {
+    public native void sayHi(String who, int times);
+
+    static { System.loadLibrary("Hello"); }
+
+    public static void main(String[] args) {
+        Hello hello = new Hello();
+        
+        hello.sayHi(args[0], Integer.parseInt(args[1]));
+    }
+}
+\end{lstlisting}
+The code above shows a simple Java program which uses some native C code from a shared library. Line 4 indicates which shared library to load into the application, which is by default lib*.so where * indicates the name of the C file. Line 2 is the native method declaration which specifies the name of the method and the parameters which will be passed to the corresponding C method. Line 9 is where this native method is called.
+
+\begin{lstlisting}[language=sh]
+$ javac Hello.java
+\end{lstlisting}
+Compiling the above Java class is shown above and should be self explanatory.
+
+\begin{lstlisting}[language=sh]
+$ javah -jni Hello.java
+\end{lstlisting}
+In order to generate the C header file the command 'javah' is used with the flag 'jni' which tells Java that a header file is required which is for use with the JNI. It will then produce method signatures which correspond to the native method declared within Hello.java. The auto generated C header file is shown below.
+\todo[noline]{explain parameters and mapping for jString to char* etc}
+
+\begin{lstlisting}[language=C]
+/* DO NOT EDIT THIS FILE - it is machine generated */
+#include <jni.h>
+/* Header for class Hello */
+
+#ifndef _Included_Hello
+#define _Included_Hello
+#ifdef __cplusplus
+extern "C" {
+#endif
+/*
+ * Class:     Hello
+ * Method:    sayHi
+ * Signature: (Ljava/lang/String;I)V
+ */
+JNIEXPORT void JNICALL Java_Hello_sayHi
+  (JNIEnv *, jobject, jstring, jint);
+
+#ifdef __cplusplus
+}
+#endif
+#endif
+\end{lstlisting}
+
+\begin{lstlisting}[language=C]
+#include <stdio.h>
+#include "Hello.h"
+
+JNIEXPORT void JNICALL Java_Hello_sayHi
+(JNIEnv *env, jobject obj, jstring who, jint times) {
+    jint i;
+    jboolean iscopy;
+    const char *name;
+    name = (*env)->GetStringUTFChars(env, who, &iscopy);
+    for (i = 0; i < times; i++) {
+        printf("Hello %s\n", name);
+    }
+}
+\end{lstlisting}
+The C source file implementation is shown above. Line 9 is the interesting line, where the code is retrieving the string stored at pointer 'who' from the Java environment and copying it into the pointer 'name' for use later on.
+
+\begin{lstlisting}[language=sh]
+$ cc -c -I/System/Library/Frameworks/JavaVM.framework/Headers Hello.c
+$ cc -dynamiclib -o libhello.so Hello.o -framework JavaVM
+\end{lstlisting}
+The 2 commands above will first compile the C source code into an object file (.o), requiring a pointer to the jni.h file provided with the Java framework. The second line then generates the required shared object file (.so) which the Java application looks for.
+
+\begin{lstlisting}[language=sh]
+$ java Hello Ashley 5
+Ashley
+Ashley
+Ashley
+Ashley
+Ashley
+\end{lstlisting}
+Running the Java application will give the above output. \\
+\newline
+As can be seen in the above code, there are 2 extra parameters in the method that weren't defined by me. The 'env' pointer is a structure that contains the interface to the JVM, therefore providing numerous functions required to interact with the JVM and the Java objects. Examples include converting native arrays to Java arrays and throwing exceptions, meaning that anything that can be done in Java can be done via this interface. \\
+\newline
+The 'obj' argument refers to the Java object which the native method had been declared within. \\
+\newline
+Although the JNI provides a very useful interface to interact with native library code, there are a number of issues that users should be wary of before progressing:
+\begin{itemize}
+	\item The Java application that relies on the JNI loses its portability with the JVM as it relies on natively compiled code.
+	\item Errors within the native code can potentially crash the JVM, with certain errors been very difficult to reproduce and debug.
+	\item Anything instantiated with the native code won't be collected by the garbage collector with the JVM, so freeing memory should be a concern.
+	\item If using the JNI on large scale, converting between Java objects and C structs can be difficult
+\end{itemize}
+
 \subsubsection{ByteBuffer}
 \subsection{I/O API's}
 \subsubsection{DPDK}
@@ -184,7 +362,6 @@ The functionality of the application will be evaluated to make sure it provides 
 
 \todo[inline]{Add references}
 \todo[inline]{Add figure labels}
-\todo[inline]{Complete front page}
 \todo[inline]{Do final read through}
 \todo[inline]{Put through spell checker}
 \todo[inline]{Other useful applications}
