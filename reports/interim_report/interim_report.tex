@@ -98,33 +98,37 @@ Wayne \textsc{Luk}
 
 \newpage
 
-\section{Introduction (1 - 3 pages)}
+\section{Introduction}
 \subsection{Motivation}
-As modern computing techniques advance, people are trying to find more generic solutions to problems which have been solved by native applications in the past. A main area of focus has been network middleboxes (network appliance), which are developed to manipulate network packets. Common examples of middleboxes are firewalls, network address translators (NATs) and load balancers, all of which inspect or transform network packets. In recent years, people have been developing a number of programmable middleboxes which allow these generic solutions to be used on a wide scale basis.
+As modern computing techniques advance, people are trying to find more generic solutions to problems which have been solved by native applications in the past. A main area of focus has been network middleboxes (network appliances), which are developed to manipulate network packets. Common examples of middleboxes are firewalls, network address translators (NATs) and load balancers, all of which inspect or transform network packets in the middle of a connection between a public and private network. In recent years, people have been developing a number of programmable middleboxes which allow these generic solutions to be used on a wide scale basis.
 
 \begin{center}
 	\includegraphics[scale=0.75]{images/middleboxes.jpg}
 \end{center}
 
-As middleboxes are mainly used for networking purposes, they are required to process network packets at line rate (i.e. at speeds which mean there is no backlog of packets to process). This requires the application to retrieve the packet from the network line, inspect and transform the packet in the desired way and then insert the packet back onto the network line, all within a time period sufficient enough to not cause a backlog. High performance implementations of such applications are available, but are written in native languages, predominately in C/C++. However, more and more high performance computing projects are been developed in Java and have succeeded in performing at similar speeds to C/C++ applications. \\
+\noindent As middleboxes are mainly used for networking purposes, they are required to process network packets at line rate (i.e. at speeds which allow packets to be processed as they are received). This requires the application to retrieve the packet from the network line, inspect and transform the packet in the desired way and then insert the packet back onto the network line, all within a time period sufficient enough to not cause a backlog. High performance implementations of such applications are available, but are written in native languages, predominately in C/C++. However, more and more high performance computing projects are been developed in Java and have succeeded in performing at similar speeds to C/C++ applications. \\
 \newline
 The main challenge is actually getting the I/O system for the Java application to run at line rate speeds, due to challenges with how the JVM (Java Virtual Machine) interacts with memory and the computer's kernel. Once this challenge has been overcome, there are no reasons why programmable middleboxes written in none native languages such as Java can exist within networking systems.
 
 \subsection{Objectives}
-\todo[inline]{More here about main objective I think - check slides - mention DPDK before and link to background}
-With the main aim of implementing a Java application which can process network packets at line speed with similar comparisons to C/C++ applications we defined a number of milestone objectives:
+The main objective for this project is to research, develop and test a new application which is written in a non-native language such as Java, but can process packets at a high performance level. This also requires that the application can perform I/O operations at line rate in order to pass on data packets without slowing the line rate. The aim is to match current native applications which are written in C/C++. \\
+\newline
+With the main objective stated above, I set out a few initial, smaller objectives in order to divide the project into more manageable objectives:
 \begin{itemize}
-	\item Understand similar application and API's written in C/C++ which process at line speeds and how the implementations can be exploited for Java applications
+	\item Understand similar applications and API's written in C/C++ which process at line speeds and how the implementations can be exploited for Java applications
 	\item Exploit two Java features which allows for better I/O performance: ByteBuffer's and the Java Native Interface (JNI)
 	\item Implement basic middlebox applications in Java such as a firewall and a NAT
 	\item Compare Java implementations to those which are pure Java and pure C/C++
 \end{itemize}
 
-\subsection{Contributions / Main idea for solving it}
+\subsection{Solution Idea}
+The idea is to implement a new library in Java using a few techniques in order to speed up network access. Firstly, no networking will be done via the JVM and the operating system kernel. Instead, the Java application will bypass the kernel altogether using a combination of direct memory access and high speed I/O operations via a C library which we interact with the application via the Java Native Interface (JNI). \\
+\newline
+This eliminates the need for the JVM to call system calls from the kernel in order to do the network access, which can be relatively slow compared to direct network access achievable from native applications.
 
 \newpage
 
-\section{Background (10 - 20 pages)}
+\section{Background}
 \subsection{Network Components}
 \subsubsection{Network Packets}
 A network packet is responsible for carrying data from a source to a destination. Packets are routed, fragmented and dropped via information stored within the packet's header. Note: in this report packets and datagrams are interchangeable.
@@ -296,7 +300,7 @@ Although the JNI provides a very useful interface to interact with native librar
 
 \newpage
 
-\section{Project Plan (1 - 2 pages)}
+\section{Project Plan}
 \subsection{Time Plan}
 The given time plan outlined below provides me with a useful indication of how to measure the progress of the project, as well as dividing the whole project into smaller, more manageable sections which can be assessed individually. Some of the milestones have already been completed, while the others are expected to be finished within the given time period.
 \subsubsection{Key Milestones}
@@ -317,7 +321,7 @@ The given time plan outlined below provides me with a useful indication of how t
 \missingfigure{Gantt chart would be very useful here}
 
 \subsubsection{Completed Milestones}
-As indicated, the background reading on the DPDK and Netmap libraries has been completed and the overview of the implementation has been assessed. The pros and cons has been outlined in the background section (give number). From this, I was able to get DPDL fully working on a virtual machine running locally on a personal machine, which allowed for a more in depth analysis of the implementation of DPDK. \\
+As indicated, the background reading on the DPDK and Netmap libraries has been completed and the overview of the implementation has been assessed. The pros and cons has been outlined in the background section (give number). From this, I was able to get DPDK fully working on a virtual machine running locally on a personal machine, which allowed for a more in depth analysis of the implementation of DPDK. \\
 \newline
 I'm currently working on a way to generate shared object files from the C code used the link DPDK with a Java application. Due to the complex build system which DPDK makes use of, there has been a number of issues which have arisen.
 
@@ -343,7 +347,7 @@ Another interesting extension could be to test the limitations of the NAT and fi
 
 \newpage
 
-\section{Evaluation Plan (1 - 2 pages)}
+\section{Evaluation Plan}
 The sections below outline how the project will be evaluated in order to determine whether the initial objectives have been met and whether the final outcome can be deemed a success, even if it provides unexpected results.
 
 \subsection{Experiments \& Outcomes}
@@ -351,12 +355,12 @@ The main measure of success will be from the experiments which are to be carried
 \newline
 Benchmarking will consist of setting up 2 independent computers, most likely standalone machines, in order to take advantage of the ability to overwrite the Intel network card drivers as required by the DPDK API. Testing can the be carried out on the firewall and NAT implemented in the 3 different contexts, measuring the latency between the time sent and time received of the network packet. As the testing will be carried out on the same machines, linked to the same network there is unlikely to be much variation in the network latency. This means that the variation in the times will be from the system processing speeds. To account for minor variations in the computing performance of the system, numerous iterations of the same test will be carried out, then taking statistical averages will provide the best final results in order to analyse correctly. \\
 \newline
-Analysis of the results will be mainly carried out via the use of graphs which allow for easy comparison of results. The expected outcome is that the application developed from within this project is of similar speeds to applications coded directly in C/C++ and much faster than those coded in Java. This is mainly because the kernel will be bypassed, but the use of the Java Native Interface is expected to slow down certain aspects of the application. However, as long as speeds which coincide with those of the line rate are reached, this will be acceptable. There is the possibility that expected speeds are well above those that are actually measured. Although this isn't ideal, the project shouldn't be considered a failure as it will still provide very useful feedback as to where future investigations should be focussed on.
+Analysis of the results will be mainly carried out via the use of graphs which allow for easy comparison of results. The expected outcome is that the application developed from within this project is of similar speeds to applications coded directly in C/C++ and much faster than those coded in Java. This is mainly because the kernel will be bypassed, but the use of the Java Native Interface is expected to slow down certain aspects of the application. However, as long as speeds which coincide with those of the line rate are reached, this will be acceptable. There is the possibility that expected speeds are much faster than those that are actually measured. Although this isn't ideal, the project shouldn't be considered a failure as it will still provide very useful feedback as to where future investigations should be focussed on.
 
-\subsection{Functionality}
-The functionality of the application will be evaluated to make sure it provides those features that are required. This will be done by manually accessing whether the provided application is capable of doing the features that we outlined in the objectives. This can obviously be done by assessing the firewall and NAT applications.
-
-\subsection{Usability}
+\subsection{Functionality \& Usability}
+Although the objectives didn't specify any requirement to make the final application highly usable, my personal preference would be to have a product that could be used by anybody in the future. This obviously requires well commented and documented code. As the previous evaluation was all quantitative measurements, this evaluation will consist of qualitative measurements mainly undertaken by myself. \\
+\newline
+The functionality and usability can also be checked by the project supervisor \& co-supervisor to check if the original specifications were met. This can allow for an appraisal of the final application to be carried out which will be a good indication of the success of the project.
 
 \newpage
 
