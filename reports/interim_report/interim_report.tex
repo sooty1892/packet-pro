@@ -12,6 +12,7 @@
 \renewcommand{\lstlistingname}{Code}
 \usepackage{color}
 \usepackage{float}
+\usepackage{cite}
 \usepackage[nottoc,numbib]{tocbibind}
 %\usepackage{tocbibind}
 
@@ -217,6 +218,7 @@ Within this project, the term 'firewall' is used for a network layer firewall wh
 As the Java language and the JVM implementation is known by most, this section will focus on the more specific sections related to this project, instead of discussing the overall implementation.
 
 \subsubsection{Java Virtual Machine (JVM)}
+The Java Virtual Machine is an abstract computer that allows Java programs to run on any computer without dependant compilation. It provides an appealing coding language due to the vast support, frameworks and code optimisations available such as garbage collections and multithreading. Figure~\ref{fig:jvm} shows the basic JVM architecture with the relevant sections explained in the list below.
 
 \begin{figure}[H]
 	\centering
@@ -236,6 +238,8 @@ As the Java language and the JVM implementation is known by most, this section w
 	\item Native method library - holds the native libraries information
 	\item Execution engine - Contains the interpreter and just in time compiler (JIT - converts byte code to machine code). JVM decides which parts to be interpreted and when to use JIT compiler.
 \end{itemize}
+
+Typically, any network communication from a Java application occurs via the JVM and through the operating system. This is because the JVM is still technically an application running on top of the OS and therefore doesn't have any superuser access rights. Any network operation results in a kernel system call, which is then put into a priority queue in order to be executed. This is one of the main reasons why network calls through the JVM and kernel can be seen as 'slow', in relative speeds compared to network line rate speeds.
 
 \subsubsection{Java Native Interface (JNI)}
 Provided by the Java Software Development Kit (SDK), the JNI is a native programming interface that lets Java applications use libraries written in other languages. The JNI also includes the invocation API which allows a JVM to be embedded into native applications. This project and therefore this overview will only focus on Java code using C libraries via the JNI on a linux based system\\
@@ -450,7 +454,7 @@ Analysis of the results will be mainly carried out via the use of graphs which a
 \subsection{Functionality \& Usability}
 Although the objectives didn't specify any requirement to make the final application highly usable, my personal preference would be to have a product that could be used by anybody in the future. This obviously requires well commented and documented code. As the previous evaluation was all quantitative measurements, this evaluation will consist of qualitative measurements mainly undertaken by myself. \\
 \newline
-The functionality and usability can also be checked by the project supervisor \& co-supervisor to check if the original specifications were met. This can allow for an appraisal of the final application to be carried out which will be a good indication of the success of the project.
+The functionality and usability can also be checked by the project supervisor \& co-supervisor to check if the original specifications were met. This can allow for an appraisal of the final application to be carried out which will be a good indication of the success of the project. \cite{middlebox}
 
 \newpage
 
@@ -461,12 +465,12 @@ The functionality and usability can also be checked by the project supervisor \&
 \todo[inline]{Other useful applications}
 \todo[inline]{What font, size and line spacing?}
 \todo[inline]{hyper link contents}
-\todo[inline]{java network options don't allow for generic packets to be inspected}
+\todo[inline]{java network options don't allow for generic packets to be inspected}s
 
-\begin{thebibliography}{99}
-%http://www.neclab.eu/Projects/midcom.htm \\
-%http://windowsitpro.com/networking/what-types-network-address-translation-nat-exist \\
-%http://en.wikipedia.org/wiki/Firewall_(computing)#mediaviewer/File:Firewall.png
-\end{thebibliography}
+\bibliographystyle{plain}
+\bibliography{packet}
 
 \end{document}  
+
+
+
