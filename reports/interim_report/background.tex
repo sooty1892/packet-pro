@@ -99,7 +99,7 @@ The Java Virtual Machine is an abstract computer that allows Java programs to ru
 \end{figure}
 
 \begin{itemize}
-	\item Class loader sub system - Loads .class files into memory, verifies byte code instructions and allows memory required for the program
+	\item Class loader sub system - Loads .class files into memory, verifies byte code instructions and allocates memory required for the program
 	\item Method area - stores class code and method code
 	\item Heap - New objects are created on the heap
 	\item Stack - Where the methods are executed and contains frames where each frame executes a separate method
@@ -230,7 +230,7 @@ For high performance computing in Java, a number of existing programming options
 
 \paragraph{Java Sockets}\mbox{}\\ %subsubsubsection
 \label{subsec:sockets}
-Java sockets are the standard low level communication for applications are most networking protocols have socket implementations. They allow for streams of data to be sent between applications as a socket is one end point for a 2 way communication link, meaning that data can be read from and written to a socket in order to transfer data. Even though sockets are a viable option for networking, both of the Java socket implementations (IO sockets \& NIO (new I/O) sockets) are inefficient over high speed networks \cite{sockets} and therefore lack the performance that is required. As discussed previously, the poor performance is due to the JVM interacting with network cards via the OS kernel.
+Java sockets are the standard low level communication for applications as most networking protocols have socket implementations. They allow for streams of data to be sent between applications as a socket is one end point for a 2 way communication link, meaning that data can be read from and written to a socket in order to transfer data. Even though sockets are a viable option for networking, both of the Java socket implementations (IO sockets \& NIO (new I/O) sockets) are inefficient over high speed networks \cite{sockets} and therefore lack the performance that is required. As discussed previously, the poor performance is due to the JVM interacting with network cards via the OS kernel.
 
 \paragraph{Remote Method Invocation (RMI)}\mbox{}\\ %subsubsubsection
 Remote Method Invocation (RMI) is a protocol developed by Java which allows an object running in a JVM to invoke methods on another object running on a different JVM. Although this method provides a relatively easy interface for which JVM's can communicate, its major drawback relates to the speed. Since RMI uses Java sockets as its basic level communication method, it faces the same performance issues as mentioned in section~\ref{subsec:sockets}.
@@ -257,17 +257,17 @@ As jVerbs takes advantage of mapping the network device directly into the JVM, b
 jVerbs provides a useful example framework which re-emphasises that packet processing in Java is very possible with low latency, while assisting in certain implementation and design choices which can be analysed in more detail. 
 
 \subsection{Native I/O API's}
-Currently available native networking API's are capable of reading and writing packets the NIC transmission and receive queues at line rate. This is due to a number of techniques which tend to alter the kernels understand of the underlying NIC, therefore requiring specialist hardware and software to use such tools. DPDK (Section~\ref{subsec:dpdk}) is one of the tools that is open source and publicly available for use.
+Currently available native networking API's are capable of reading and writing packets to the NIC transmission and receive queues at line rate. This is due to a number of techniques which tend to alter the kernels understand of the underlying NIC, therefore requiring specialist hardware and software to use such tools. DPDK (Section~\ref{subsec:dpdk}) is one of the tools that is open source and publicly available for use.
 
 \subsubsection{Data Plane Development Kit (DPDK)}
 \label{subsec:dpdk}
-Data Plane Development Kit (DPDK) \cite{dpdk} is a set of libraries and drivers which enabaled fast packet processing with certain system set ups. Since DPDK is developed by Intel, it only supports Intel x86 CPU's and certain network interface controllers. DPDK overwrites the NIC's drivers meaning that the operating system doesn't recognise the network cards and can't interact with them. It installs its own drivers allowing it to interact with certain memory locations with permission from the kernel or even involving it in any way. \\
+Data Plane Development Kit (DPDK) \cite{dpdk} is a set of libraries and drivers which enabaled fast packet processing with certain system set ups. Since DPDK is developed by Intel, it only supports Intel x86 CPU's and certain network interface controllers. DPDK overwrites the NIC's drivers meaning that the operating system doesn't recognise the network cards and can't interact with them. It installs its own drivers allowing it to interact with certain memory locations without permission from the kernel or even involving it in any way. \\
 \newline
 DPDK makes use of an environment abstraction layer (EAL) which hides the environmental specifics and provides a standard interface which any application can interact with. Due to this, if the system changes in any way, the DPDK library needs to be re-compiled with other features been re-enabled in order to allow applications to run correctly again. \\
 \newline
 DPDK also makes use of 'Hugepages', which are memory locations of 2mb size rather than the standard 4kb size, while also forcing the user to reserve these 'Hugepage' locations at initial boot. It uses these memory locations to store packets in the corresponding ring buffer as mentioned in Section~\ref{subsec:handling}. \\
 \newline
-In order to use the DPDK libraries for the intended purpose, data packets have to be written into the correct buffer location so they are inserted onto the network. I similar approach is used when receiving packets on the incoming buffer ring, but instead of the system using interrupts to acknowledge the arrival of a new packet, which is performance costly, it constantly polls the buffer space to check for new packets. DPDK also allows for multiple queues per NIC and can handle multiple NIC's per system, there scalability is a major bonus of the libraries. \\
+In order to use the DPDK libraries for the intended purpose, data packets have to be written into the correct buffer location so they are inserted onto the network. I similar approach is used when receiving packets on the incoming buffer ring, but instead of the system using interrupts to acknowledge the arrival of a new packet, which is performance costly, it constantly polls the buffer space to check for new packets. DPDK also allows for multiple queues per NIC and can handle multiple NIC's per system, therefore scalability is a major bonus of the libraries. \\
 \newline
 DPDK is very well documented on a number of levels. Firstly there is a online API which gives in depth details about what the methods, constants and structs do. There are a number of well written guides which give step-by-step details of how to install, set-up and use DPDK on various platforms and finally, there are many sample programs included with the build which give understanding of how the overall library works.
 
