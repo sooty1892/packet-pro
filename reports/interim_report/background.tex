@@ -5,8 +5,7 @@
 \section{Background}
 \subsection{Network Components}
 \subsubsection{Network Packets}
-\todo[inline]{How packets are passed around in general}
-A network packet is responsible for carrying data from a source to a destination. Packets are routed, fragmented and dropped via information stored within the packet's header. Note: in this report packets and datagrams are interchangeable. Data within the packets are generally input from the application layer, while the headers (Figure~\ref{fig:ipv4}) are generated and updated by the network layer which have a much better understanding of the protocols in use.
+A network packet is responsible for carrying data from a source to a destination. Packets are routed, fragmented and dropped via information stored within the packet's header. Note: in this report packets and datagrams are interchangeable. Data within the packets are generally input from the application layer, while the headers (Figure~\ref{fig:ipv4}) are generated and updated by the network layer which have a much better understanding of the protocols in use. Packets are routed to their destination based on a given IP address which corresponds to a specific computer located within the network, whether that is a public or private network. In this project we will only be concerned with IPv4 packets and addresses, although IPv6 which offers a much larger IP address range is available, although not fully adopted yet.
 
 \begin{figure}[H]
 	\centering
@@ -32,6 +31,18 @@ A network packet is responsible for carrying data from a source to a destination
 	\item Destination Address - Receiver of the packet
 	\item Options - specifies a number of options which are applicable for each datagram. As this project doesn't concern these it won't be discussed further.
 \end{itemize}
+
+\subsubsection{Packet Handling}
+\label{subsec:handling}
+Once the kernel of the given operating system has received data to transmit from a given application, the data is then placed into a packet with the correct header and these packets are placed on a IP stack (Figure~\ref{fig:buffer}). Through a few intermediate steps the packets arrive at the driver queue, also known as the transmission queue. This queue is implemented as a ring buffer, therefore has a maximum capacity before it starts to overwrite packets which are still to be transmitted. As long as the queue isn't empty, the network interface card (NIC) will take packets from the queue and place them on the transmission medium. A similar process occurs when receiving packets, but in the opposite direction. For each NIC, there is a receive and transmit queue which are independent of each other allow communication to be bidirectional, although this depends on the kernel and its handling of events associated with packets.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{img/buffer.jpg}
+	\caption{Linux packet handling \cite{buffer}}
+	\label{fig:buffer}
+\end{figure}
+
 
 \subsubsection{Network Address Translator (NAT)}
 As a routing device, a NAT is responsible for remapping an IP address to another by altering the IP datagram packet header. NAT's have become extremely important in modern networking systems due to IPv4 address exhaustion, allowing a single public IP address to map to multiple private IP addresses. This is particularly useful in large corporations where only a limited public network connection is required, meaning that all private IP addresses (usually associated with a single machine) are mapped to the same public IP address. A NAT will make use of multiple connection ports to identify which packets are for which private IP address and then re-assign the packet header so the internal routers can forward the packet correctly. As can be seen by Table~\ref{tab:ip} and Figure~\ref{fig:nat}, each internal address is mapped to via the port number associated with the external address. NAT's are generally implemented as part of a network firewall as they inspect the datagram packets for malicious data and sources.
@@ -70,7 +81,7 @@ Within this project, the term 'firewall' is used for a network layer firewall wh
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.7\textwidth]{img/firewall.png}
-	\caption{Firewall intercepting packets to prevent security issues \cite{firewall}}
+	\caption{Firewall intercepting packets as a security measure \cite{firewall}}
 	\label{fig:firewall}
 \end{figure}
 
@@ -141,7 +152,6 @@ $ javah -jni Hello.java
 \end{lstlisting}
 
 In order to generate the C header file the command 'javah' (Code~\ref{lst:gen}) is used with the flag 'jni' which tells Java that a header file is required which is for use with the JNI. It will then produce method signatures which correspond to the native method declared within Hello.java. The auto generated C header file is shown in Code~\ref{lst:auto}.
-\todo[noline]{Explain parameters and mapping for jString to char* etc}
 
 \begin{lstlisting}[language=C, caption={Auto-generated C header file}, label=lst:auto]
 /* DO NOT EDIT THIS FILE - it is machine generated */
@@ -219,11 +229,11 @@ Although the JNI provides a very useful interface to interact with native librar
 For high performance computing in Java, a number of existing programming options are available in order for applications to communicate over a network. These can be classified as: (1) Java sockets; and (2) Remote Method Invocation (RMI); (3) shared memory programming. As will be discussed, none of these are capable of truly high performance networking, especially at line rate speeds.
 
 \paragraph{Java Sockets}\mbox{}\\ %subsubsubsection
+\label{subsec:sockets}
 Java sockets are the standard low level communication for applications are most networking protocols have socket implementations. They allow for streams of data to be sent between applications as a socket is one end point for a 2 way communication link, meaning that data can be read from and written to a socket in order to transfer data. Even though sockets are a viable option for networking, both of the Java socket implementations (IO sockets \& NIO (new I/O) sockets) are inefficient over high speed networks \cite{sockets} and therefore lack the performance that is required. As discussed previously, the poor performance is due to the JVM interacting with network cards via the OS kernel.
 
 \paragraph{Remote Method Invocation (RMI)}\mbox{}\\ %subsubsubsection
-\label{subsec:rmi}
-Remote Method Invocation (RMI) is a protocol developed by Java which allows an object running in a JVM to invoke methods on another object running on a different JVM. Although this method provides a relatively easy interface for which JVM's can communicate, its major drawback relates to the speed. Since RMI uses Java sockets as its basic level communication method, it faces the same performance issues as mentioned in section~\ref{subsec:rmi}.
+Remote Method Invocation (RMI) is a protocol developed by Java which allows an object running in a JVM to invoke methods on another object running on a different JVM. Although this method provides a relatively easy interface for which JVM's can communicate, its major drawback relates to the speed. Since RMI uses Java sockets as its basic level communication method, it faces the same performance issues as mentioned in section~\ref{subsec:sockets}.
 
 \paragraph{Shared Memory Programming}\mbox{}\\ %subsubsubsection
 Shared memory programming provides high performance JVM interaction due to Java's multithread and parallel programming support. This allows different JVM's to communicate via objects within memory which is shared between the JVM's. However, this technique requires the JVM's to be on the same shared memory system, which is a major drawback for distributed systems as scalability options decrease. \\
@@ -247,9 +257,19 @@ As jVerbs takes advantage of mapping the network device directly into the JVM, b
 jVerbs provides a useful example framework which re-emphasises that packet processing in Java is very possible with low latency, while assisting in certain implementation and design choices which can be analysed in more detail. 
 
 \subsection{Native I/O API's}
+Currently available native networking API's are capable of reading and writing packets the NIC transmission and receive queues at line rate. This is due to a number of techniques which tend to alter the kernels understand of the underlying NIC, therefore requiring specialist hardware and software to use such tools. DPDK (Section~\ref{subsec:dpdk}) is one of the tools that is open source and publicly available for use.
 
+\subsubsection{Data Plane Development Kit (DPDK)}
+\label{subsec:dpdk}
+Data Plane Development Kit (DPDK) \cite{dpdk} is a set of libraries and drivers which enabaled fast packet processing with certain system set ups. Since DPDK is developed by Intel, it only supports Intel x86 CPU's and certain network interface controllers. DPDK overwrites the NIC's drivers meaning that the operating system doesn't recognise the network cards and can't interact with them. It installs its own drivers allowing it to interact with certain memory locations with permission from the kernel or even involving it in any way. \\
+\newline
+DPDK makes use of an environment abstraction layer (EAL) which hides the environmental specifics and provides a standard interface which any application can interact with. Due to this, if the system changes in any way, the DPDK library needs to be re-compiled with other features been re-enabled in order to allow applications to run correctly again. \\
+\newline
+DPDK also makes use of 'Hugepages', which are memory locations of 2mb size rather than the standard 4kb size, while also forcing the user to reserve these 'Hugepage' locations at initial boot. It uses these memory locations to store packets in the corresponding ring buffer as mentioned in Section~\ref{subsec:handling}. \\
+\newline
+In order to use the DPDK libraries for the intended purpose, data packets have to be written into the correct buffer location so they are inserted onto the network. I similar approach is used when receiving packets on the incoming buffer ring, but instead of the system using interrupts to acknowledge the arrival of a new packet, which is performance costly, it constantly polls the buffer space to check for new packets. DPDK also allows for multiple queues per NIC and can handle multiple NIC's per system, there scalability is a major bonus of the libraries. \\
+\newline
+DPDK is very well documented on a number of levels. Firstly there is a online API which gives in depth details about what the methods, constants and structs do. There are a number of well written guides which give step-by-step details of how to install, set-up and use DPDK on various platforms and finally, there are many sample programs included with the build which give understanding of how the overall library works.
 
-\subsubsection{DPDK}
-\subsubsection{Netmap}
 
 \end{document}
