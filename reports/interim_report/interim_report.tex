@@ -9,7 +9,17 @@
 \newdateformat{monthyeardate}{\monthname[\THEMONTH] \THEYEAR}
 % for code snippet
 \usepackage{listings}
+\renewcommand{\lstlistingname}{Code}
 \usepackage{color}
+\usepackage{float}
+\usepackage[nottoc,numbib]{tocbibind}
+%\usepackage{tocbibind}
+
+% last packet to be imported
+\usepackage{hyperref}
+
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -37,9 +47,9 @@
 
 \lstset{style=mystyle}
 
-\title{Packet Processing in Java}
-\author{Ashley Hemingway}
-\date{\monthyeardate\today}
+% \title{Packet Processing in Java}
+% \author{Ashley Hemingway}
+% \date{\monthyeardate\today}
 
 \begin{document}
 
@@ -55,7 +65,7 @@
 \textsc{\Large Individual Project}\\[0.5cm]
 \textsc{\large Computing - BEng}\\[0.5cm]
 
-\HRule \\[0.4cm]
+\HRule \\[0.6cm]
 { \huge \bfseries Packet Processing in Java}\\[0.4cm]
 \HRule \\[1.5cm]
 
@@ -100,11 +110,14 @@ Wayne \textsc{Luk}
 
 \section{Introduction}
 \subsection{Motivation}
-As modern computing techniques advance, people are trying to find more generic solutions to problems which have been solved by native applications in the past. A main area of focus has been network middleboxes (network appliances), which are developed to manipulate network packets. Common examples of middleboxes are firewalls, network address translators (NATs) and load balancers, all of which inspect or transform network packets in the middle of a connection between a public and private network. In recent years, people have been developing a number of programmable middleboxes which allow these generic solutions to be used on a wide scale basis.
+As modern computing techniques advance, people are trying to find more generic solutions to problems which have been solved by native applications in the past. A main area of focus has been network middleboxes (Figure~\ref{fig:middlebox}), which are developed to manipulate network packets. Common examples of middleboxes are firewalls, network address translators (NATs) and load balancers, all of which inspect or transform network packets in the middle of a connection between a public and private network. In recent years, people have been developing a number of programmable middleboxes which allow these generic solutions to be used on a wide scale basis.
 
-\begin{center}
+\begin{figure}[H]
+	\centering
 	\includegraphics[scale=0.75]{images/middleboxes.jpg}
-\end{center}
+	\caption{Middlebox Example}
+	\label{fig:middlebox}
+\end{figure}
 
 \noindent As middleboxes are mainly used for networking purposes, they are required to process network packets at line rate (i.e. at speeds which allow packets to be processed as they are received). This requires the application to retrieve the packet from the network line, inspect and transform the packet in the desired way and then insert the packet back onto the network line, all within a time period sufficient enough to not cause a backlog. High performance implementations of such applications are available, but are written in native languages, predominately in C/C++. However, more and more high performance computing projects are been developed in Java and have succeeded in performing at similar speeds to C/C++ applications. \\
 \newline
@@ -131,9 +144,15 @@ This eliminates the need for the JVM to call system calls from the kernel in ord
 \section{Background}
 \subsection{Network Components}
 \subsubsection{Network Packets}
-A network packet is responsible for carrying data from a source to a destination. Packets are routed, fragmented and dropped via information stored within the packet's header. Note: in this report packets and datagrams are interchangeable.
+\todo[inline]{How packets are passed around in general}
+A network packet is responsible for carrying data from a source to a destination. Packets are routed, fragmented and dropped via information stored within the packet's header. Note: in this report packets and datagrams are interchangeable. Data within the packets are generally input from the application layer, while the headers (Figure~\ref{fig:ipv4}) are generated and updated by the network layer which have a much better understanding of the protocols in use.
 
-\includegraphics[width=\textwidth]{images/ipv4header.png}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{images/ipv4header.png}
+	\caption{IPv4 Packet Header}
+	\label{fig:ipv4}
+\end{figure}
 
 \begin{itemize}
 	\item Version - IP version number (set to 4 for IPv4)
@@ -154,9 +173,10 @@ A network packet is responsible for carrying data from a source to a destination
 \end{itemize}
 
 \subsubsection{Network Address Translator (NAT)}
-As a routing device, a NAT is responsible for remapping an IP address to another by altering the IP datagram packet header. NAT's have become extremely important in modern networking systems due to IPv4 address exhaustion, allowing a single public IP address to map to multiple private IP addresses. This is particularly useful in large corporations where only a limited public network connection is required, meaning that all private IP addresses (usually associated with a single machine) are mapped to the same public IP address. A NAT will make use of multiple connection ports to identify which packets are for which private IP address and then re-assign the packet header so the internal routers can forward the packet correctly. As can be seen by Figure (number) each internal address is mapped to via the port number associated with the external address. NAT's are generally implemented as part of a network firewall as they inspect the datagram packets for malicious data and sources.
+As a routing device, a NAT is responsible for remapping an IP address to another by altering the IP datagram packet header. NAT's have become extremely important in modern networking systems due to IPv4 address exhaustion, allowing a single public IP address to map to multiple private IP addresses. This is particularly useful in large corporations where only a limited public network connection is required, meaning that all private IP addresses (usually associated with a single machine) are mapped to the same public IP address. A NAT will make use of multiple connection ports to identify which packets are for which private IP address and then re-assign the packet header so the internal routers can forward the packet correctly. As can be seen by Table~\ref{tab:ip} and Figure~\ref{fig:nat}, each internal address is mapped to via the port number associated with the external address. NAT's are generally implemented as part of a network firewall as they inspect the datagram packets for malicious data and sources.
 
-\begin{center}
+\begin{table}[H]
+	\centering
 	\begin{tabular} { | c | c | }
 		\hline
 		\textbf{Private IP Address} & \textbf{Public IP Address} \\
@@ -170,21 +190,53 @@ As a routing device, a NAT is responsible for remapping an IP address to another
 		10.0.0.4 & 14.1.23.5:62453 \\
 		\hline
 	\end{tabular}
-\end{center}
+	\caption{Example of public IP address and ports mapping to private IP address}
+	\label{tab:ip}
+\end{table}
 
-\includegraphics[width=\textwidth]{images/nat.jpg}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{images/nat.jpg}
+	\caption{NAT translating public IP addresses into private IP addresses}
+	\label{fig:nat}
+\end{figure}
 
 \subsubsection{Firewall}
-Firewalls are generally the major applications which sits between the public and private network of a system. They provide packet filtering which controls which packets can enter the private network via establishing a set of rules which packets have to adhere to. Filtering can be based on a number attributes of the packet such as the source and destination IP address and port and the destination service. Firewalls can also offer a number of other useful features such as NAT's or dynamic host configuration protocol (DCHP). As well as providing protection on a network level, application layer firewalls exist which stop certain applications from sending or receiving a packet. \\
+Firewalls (Figure~\ref{fig:firewall}) are generally the major applications which sits between the public and private network of a system. They provide packet filtering which controls which packets can enter the private network via establishing a set of rules which packets have to adhere to. Filtering can be based on a number attributes of the packet such as the source and destination IP address and port and the destination service. Firewalls can also offer a number of other useful features such as NAT's or dynamic host configuration protocol (DCHP). As well as providing protection on a network level, application layer firewalls exist which stop certain applications from sending or receiving a packet. \\
 \newline
-Within this project, the term 'firewall' is used for a network layer firewall which filters packets dependent on the source IP address. Any changes in this will be mentioned within the relevant sections.
+Within this project, the term 'firewall' is used for a network layer firewall which filters packets dependent on the source IP address. Any changes in this will be mentioned within the relevant sections. \\
 
-\includegraphics[width=\textwidth]{images/firewall.png}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\textwidth]{images/firewall.png}
+	\caption{Firewall intercepting packets to prevent security issues}
+	\label{fig:firewall}
+\end{figure}
 
 \subsection{Java Features}
 As the Java language and the JVM implementation is known by most, this section will focus on the more specific sections related to this project, instead of discussing the overall implementation.
 
-\subsubsection{JVM Networking}
+\subsubsection{Java Virtual Machine (JVM)}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{images/jvm.png}
+	\caption{Java Virtual Machine interface}
+	\label{fig:jvm}
+\end{figure}
+
+\begin{itemize}
+	\item Class loader sub system - Loads .class files into memory, verifies byte code instructions and allows memory required for the program
+	\item Method area - stores class code and method code
+	\item Heap - New objects are created on the heap
+	\item Stack - Where the methods are executed and contains frames where each frame executes a separate method
+	\item PC registers - Program counter registers store memory address of the instruction to be executed by the micro processor
+	\item Native method stack - Where the native methods are executed.
+	\item Native method interface - A program that connects the native method libraries with the JVM
+	\item Native method library - holds the native libraries information
+	\item Execution engine - Contains the interpreter and just in time compiler (JIT - converts byte code to machine code). JVM decides which parts to be interpreted and when to use JIT compiler.
+\end{itemize}
+
 \subsubsection{Java Native Interface (JNI)}
 Provided by the Java Software Development Kit (SDK), the JNI is a native programming interface that lets Java applications use libraries written in other languages. The JNI also includes the invocation API which allows a JVM to be embedded into native applications. This project and therefore this overview will only focus on Java code using C libraries via the JNI on a linux based system\\
 \newline
@@ -198,7 +250,7 @@ In order to call native libraries from Java applications a number of steps have 
 	\item Run Java program - run the Java program which calls the native code
 \end{enumerate}
 
-\begin{lstlisting}[language=Java]
+\begin{lstlisting}[language=Java, caption={Basic Java class showing native method declaration and calling with shared library loading}, label=lst:java]
 public class Hello {
     public native void sayHi(String who, int times);
 
@@ -211,20 +263,23 @@ public class Hello {
     }
 }
 \end{lstlisting}
-The code above shows a simple Java program which uses some native C code from a shared library. Line 4 indicates which shared library to load into the application, which is by default lib*.so where * indicates the name of the C file. Line 2 is the native method declaration which specifies the name of the method and the parameters which will be passed to the corresponding C method. Line 9 is where this native method is called.
 
-\begin{lstlisting}[language=sh]
+Code~\ref{lst:java} shows a simple Java program which uses some native C code from a shared library. Line 4 indicates which shared library to load into the application, which is by default lib*.so where * indicates the name of the C file. Line 2 is the native method declaration which specifies the name of the method and the parameters which will be passed to the corresponding C method. Line 9 is where this native method is called.
+
+\begin{lstlisting}[language=sh, caption={Compiling basic Java program}, label=lst:javacomp]
 $ javac Hello.java
 \end{lstlisting}
-Compiling the above Java class is shown above and should be self explanatory.
 
-\begin{lstlisting}[language=sh]
+Code~\ref{lst:javacomp}, run from a terminal, compiles the Java class and create a class file which can be executed.
+
+\begin{lstlisting}[language=sh, caption={Generating C header file}, label=lst:gen]
 $ javah -jni Hello.java
 \end{lstlisting}
-In order to generate the C header file the command 'javah' is used with the flag 'jni' which tells Java that a header file is required which is for use with the JNI. It will then produce method signatures which correspond to the native method declared within Hello.java. The auto generated C header file is shown below.
-\todo[noline]{explain parameters and mapping for jString to char* etc}
 
-\begin{lstlisting}[language=C]
+In order to generate the C header file the command 'javah' (Code~\ref{lst:gen}) is used with the flag 'jni' which tells Java that a header file is required which is for use with the JNI. It will then produce method signatures which correspond to the native method declared within Hello.java. The auto generated C header file is shown in Code~\ref{lst:auto}.
+\todo[noline]{Explain parameters and mapping for jString to char* etc}
+
+\begin{lstlisting}[language=C, caption={Auto-generated C header file}, label=lst:auto]
 /* DO NOT EDIT THIS FILE - it is machine generated */
 #include <jni.h>
 /* Header for class Hello */
@@ -248,7 +303,7 @@ JNIEXPORT void JNICALL Java_Hello_sayHi
 #endif
 \end{lstlisting}
 
-\begin{lstlisting}[language=C]
+\begin{lstlisting}[language=C, caption={C source file corresponding to auto-generated header file}, label=lst:source]
 #include <stdio.h>
 #include "Hello.h"
 
@@ -263,25 +318,28 @@ JNIEXPORT void JNICALL Java_Hello_sayHi
     }
 }
 \end{lstlisting}
-The C source file implementation is shown above. Line 9 is the interesting line, where the code is retrieving the string stored at pointer 'who' from the Java environment and copying it into the pointer 'name' for use later on.
 
-\begin{lstlisting}[language=sh]
+The C source file implementation is in Code~\ref{lst:source}. Line 9 is the interesting line, where the code is retrieving the string stored at pointer 'who' from the Java environment and copying it into the pointer 'name' for use later on.
+
+\begin{lstlisting}[language=sh, caption={Terminal commands to generate shared library file (.so)}, label=lst:shared]
 $ cc -c -I/System/Library/Frameworks/JavaVM.framework/Headers Hello.c
 $ cc -dynamiclib -o libhello.so Hello.o -framework JavaVM
 \end{lstlisting}
-The 2 commands above will first compile the C source code into an object file (.o), requiring a pointer to the jni.h file provided with the Java framework. The second line then generates the required shared object file (.so) which the Java application looks for.
 
-\begin{lstlisting}[language=sh]
-$ java Hello Ashley 5
-Ashley
-Ashley
-Ashley
-Ashley
-Ashley
+The 2 commands in Code~\ref{lst:shared} will first compile the C source code into an object file (.o), requiring a pointer to the jni.h file provided with the Java framework. The second line then generates the required shared object file (.so) which the Java application looks for.
+
+\begin{lstlisting}[language=sh, caption={Output from running Java application calling native C methods}, label=lst:output]
+$ java Hello Packet-Processing 5
+Packet-Processing
+Packet-Processing
+Packet-Processing
+Packet-Processing
+Packet-Processing
 \end{lstlisting}
-Running the Java application will give the above output. \\
+
+Running the Java application with the required parameters will output the above in Code~\ref{lst:output}. \\
 \newline
-As can be seen in the above code, there are 2 extra parameters in the method that weren't defined by me. The 'env' pointer is a structure that contains the interface to the JVM, therefore providing numerous functions required to interact with the JVM and the Java objects. Examples include converting native arrays to Java arrays and throwing exceptions, meaning that anything that can be done in Java can be done via this interface. \\
+As can be seen in the example code (Code~\ref{lst:source}), there are 2 extra parameters in the method signature that weren't defined within the Java native method signature (Code~\ref{lst:java}). The 'env' pointer is a structure that contains the interface to the JVM, therefore providing numerous functions required to interact with the JVM and the Java objects. Examples include converting native arrays to Java arrays and throwing exceptions, allowing standard Java operations to be executed within the native C libraries via this interface. \\
 \newline
 The 'obj' argument refers to the Java object which the native method had been declared within. \\
 \newline
@@ -293,8 +351,38 @@ Although the JNI provides a very useful interface to interact with native librar
 	\item If using the JNI on large scale, converting between Java objects and C structs can be difficult
 \end{itemize}
 
-\subsubsection{ByteBuffer}
-\subsection{I/O API's}
+\subsubsection{Current Java Networking Methods}
+For high performance computing in Java, a number of existing programming options are available in order for applications to communicate over a network. These can be classified as: (1) Java sockets; and (2) Remote Method Invocation (RMI); (3) shared memory programming. As will be discussed, none of these are capable of truly high performance networking, especially at line rate speeds.
+
+\paragraph{Java Sockets}\mbox{}\\ %subsubsubsection
+Java sockets are the standard low level communication for applications are most networking protocols have socket implementations. They allow for streams of data to be sent between applications as a socket is one end point for a 2 way communication link, meaning that data can be read from and written to a socket in order to transfer data. Even though sockets are a viable option for networking, both of the Java socket implementations (IO sockets \& NIO (new I/O) sockets) are inefficient over high speed networks (reference here) and therefore lack the performance that is required. As discussed previously, the poor performance is due to the JVM interacting with network cards via the OS kernel.
+
+\paragraph{Remote Method Invocation (RMI)}\mbox{}\\ %subsubsubsection
+\label{subsec:rmi}
+Remote Method Invocation (RMI) is a protocol developed by Java which allows an object running in a JVM to invoke methods on another object running on a different JVM. Although this method provides a relatively easy interface for which JVM's can communicate, its major drawback relates to the speed. Since RMI uses Java sockets as its basic level communication method, it faces the same performance issues as mentioned in section~\ref{subsec:rmi}.
+
+\paragraph{Shared Memory Programming}\mbox{}\\ %subsubsubsection
+Shared memory programming provides high performance JVM interaction due to Java's multithread and parallel programming support. This allows different JVM's to communicate via objects within memory which is shared between the JVM's. However, this technique requires the JVM's to be on the same shared memory system, which is a major drawback for distributed systems as scalability options decrease. \\
+
+Even though these 3 techniques allow for communication between JVM's, the major issue is that incoming packets are still handled by the kernel and then passed onto the corresponding JVM. This means that packets are destined for certain applications, meaning that generic packets can't be intercepted and checked, which is a requirement for generic middlebox software. There is also the issue that all packets are processed via the kernel, which is a major speed reducer which limits the line rate.
+
+\subsection{jVerbs}
+Ultra-low latency for Java applications has been partially solved by the jVerbs (reference) framework. Using remote direct memory access (RDMA), jVerbs provides an interface for which Java applications can communicate, mainly useful within large scale data centre applications. \\
+\newline
+RDMA is a technology that allows computers within a network to transfer data between each other via direct memory operations, without involving the processor, cache or operating system of either communicating computer. RDMA implements a transport protocol directly within the network interface card (NIC), allowing for zero copy networking, which allows a computer to read from another computer and write to its own direct main memory without intermediate copies. High throughput and performance is a feature of RDMA due to the lack of kernel involvement, but the major downside is that it requires specific hardware which supports the RDMA protocol, while also requiring the need for specific computer connections set up by sockets. \\
+\newline
+As jVerbs takes advantage of mapping the network device directly into the JVM, bypassing both the JVM and operating system (Figure~\ref{fig:jverb}), it can significantly reduce the latency. In order to have low level interaction with the NIC, jVerbs has a very thin layer of JNI calls which can increase the overhead slightly. However, jVerbs is flawed, mainly because it requires specific hardware to run on, firstly limited by the RDMA protocol reliant hardware and further by the required RDMA wrappers which are implemented by the creators. Also, it can only be used for specific computer to computer connection and not generally packet inspection. 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{images/jverbs.png}
+	\caption{jVerbs architecture - shows how the framework bypasses the kernel and JVM}
+	\label{fig:jverb}
+\end{figure}
+
+jVerbs provides a useful example framework which re-emphasises that packet processing in Java is very possible with low latency, while assisting in certain implementation and design choices which can be analysed in more detail. 
+
+\subsection{Native I/O API's}
 \subsubsection{DPDK}
 \subsubsection{Netmap}
 
@@ -318,7 +406,9 @@ The given time plan outlined below provides me with a useful indication of how t
 \end{itemize}
 
 \subsubsection{Time Estimations}
-\missingfigure{Gantt chart would be very useful here}
+\begin{center}
+	\includegraphics[width=\textwidth]{images/timeline.png}
+\end{center}
 
 \subsubsection{Completed Milestones}
 As indicated, the background reading on the DPDK and Netmap libraries has been completed and the overview of the implementation has been assessed. The pros and cons has been outlined in the background section (give number). From this, I was able to get DPDK fully working on a virtual machine running locally on a personal machine, which allowed for a more in depth analysis of the implementation of DPDK. \\
@@ -370,10 +460,12 @@ The functionality and usability can also be checked by the project supervisor \&
 \todo[inline]{Put through spell checker}
 \todo[inline]{Other useful applications}
 \todo[inline]{What font, size and line spacing?}
+\todo[inline]{hyper link contents}
+\todo[inline]{java network options don't allow for generic packets to be inspected}
 
 \begin{thebibliography}{99}
-http://www.neclab.eu/Projects/midcom.htm \\
-http://windowsitpro.com/networking/what-types-network-address-translation-nat-exist \\
+%http://www.neclab.eu/Projects/midcom.htm \\
+%http://windowsitpro.com/networking/what-types-network-address-translation-nat-exist \\
 %http://en.wikipedia.org/wiki/Firewall_(computing)#mediaviewer/File:Firewall.png
 \end{thebibliography}
 
