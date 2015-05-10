@@ -78,7 +78,7 @@ struct lcore_config {
 /**
  * Internal configuration (per-lcore)
  */
-extern struct lcore_config lcore_config[RTE_MAX_LCORE];
+extern struct lcore_config lcore_config[128];
 
 RTE_DECLARE_PER_LCORE(unsigned, _lcore_id);  /**< Per thread "lcore id". */
 RTE_DECLARE_PER_LCORE(rte_cpuset_t, _cpuset); /**< Per thread "cpuset". */
@@ -131,7 +131,7 @@ rte_lcore_count(void)
 static inline int
 rte_lcore_index(int lcore_id)
 {
-	if (lcore_id >= RTE_MAX_LCORE)
+	if (lcore_id >= 128)
 		return -1;
 	if (lcore_id < 0)
 		lcore_id = rte_lcore_id();
@@ -173,7 +173,7 @@ static inline int
 rte_lcore_is_enabled(unsigned lcore_id)
 {
 	struct rte_config *cfg = rte_eal_get_configuration();
-	if (lcore_id >= RTE_MAX_LCORE)
+	if (lcore_id >= 128)
 		return 0;
 	return (cfg->lcore_role[lcore_id] != ROLE_OFF);
 }
@@ -196,14 +196,14 @@ rte_get_next_lcore(unsigned i, int skip_master, int wrap)
 {
 	i++;
 	if (wrap)
-		i %= RTE_MAX_LCORE;
+		i %= 128;
 
-	while (i < RTE_MAX_LCORE) {
+	while (i < 128) {
 		if (!rte_lcore_is_enabled(i) ||
 		    (skip_master && (i == rte_get_master_lcore()))) {
 			i++;
 			if (wrap)
-				i %= RTE_MAX_LCORE;
+				i %= 128;
 			continue;
 		}
 		break;

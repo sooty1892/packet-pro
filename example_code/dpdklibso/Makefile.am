@@ -1,6 +1,6 @@
-AM_CXXFLAGS = -fPIC -g -O2 -Idpdk/build/include -include dpdk/build/include/rte_config.h 
+AM_CXXFLAGS = -msse -msse2 -msse3 -fPIC -g -O2 -I/home/testdpdk/packet-pro/dpdk-1.7.1/build/include -include /home/testdpdk/packet-pro/dpdk-1.7.1/build/include/rte_config.h 
 
-DPDK_FLAGS=-Ldpdk/build/lib \
+DPDK_FLAGS=-L/home/testdpdk/packet-pro/dpdk-1.7.1/build/lib \
 	-Wl,--whole-archive \
 	-Wl,-lrte_distributor \
 	-Wl,-lrte_kni \

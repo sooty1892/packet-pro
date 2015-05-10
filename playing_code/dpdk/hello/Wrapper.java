@@ -1,4 +1,3 @@
-package hello;
 
 public class Wrapper {
 

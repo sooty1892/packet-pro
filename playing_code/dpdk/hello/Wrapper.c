@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "hello_Wrapper.h"
+#include "Wrapper.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -16,17 +16,18 @@
 #include <rte_lcore.h>
 #include <rte_debug.h>
 
-JNIEXPORT jint JNICALL Java_hello_Wrapper_eal_1init(JNIEnv *env, jclass class, jint num, jobjectArray stringArray) {
+JNIEXPORT jint JNICALL Java_Wrapper_eal_1init(JNIEnv *env, jclass class, jint num, jobjectArray stringArray) {
 	char **orderedIds;
 	orderedIds = malloc(num * sizeof(char*));
-	for (int i=0; i<num; i++) {
-        jstring string = (jstring) GetObjectArrayElement(env, stringArray, i);
-        const char *rawString = GetStringUTFChars(env, string, 0);
-        len = strlen(rawString)
+	int i;
+	for (i=0; i<num; i++) {
+        jstring string = (jstring) (*env)->GetObjectArrayElement(env, stringArray, i);
+        const char *rawString = (*env)->GetStringUTFChars(env, string, 0);
+        int len = strlen(rawString);
         orderedIds[i] = malloc((len+1) * sizeof(char));
     }
 
-	ret = rte_eal_init(num, orderedIds);
+	int ret = rte_eal_init(num, orderedIds);
 	// Don't forget to call `ReleaseStringUTFChars` when you're done.
 	// also release malloc
 	if (ret < 0) {
@@ -35,10 +36,10 @@ JNIEXPORT jint JNICALL Java_hello_Wrapper_eal_1init(JNIEnv *env, jclass class, j
 	return ret;
 }
 
-JNIEXPORT jint JNICALL Java_hello_Wrapper_lcore_1id(JNIEnv *, jclass) {
+JNIEXPORT jint JNICALL Java_Wrapper_lcore_1id(JNIEnv *env, jclass class) {
 	return rte_lcore_id();
 }
 
-JNIEXPORT void JNICALL Java_hello_Wrapper_mp_1wait_1lcore(JNIEnv *, jclass) {
+JNIEXPORT void JNICALL Java_Wrapper_mp_1wait_1lcore(JNIEnv *env, jclass class) {
 	rte_eal_mp_wait_lcore();
 }
