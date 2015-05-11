@@ -1,0 +1,41 @@
+AM_CFLAGS = -msse -msse2 -msse3 -mssse3 -fPIC -g -O2 -I/home/dpdk64/packet-pro/dpdk-2.0.0/x86_64-native-linuxapp-gcc/include -include /home/dpdk64/packet-pro/dpdk-2.0.0/x86_64-native-linuxapp-gcc/include/rte_config.h 
+
+DPDK_FLAGS=-L/home/dpdk64/packet-pro/dpdk-2.0.0/x86_64-native-linuxapp-gcc/lib \
+	-Wl,--whole-archive \
+	-Wl,-lrte_distributor \
+	-Wl,-lrte_kni \
+	-Wl,-lrte_pipeline \
+	-Wl,-lrte_table \
+	-Wl,-lrte_port \
+	-Wl,-lrte_timer \
+	-Wl,-lrte_hash \
+	-Wl,-lrte_lpm \
+	-Wl,-lrte_power \
+	-Wl,-lrte_meter \
+	-Wl,-lrte_sched \
+	-Wl,-lrte_kvargs \
+	-Wl,-lrte_mbuf \
+	-Wl,-lrte_ip_frag \
+	-Wl,-lethdev \
+	-Wl,-lrte_malloc \
+	-Wl,-lrte_cmdline \
+	-Wl,-lrte_cfgfile \
+	-Wl,-lrte_eal \
+	-Wl,-lrte_mempool \
+	-Wl,-lrte_ring \
+	-Wl,-lrte_pmd_bond \
+	-Wl,-lrte_pmd_vmxnet3_uio \
+	-Wl,-lrte_pmd_virtio_uio \
+	-Wl,-lrte_pmd_i40e \
+	-Wl,-lrte_pmd_ixgbe \
+	-Wl,-lrte_pmd_e1000 \
+	-Wl,-lrte_pmd_ring \
+	-Wl,-lrt -Wl,-lm -Wl,-ldl \
+	-Wl,--no-whole-archive
+
+lib_LTLIBRARIES = libdpdk.la
+
+libdpdk_la_LDFLAGS = -module -avoid-version -pthread $(DPDK_FLAGS)
+
+libdpdk_la_SOURCES = Wrapper.c
+
