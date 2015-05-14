@@ -1,4 +1,4 @@
-AM_CFLAGS = -msse -msse2 -msse3 -mssse3 -fPIC -g -O2 -I/home/dpdk64/packet-pro/dpdk-2.0.0/x86_64-native-linuxapp-gcc/include -include /home/dpdk64/packet-pro/dpdk-2.0.0/x86_64-native-linuxapp-gcc/include/rte_config.h 
+AM_CFLAGS = -msse -msse2 -msse3 -mssse3 -fPIC -g -O2 -I/usr/lib/jvm/java-7-openjdk-amd64/include -I/home/dpdk64/packet-pro/dpdk-2.0.0/x86_64-native-linuxapp-gcc/include -include /home/dpdk64/packet-pro/dpdk-2.0.0/x86_64-native-linuxapp-gcc/include/rte_config.h 
 
 DPDK_FLAGS=-L/home/dpdk64/packet-pro/dpdk-2.0.0/x86_64-native-linuxapp-gcc/lib \
 	-Wl,--whole-archive \
