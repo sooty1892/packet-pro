@@ -4,6 +4,7 @@
 
 # java
 *.jnilib
+*.class
 
 # iso images
 *.iso
@@ -15,6 +16,7 @@
 
 # dpdk make files
 /dpdk-1.7.1
+/dpdk-2.0.0
 
 # build folders
 **/build/
