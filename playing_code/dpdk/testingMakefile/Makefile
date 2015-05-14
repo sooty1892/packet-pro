@@ -16,7 +16,7 @@ SRCS-y := Wrapper.c
 RTE_BUILD_SHARED_LIB=y
 
 CFLAGS += -fPIC
-LDLIBS += -lrte_eal
+LDLIBS += -lrte_eal -lrte_mempool -lrte_mbuf -lrte_cmdline -lrte_timer -lrte_ring -lrte_pmd_ring -lrte_malloc -lethdev
 CFLAGS += -O3
 #CFLAGS += $(WERROR_FLAGS)
 CFLAGS += -I/usr/lib/jvm/java-7-openjdk-amd64/include
