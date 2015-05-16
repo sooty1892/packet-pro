@@ -8,10 +8,10 @@ RTE_TARGET ?= x86_64-native-linuxapp-gcc
 include $(RTE_SDK)/mk/rte.vars.mk
 
 # binary name
-SHARED = libWrapper.so
+SHARED = libnat_dpdk.so
 
 # all source are stored in SRCS-y
-SRCS-y := Wrapper.c
+SRCS-y := DpdkAccess.c
 
 RTE_BUILD_SHARED_LIB=y
 
