@@ -38,3 +38,5 @@
 
 # course docs folder
 /course_docs
+
+**/x86_64-native-linuxapp-gcc/
