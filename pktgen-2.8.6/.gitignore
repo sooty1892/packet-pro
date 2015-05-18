@@ -1,0 +1,14 @@
+*.o
+*.a
+*.cmd
+*.d
+*.map
+*~
+_install
+_postinstall
+_preinstall
+_postbuild
+_postclean
+lib/common/common/
+docs/build/
+
