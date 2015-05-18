@@ -92,7 +92,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 		printf("C: Cannot configure device: error=%d, port=%d\n", ret, 0);
 		return ERROR;
 	}
-	printf("%d rte_eth_dev_configure() successful\n", port_to_conf);
+	printf("C: %d rte_eth_dev_configure() successful\n", port_to_conf);
 	// ID of the execution unit we are running on
 	unsigned cpu = rte_lcore_id();
 	// Get the ID of the physical socket of the specified lcore
@@ -104,33 +104,33 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 								rte_pktmbuf_pool_init, NULL,
 								rte_pktmbuf_init, NULL, socketid, 0);
 	if (rx_pool == NULL) {
-		printf("rte_mempool_create(): error\n");
+		printf("C: rte_mempool_create(): error\n");
 		return ERROR;
 	}
 
 	// Allocate and set up a receive queue for an Ethernet device.
 	ret = rte_eth_rx_queue_setup(port_to_conf, 0, 256, socketid, &rx_conf, rx_pool);
 	if (ret < -1) {
-		printf("rte_eth_rx_dev_queue_setup(): error=%d, port=%d\n", ret, port_to_conf);
+		printf("C: rte_eth_rx_dev_queue_setup(): error=%d, port=%d\n", ret, port_to_conf);
 		return ERROR;
 	}
-	printf("%d rte_eth_rx_queue_setup() successful\n", port_to_conf);
+	printf("C: %d rte_eth_rx_queue_setup() successful\n", port_to_conf);
 
 	// Allocate and set up a transmit queue for an Ethernet device.
 	ret = rte_eth_tx_queue_setup(port_to_conf, 0, 256, socketid, &tx_conf);
 	if (ret < 0) {
-		printf("rte_eth_tx_queue_setup(): error=%d, port=%d\n", ret, port_to_conf);
+		printf("C: rte_eth_tx_queue_setup(): error=%d, port=%d\n", ret, port_to_conf);
 		return ERROR;
 	}
-	printf("If %d rte_eth_tx_queue_setup() successful\n", port_to_conf);
+	printf("C: %d rte_eth_tx_queue_setup() successful\n", port_to_conf);
 
 	// Start an Ethernet device.
 	ret = rte_eth_dev_start(port_to_conf);
 	if (ret < 0) {
-		printf("rte_eth_dev_start(): error=%d, port=%d\n", ret, port_to_conf);
+		printf("C: rte_eth_dev_start(): error=%d, port=%d\n", ret, port_to_conf);
 		return ERROR;
 	}
-	printf("%d rte_eth_dev_start() successful\n", port_to_conf);
+	printf("C: %d rte_eth_dev_start() successful\n", port_to_conf);
 
 	// used to retrieve link-level information of an
 	// Ethernet port. Aligned for atomic64 read/write
@@ -141,10 +141,10 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 	// an Ethernet device. It might need to wait up to 9 seconds in it.
 	rte_eth_link_get(port_to_conf, &link);
 	if (link.link_status == 0) {
-		printf("DPDK interface is down: %d\n", port_to_conf);
+		printf("C: DPDK interface is down: %d\n", port_to_conf);
 		return ERROR;
 	}
-	printf("If %d is UP and RUNNING\n", port_to_conf);
+	printf("C: %d is UP and RUNNING\n", port_to_conf);
 
 	// Enable receipt in promiscuous mode for an Ethernet device.
 	rte_eth_promiscuous_enable(port_to_conf);
@@ -176,8 +176,8 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 				rte_pktmbuf_free(rx_mbufs[i]);
 			}
 			if (pktcount == 10000000)
-				printf("Received %ld packets so far\n", pktcount);
-			printf("Received %ld packets\n", pktcount);
+				printf("C: Received %ld packets so far\n", pktcount);
+			printf("C: Received %ld packets\n", pktcount);
 		}
 		//  rte_eal_mp_wait_lcore();
 	}
