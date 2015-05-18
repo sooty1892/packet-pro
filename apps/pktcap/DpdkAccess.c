@@ -132,6 +132,10 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 	}
 	printf("%d rte_eth_dev_start() successful\n", port_to_conf);
 
+	// used to retrieve link-level information of an
+	// Ethernet port. Aligned for atomic64 read/write
+	struct rte_eth_link link;
+
 	// Retrieve the status (ON/OFF), the speed (in Mbps) and the
 	// mode (HALF-DUPLEX or FULL-DUPLEX) of the physical link of
 	// an Ethernet device. It might need to wait up to 9 seconds in it.
