@@ -14,17 +14,13 @@
 #include <rte_debug.h>
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass class) {
-	char *strs[] = {"Pktcap", "-c", "0x01", "-n", "1"};
+	char *strs[] = {"Pktcap", "-c", "0x3", "-n", "1"};
 	/*int i;
 	for (i=0; i < 5; i++) {
 		printf("C String: %s\n", strs[i]);
 	}*/
-	int ret = rte_eal_init(5, strs);
+	int ret = rte_eal_init(7, strs);
 	int count = rte_eth_dev_count();
-	if (count <= 0) {
-		rte_panic("%i Ports Enabled!!!", count);
-	} else {
-		printf("C: %d ports enabled\n", count);
-	}
+	printf("C: %d ports enabled\n", count);
 	return ret;
 }
