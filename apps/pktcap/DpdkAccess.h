@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     DpdkAccess
  * Method:    nat_setup_and_conf
- * Signature: ()I
+ * Signature: (Ljava/nio/ByteBuffer;)I
  */
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf
-  (JNIEnv *, jclass);
+  (JNIEnv *, jclass, jobject);
 
 #ifdef __cplusplus
 }
