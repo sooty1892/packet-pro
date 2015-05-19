@@ -73,7 +73,22 @@ static struct rte_eth_rxconf rx_conf = {
 // RTE mempool structure
 static struct rte_mempool *rx_pool;
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass class) {
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass class, jobject buffer) {
+
+	jclass cls = env->GetObjectClass(buffer);
+	jmethodID mid = env->GetMethodID(cls, "limit", "(I)Ljava/nio/Buffer;");
+	char *buf = (char*)env->GetDirectBufferAddress(buffer);
+	jlong capacity = env->GetDirectBufferCapacity(buffer);
+	//int written = 0;
+
+	// Do something spectacular with the buffer...
+
+	//env->CallObjectMethod(buffer, mid, written);
+	buf[0] = 123;
+	buf[1] = 54;
+
+
+
 	char *strs[] = {"Pktcap", "-c", "0x3", "-n", "1"};
 
 	int port_to_conf = 0;
