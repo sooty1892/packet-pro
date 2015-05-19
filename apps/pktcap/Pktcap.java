@@ -10,6 +10,8 @@ public class Pktcap {
 			return;
 		}
 		System.out.println("JAVA: Setup complete");
+	int ret = (int)buffer.get(0);
+	System.out.println("1st: " + ret);
 	}
 
 }

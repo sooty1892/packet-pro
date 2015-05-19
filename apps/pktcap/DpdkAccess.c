@@ -75,10 +75,10 @@ static struct rte_mempool *rx_pool;
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass class, jobject buffer) {
 
-	jclass cls = env->GetObjectClass(buffer);
-	jmethodID mid = env->GetMethodID(cls, "limit", "(I)Ljava/nio/Buffer;");
-	char *buf = (char*)env->GetDirectBufferAddress(buffer);
-	jlong capacity = env->GetDirectBufferCapacity(buffer);
+	//jclass cls = (*env)->GetObjectClass(buffer);
+	//jmethodID mid = (*env)->GetMethodID(cls, "limit", "(I)Ljava/nio/Buffer;");
+	char *buf = (char*)(*env)->GetDirectBufferAddress(env, buffer);
+	//jlong capacity = (*env)->GetDirectBufferCapacity(buffer);
 	//int written = 0;
 
 	// Do something spectacular with the buffer...
@@ -86,7 +86,6 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 	//env->CallObjectMethod(buffer, mid, written);
 	buf[0] = 123;
 	buf[1] = 54;
-
 
 
 	char *strs[] = {"Pktcap", "-c", "0x3", "-n", "1"};
@@ -170,7 +169,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 	// contains a packet mbuf
 	struct rte_mbuf *rx_mbufs[MAX_PKT_BURST];
 	/* call it on master lcore too */
-	while(1) {
+/*	while(1) {
 		// Retrieve a burst of input packets from a receive queue of an
 		// Ethernet device. The retrieved packets are stored in rte_mbuf
 		// structures whose pointers are supplied in the rx_pkts array
@@ -184,7 +183,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 		if ( recv_cnt > 0) {
 			pktcount += recv_cnt;
 			for (i = 0 ; i < recv_cnt; i++) {
-				/* drop packet */
+				//  drop packet 
 				// Free a packet mbuf back into its original mempool.
 				// Free an mbuf, and all its segments in case of chained
 				// buffers. Each segment is added back into its original mempool.
@@ -195,6 +194,6 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 			printf("C: Received %ld packets\n", pktcount);
 		}
 		//  rte_eal_mp_wait_lcore();
-	}
+	}*/
 	return 0;
 }
