@@ -4,12 +4,12 @@ public class DpdkAccess {
 	///private static native int eal_init(int num, String[] args);
 	//private static native int lcore_id();
 	//private static native void mp_wait_lcore();
-	private static native int nat_setup_and_conf();
+	private static native int nat_setup_and_conf(ByteBuffer buffer);
 
 	static { System.loadLibrary("nat_dpdk"); }
 
-	public static int setup_and_conf() {
-		return nat_setup_and_conf();
+	public static int setup_and_conf(ByteBuffer buffer) {
+		return nat_setup_and_conf(buffer);
 	}
 
 	//initialise eal
