@@ -221,7 +221,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 				RTE_MBUF_ASSERT(ipgdr != NULL);
 
 				dest_addr = rte_be_to_cpu_32(iphdr->dst_addr);
-				printf("Received packet with IP address: %zu\n", dest_addr);
+				printf("Received packet with IP address: %" PRIu32 "\n", dest_addr);
 
 			}
 			if (pktcount == 10000000)
