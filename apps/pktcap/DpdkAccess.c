@@ -169,11 +169,11 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 	// contains a packet mbuf
 	struct rte_mbuf *rx_mbufs[MAX_PKT_BURST];
 	/* call it on master lcore too */
-/*	while(1) {
+	while(1) {
 		// Retrieve a burst of input packets from a receive queue of an
 		// Ethernet device. The retrieved packets are stored in rte_mbuf
 		// structures whose pointers are supplied in the rx_pkts array
-		recv_cnt = rte_eth_rx_burst(port_to_conf, 0, rx_mbufs, MAX_PKT_BURST);
+/*		recv_cnt = rte_eth_rx_burst(port_to_conf, 0, rx_mbufs, MAX_PKT_BURST);
 		if (recv_cnt < 0) {
 			if (errno != EAGAIN && errno != EINTR) {
 				perror("rte_eth_rx_burst()");
@@ -193,7 +193,9 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 				printf("C: Received %ld packets so far\n", pktcount);
 			printf("C: Received %ld packets\n", pktcount);
 		}
-		//  rte_eal_mp_wait_lcore();
-	}*/
+		//  rte_eal_mp_wait_lcore(); */
+		buf[0] = i;
+		i++;
+	}
 	return 0;
 }

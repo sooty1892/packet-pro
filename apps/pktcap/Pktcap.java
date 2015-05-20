@@ -2,13 +2,13 @@ import java.nio.ByteBuffer;
 
 public class Pktcap implements Runnable {
 
-	private ByteBuffer buffer;
+	private static ByteBuffer buffer;
 	
 	public static void main(String[] args) {
         System.out.println("JAVA: Starting Java app");
         buffer = ByteBuffer.allocateDirect(8*1024);
         (new Thread(new Pktcap())).start();
-        (new Thread(new PacketInspector())).start();
+        (new Thread(new PacketInspector(buffer))).start();
 	}
 	
 	public void run() {
