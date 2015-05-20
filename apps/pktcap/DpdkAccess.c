@@ -173,7 +173,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 		// Retrieve a burst of input packets from a receive queue of an
 		// Ethernet device. The retrieved packets are stored in rte_mbuf
 		// structures whose pointers are supplied in the rx_pkts array
-/*		recv_cnt = rte_eth_rx_burst(port_to_conf, 0, rx_mbufs, MAX_PKT_BURST);
+		recv_cnt = rte_eth_rx_burst(port_to_conf, 0, rx_mbufs, MAX_PKT_BURST);
 		if (recv_cnt < 0) {
 			if (errno != EAGAIN && errno != EINTR) {
 				perror("rte_eth_rx_burst()");
@@ -187,15 +187,24 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 				// Free a packet mbuf back into its original mempool.
 				// Free an mbuf, and all its segments in case of chained
 				// buffers. Each segment is added back into its original mempool.
-				rte_pktmbuf_free(rx_mbufs[i]);
+				//rte_pktmbuf_free(rx_mbufs[i]);
+
+				struct ipv4_hdr *iphdr;
+				uint32_t dest_addr;
+
+				// Remove Ethernet header from input packet
+				iphdr = (struct ipv4_hdr *)rte_pktmbuf_adj(rx_mbufs[i], (uint16_t)sizeof(struct ether_hdr));
+				RTE_MBUF_ASSERT(ipgdr != NULL);
+
+				dest_addr = rte_be_to_cpu_32(iphdr->dst_addr);
+				printf("Received packet with IP address: %zu\n", dest_addr);
+
 			}
 			if (pktcount == 10000000)
 				printf("C: Received %ld packets so far\n", pktcount);
 			printf("C: Received %ld packets\n", pktcount);
 		}
 		//  rte_eal_mp_wait_lcore(); */
-		buf[0] = i;
-		i++;
 	}
 	return 0;
 }
