@@ -1,35 +1,34 @@
-L: Detected lcore 0 as core 0 on socket 0
+EAL: Detected lcore 0 as core 0 on socket 0
 EAL: Detected lcore 1 as core 1 on socket 0
+EAL: Detected lcore 2 as core 2 on socket 0
+EAL: Detected lcore 3 as core 3 on socket 0
 EAL: Support maximum 128 logical core(s) by configuration.
-EAL: Detected 2 lcore(s)
+EAL: Detected 4 lcore(s)
 EAL: VFIO modules not all loaded, skip VFIO support...
 EAL: Setting up memory...
 EAL: Ask a virtual area of 0x200000 bytes
-EAL: Virtual area found at 0x7fa479800000 (size = 0x200000)
+EAL: Virtual area found at 0x7f0fbe000000 (size = 0x200000)
 EAL: Ask a virtual area of 0x200000 bytes
-EAL: Virtual area found at 0x7fa479400000 (size = 0x200000)
-EAL: Ask a virtual area of 0x200000 bytes
-EAL: Virtual area found at 0x7fa479000000 (size = 0x200000)
-EAL: Ask a virtual area of 0x1f800000 bytes
-EAL: Virtual area found at 0x7fa459600000 (size = 0x1f800000)
-EAL: Ask a virtual area of 0x200000 bytes
-EAL: Virtual area found at 0x7fa459200000 (size = 0x200000)
+EAL: Virtual area found at 0x7f0fbdc00000 (size = 0x200000)
+EAL: Ask a virtual area of 0x1fc00000 bytes
+EAL: Virtual area found at 0x7f0f9de00000 (size = 0x1fc00000)
 EAL: Requesting 256 pages of size 2MB from socket 0
-EAL: TSC frequency is ~2296139 KHz
+EAL: TSC frequency is ~2297143 KHz
 EAL: WARNING: cpu flags constant_tsc=yes nonstop_tsc=no -> using unreliable clock cycles !
-EAL: open shared lib ../dpdk-2.0.0/x86_64-native-linuxapp-gcc/lib/librte_pmd_e1000.so
-EAL: Master lcore 0 is ready (tid=7ea0d900;cpuset=[0])
-EAL: lcore 1 is ready (tid=591ff700;cpuset=[1])
+EAL: open shared lib /home/dpdk64/packet-pro/dpdk-2.0.0//x86_64-native-linuxapp-gcc/lib/librte_pmd_e1000.so
+EAL: Master lcore 0 is ready (tid=c30ca900;cpuset=[0])
+EAL: lcore 1 is ready (tid=9dbc5700;cpuset=[1])
+EAL: lcore 2 is ready (tid=9d3c4700;cpuset=[2])
 EAL: PCI device 0000:00:03.0 on NUMA socket -1
 EAL:   probe driver: 8086:100e rte_em_pmd
 EAL:   Not managed by a supported kernel driver, skipped
 EAL: PCI device 0000:00:08.0 on NUMA socket -1
 EAL:   probe driver: 8086:100e rte_em_pmd
-EAL:   PCI memory mapped at 0x7fa479a00000
+EAL:   PCI memory mapped at 0x7f0fbe200000
 PMD: eth_em_dev_init(): port_id 0 vendorID=0x8086 deviceID=0x100e
 EAL: PCI device 0000:00:09.0 on NUMA socket -1
 EAL:   probe driver: 8086:100e rte_em_pmd
-EAL:   PCI memory mapped at 0x7fa479a20000
+EAL:   PCI memory mapped at 0x7f0fbe220000
 PMD: eth_em_dev_init(): port_id 1 vendorID=0x8086 deviceID=0x100e
 1.0              lcores: RX( 1 )TX( 1 ) ports: RX( 0 )TX( 0 )
 2.1              lcores: RX( 2 )TX( 2 ) ports: RX( 1 )TX( 1 )
@@ -74,16 +73,14 @@ PMD: eth_em_dev_init(): port_id 1 vendorID=0x8086 deviceID=0x100e
 
 
 
-
-
 Lua 5.2.4  Copyright (C) 1994-2015 Lua.org, PUC-Rio
 >>> Packet Burst 32, RX Desc 512, TX Desc 512, mbufs/port 4096, mbuf cache 512
 
-=== port to lcore mapping table (# lcores 2) ===
-   lcore:     0     1 
-port   0:  D: T  1: 1 =  1: 1
-port   1:  D: T  0: 0 =  1: 1
-Total   :  0: 0  1: 1
+=== port to lcore mapping table (# lcores 3) ===
+   lcore:     0     1     2 
+port   0:  D: T  1: 1  0: 0 =  1: 1
+port   1:  D: T  0: 0  1: 1 =  1: 1
+Total   :  0: 0  1: 1  1: 1
     Display and Timer on lcore 0, rx:tx counts per port/lcore
 
 Configuring 2 ports, MBUF Size 1920, MBUF Cache Size 512
@@ -115,7 +112,7 @@ Port :
 
 Initialize Port 0 -- TxQ 1, RxQ 1,  Src MAC 08:00:27:f9:bc:43
     Create: Default RX  0:0  - Memory used (MBUFs 4096 x (size 1920 + Hdr 128)) + 1581248 =   9737 KB
-PMD: eth_em_rx_queue_setup(): sw_ring=0x7fa45a0e54c0 hw_ring=0x7fa479831500 dma_addr=0x431500
+PMD: eth_em_rx_queue_setup(): sw_ring=0x7f0f9e8e54c0 hw_ring=0x7f0fbe031500 dma_addr=0x431500
 
     Create: Default TX  0:0  - Memory used (MBUFs 4096 x (size 1920 + Hdr 128)) + 1581248 =   9737 KB
     Create: Range TX    0:0  - Memory used (MBUFs 4096 x (size 1920 + Hdr 128)) + 1581248 =   9737 KB
@@ -124,9 +121,10 @@ PMD: eth_em_rx_queue_setup(): sw_ring=0x7fa45a0e54c0 hw_ring=0x7fa479831500 dma_
 PMD: eth_em_tx_queue_setup(): TX WTHRESH must be set to 0 if tx_rs_thresh is greater than 1. (tx_rs_thresh=32 port=0 queue=0)
 !PANIC!: rte_eth_tx_queue_setup: err=-22, port=0, Invalid argument
 PANIC in pktgen_config_ports():
-rte_eth_tx_queue_setup: err=-22, port=0, Invalid argument6: [./app/app/x86_64-native-linuxapp-gcc/app/pktgen() [0x40e034]]
-5: [/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7fa47a5afec5]]
-4: [./app/app/x86_64-native-linuxapp-gcc/app/pktgen(main+0x47c) [0x40dc9c]]
-3: [./app/app/x86_64-native-linuxapp-gcc/app/pktgen(pktgen_config_ports+0x1804) [0x42e114]]
-2: [/usr/lib/x86_64-linux-gnu/librte_eal.so.1(__rte_panic+0xc3) [0x7fa47b398a13]]
-1: [/usr/lib/x86_64-linux-gnu/librte_eal.so.1(rte_dump_stack+0x18) [0x7fa47b3a1ee8]]
+rte_eth_tx_queue_setup: err=-22, port=0, Invalid argument6: [./app/build/pktgen() [0x40e034]]
+5: [/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f0fbec6cec5]]
+4: [./app/build/pktgen(main+0x47c) [0x40dc9c]]
+3: [./app/build/pktgen(pktgen_config_ports+0x1804) [0x42e114]]
+2: [/usr/lib/x86_64-linux-gnu/librte_eal.so.1(__rte_panic+0xc3) [0x7f0fbfa55a13]]
+1: [/usr/lib/x86_64-linux-gnu/librte_eal.so.1(rte_dump_stack+0x18) [0x7f0fbfa5eee8]]
+
