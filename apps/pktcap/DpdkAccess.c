@@ -108,8 +108,8 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 	// Do something spectacular with the buffer...
 
 	//env->CallObjectMethod(buffer, mid, written);
-	buf[0] = 123;
-	buf[1] = 54;
+	buf[0] = 'H';
+	//buf[1] = 54;
 
 
 	char *strs[] = {"Pktcap", "-c", "0x3", "-n", "1"};

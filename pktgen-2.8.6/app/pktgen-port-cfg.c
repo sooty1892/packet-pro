@@ -440,7 +440,7 @@ void pktgen_config_ports(void)
 			// Find out the link speed to program the WTHRESH value correctly.
 			pktgen_get_link_status(info, pid, 0);
 
-			info->tx_conf.tx_thresh.wthresh = (info->link.link_speed == 1000)? TX_WTHRESH_1GB : TX_WTHRESH;
+			//info->tx_conf.tx_thresh.wthresh = (info->link.link_speed == 1000)? TX_WTHRESH_1GB : TX_WTHRESH;
 
 			ret = rte_eth_tx_queue_setup(pid, q, pktgen.nb_txd, sid, &info->tx_conf);
 			if (ret < 0)
