@@ -1,0 +1,15 @@
+0 Serialisation	write=2,571ns read=12,537ns total=15,108ns
+1 Serialisation	write=2,183ns read=12,261ns total=14,444ns
+2 Serialisation	write=2,172ns read=12,211ns total=14,383ns
+3 Serialisation	write=2,161ns read=12,405ns total=14,566ns
+4 Serialisation	write=2,189ns read=12,379ns total=14,568ns
+0 ByteBuffer	write=201ns read=227ns total=428ns
+1 ByteBuffer	write=172ns read=191ns total=363ns
+2 ByteBuffer	write=171ns read=191ns total=362ns
+3 ByteBuffer	write=169ns read=192ns total=361ns
+4 ByteBuffer	write=169ns read=195ns total=364ns
+0 UnsafeMemory	write=39ns read=79ns total=118ns
+1 UnsafeMemory	write=22ns read=56ns total=78ns
+2 UnsafeMemory	write=21ns read=55ns total=76ns
+3 UnsafeMemory	write=21ns read=55ns total=76ns
+4 UnsafeMemory	write=22ns read=57ns total=79ns
