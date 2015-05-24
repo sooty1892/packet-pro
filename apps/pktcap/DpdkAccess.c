@@ -112,11 +112,11 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 	//buf[1] = 54;
 
 
-	char *strs[] = {"Pktcap", "-c", "0x3", "-n", "1"};
+	char *strs[] = {"Pktcap", "-c", "0x3", "-n", "3", "-m", "128", "--file-prefix", "pc", "-b", "00:08.0", "-b", "00:03.0"};
 
 	int port_to_conf = 0;
 
-	int ret = rte_eal_init(5, strs);
+	int ret = rte_eal_init(13, strs);
 	int count = rte_eth_dev_count();
 	printf("C: %d ports enabled\n", count);
 	if (count == 0) {
@@ -221,7 +221,15 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 				RTE_MBUF_ASSERT(ipgdr != NULL);
 
 				dest_addr = rte_be_to_cpu_32(iphdr->dst_addr);
-				printf("Received packet with IP address: %" PRIu32 "\n", dest_addr);
+
+				unsigned char bytes[4];
+				bytes[0] = dest_addr & 0xFF;
+				bytes[1] = (dest_addr >> 8) & 0xFF;
+				bytes[2] = (dest_addr >> 16) & 0xFF;
+				bytes[3] = (dest_addr >> 24) & 0xFF;
+				printf("%d.%d.%d.%d\n", bytes[3], bytes[2], bytes[1], bytes[0]);
+
+				//printf("Received packet with IP address: %" PRIu32 "\n", dest_addr);
 
 			}
 			if (pktcount == 10000000)

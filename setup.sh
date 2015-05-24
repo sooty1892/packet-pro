@@ -58,9 +58,11 @@ insmod $sdk/$target/kmod/rte_kni.ko "lo_mode=lo_mode_ring"
 
 name=`uname -n`
 if [ $name == "dpdk64-VirtualBox" ]; then
+ifconfig eth0 down
 ifconfig eth1 down
 ifconfig eth2 down
-$sdk/tools/dpdk_nic_bind.py -b igb_uio 00:08.0 00:09.0
+ifconfig eth3 down
+$sdk/tools/dpdk_nic_bind.py -b igb_uio 00:08.0 00:09.0 00:03.0 00:0a.0
 fi
 
 $sdk/tools/dpdk_nic_bind.py --status
