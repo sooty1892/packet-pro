@@ -11,16 +11,16 @@ public class Pktcap implements Runnable {
         //(new Thread(new PacketInspector(buffer))).start();
         if (DpdkAccess.setup_and_conf(buffer) < 0) {
         	System.out.println("JAVA: Error in DPDK setup ");
-			return;
+	       return;
         }
         System.out.println("JAVA: Starting recieve queue polling");
-        while (true) {
+        /*while (true) {
         	buffer = ByteBuffer.allocateDirect(8*1024);
         	int count = DpdkAccess.get_packets(buffer);
                 if (count > 0) {
                         System.out.println("JAVA: Received " + count + " packets");
                 }
-        }
+        }*/
 	}
 	
 	public void run() {

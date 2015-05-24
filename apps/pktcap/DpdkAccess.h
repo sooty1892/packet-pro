@@ -7,6 +7,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+//char *int_to_ip(uint32_t);
+
 /*
  * Class:     DpdkAccess
  * Method:    nat_setup_and_conf

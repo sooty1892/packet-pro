@@ -97,6 +97,15 @@ static struct rte_eth_rxconf rx_conf = {
 // RTE mempool structure
 static struct rte_mempool *rx_pool;
 
+/*char *int_to_ip(uint32_t ip) {
+	unsigned char bytes[4];
+	bytes[0] = ip & 0xFF;
+	bytes[1] = (ip >> 8) & 0xFF;
+	bytes[2] = (ip >> 16) & 0xFF;
+	bytes[3] = (ip >> 24) & 0xFF;
+	return bytes;
+}*/
+
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass class, jobject buffer) {
 
 	//jclass cls = (*env)->GetObjectClass(buffer);
@@ -238,11 +247,70 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 		}
 		//  rte_eal_mp_wait_lcore();
 	}*/
+	struct ipv4_hdr test = {1,2,3,4,5,6,7,8,9,10};
+	struct ipv4_hdr *hi = &test;
+	char *pt = (char*)hi;
+	uint8_t *version_ihl = (uint8_t*)hi;
+	uint8_t *type_of_service = (uint8_t*)((uint8_t*)hi + 1);
+	uint16_t *total_length = (uint16_t*)((uint8_t*)hi + 2);
+	uint16_t *packet_id = (uint16_t*)((uint8_t*)hi + 4);
+	uint16_t *fragment_offset = (uint16_t*)((uint8_t*)hi + 6);
+	uint8_t *time_to_live = (uint8_t*)((uint8_t*)hi + 8);
+	uint8_t *next_proto_id = (uint8_t*)((uint8_t*)hi + 9);
+	uint16_t *hdr_checksum = (uint16_t*)((uint8_t*)hi + 10);
+	uint32_t *src_addr = (uint32_t*)((uint8_t*)hi + 12);
+	uint32_t *dst_addr = (uint32_t*)((uint8_t*)hi + 16);
+	printf("VERSION_IHL %" PRIu8 "\n", *version_ihl);
+	printf("TYPE_OF_SERVICE %" PRIu8 "\n", *type_of_service);
+	printf("TOTAL LENGTH %" PRIu16 "\n", *total_length);
+	printf("PACKET ID %" PRIu16 "\n", *packet_id);
+	printf("FRAGMENT OFFSET %" PRIu16 "\n", *fragment_offset);
+	printf("TIME TO LIVE %" PRIu8 "\n", *time_to_live);
+	printf("NEXT PROTO ID %" PRIu8 "\n", *next_proto_id);
+	printf("HDR CHECKSUM %" PRIu16 "\n", *hdr_checksum);
+	printf("SRC ADDR %" PRIu32 "\n", *src_addr);
+	printf("DST ADDR %" PRIu32 "\n", *dst_addr);
 	return 0;
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1get_1packets(JNIEnv *env, jclass class, jobject buffer) {
 	struct rte_mbuf *rx_mbufs[MAX_PKT_BURST];
 	int recv_cnt = rte_eth_rx_burst(0, 0, rx_mbufs, MAX_PKT_BURST);
+	int i;
+	if (recv_cnt > 0) {
+		int i;
+		for (i=0; i < recv_cnt; i++) {
+			/*struct ipv4_hdr *iphdr;
+			uint8_t version_ihl;
+			uint8_t type_of_service;
+			uint16_t total_length;
+			uint16_t fragment_offset;
+			uint8_t time_to_live;
+			uint8_t next_proto_id;
+			uint16_t hdr_checksum;
+			uint32_t src_addr;
+			uint32_t dst_addr;
+
+			iphdr = (struct ipv4_hdr *)rte_pktmbuf_adj(rx_mbufs[i], (uint16_t)sizeof(struct ether_hdr));
+			RTE_MBUF_ASSERT(ipgdr != NULL);
+
+			dst_addr = rte_be_to_cpu_32((uint32_t)(((char*)(iphdr) + 112)));
+
+			unsigned char bytes[4];
+			bytes[0] = dst_addr & 0xFF;
+			bytes[1] = (dst_addr >> 8) & 0xFF;
+			bytes[2] = (dst_addr >> 16) & 0xFF;
+			bytes[3] = (dst_addr >> 24) & 0xFF;
+			printf("ARITH: %d.%d.%d.%d\n", bytes[3], bytes[2], bytes[1], bytes[0]);
+
+			uint32_t des = rte_be_to_cpu_32(iphdr->dst_addr);
+			unsigned char newbytes[4];
+			bytes[0] = des & 0xFF;
+			bytes[1] = (des >> 8) & 0xFF;
+			bytes[2] = (des >> 16) & 0xFF;
+			bytes[3] = (des >> 24) & 0xFF;
+			printf("CORR: %d.%d.%d.%d\n", newbytes[3], newbytes[2], newbytes[1], newbytes[0]); */
+		}
+	}
 	return recv_cnt;
 }
