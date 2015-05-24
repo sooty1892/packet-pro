@@ -9,7 +9,7 @@ public class Pktcap implements Runnable {
         buffer = ByteBuffer.allocateDirect(8*1024);
         //(new Thread(new Pktcap())).start();
         //(new Thread(new PacketInspector(buffer))).start();
-        if (DpdkAccess.setup_and_conf() < 0) {
+        if (DpdkAccess.setup_and_conf(buffer) < 0) {
         	System.out.println("JAVA: Error in DPDK setup ");
 			return;
         }
@@ -17,7 +17,9 @@ public class Pktcap implements Runnable {
         while (true) {
         	buffer = ByteBuffer.allocateDirect(8*1024);
         	int count = DpdkAccess.get_packets(buffer);
-        	System.out.println("JAVA: Received " + count + " packets");
+                if (count > 0) {
+                        System.out.println("JAVA: Received " + count + " packets");
+                }
         }
 	}
 	

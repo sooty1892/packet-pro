@@ -15,6 +15,14 @@ extern "C" {
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf
   (JNIEnv *, jclass, jobject);
 
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_get_packets
+ * Signature: (Ljava/nio/ByteBuffer;)I
+ */
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1get_1packets
+  (JNIEnv *, jclass, jobject);
+
 #ifdef __cplusplus
 }
 #endif
