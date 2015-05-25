@@ -42,6 +42,8 @@
 #define ERROR -1
 #define MBUF_SIZE (2048 + sizeof(struct rte_mbuf) + RTE_PKTMBUF_HEADROOM)
 #define NB_MBUF 8192
+#define MAX_PKT_BURST 32
+
 
 struct rte_mempool *rx_pool = NULL;
 
@@ -60,6 +62,55 @@ static const struct rte_eth_conf port_conf = {
 	},
 };
 
+// For configuring an ethernet port
+static struct rte_eth_conf eth_conf = { 
+    .rxmode = { 
+        .mq_mode = ETH_MQ_RX_RSS,
+        .split_hdr_size = 0, 
+        .header_split = 0, 
+        .hw_ip_checksum = 1, 
+        .hw_vlan_filter = 0, 
+        .jumbo_frame = 0,
+        .hw_strip_crc = 0, 
+    }, 
+    .rx_adv_conf = {
+        .rss_conf = {
+            .rss_key = NULL,
+            .rss_hf = ETH_RSS_IP,
+        },
+    },
+    .txmode = { 
+        .mq_mode = ETH_MQ_TX_NONE, 
+    }, 
+ };
+
+ // Configures a TX ring of an Ethernet port
+static struct rte_eth_txconf tx_conf = {
+    .tx_thresh = {
+        .pthresh = 36,
+        .hthresh = 0,
+        .wthresh = 0,
+    },
+    .tx_rs_thresh = 0,
+    .tx_free_thresh = 0,
+    //.txq_flags = (ETH_TXQ_FLAGS_NOMULTSEGS |
+    //		ETH_TXQ_FLAGS_NOVLANOFFL |
+    //		ETH_TXQ_FLAGS_NOXSUMSCTP |
+    //		ETH_TXQ_FLAGS_NOXSUMUDP  |
+    //		ETH_TXQ_FLAGS_NOXSUMTCP)
+};
+
+// Configures a RX ring of an Ethernet port
+static struct rte_eth_rxconf rx_conf = {
+    .rx_thresh = {
+        .pthresh = 8,
+        .hthresh = 8,
+        .wthresh = 4,
+    },
+    .rx_free_thresh = 64,
+    .rx_drop_en = 0,
+}; 
+
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 	char *args[] = {"Pktcap",
 					"-c", "0x3",
@@ -71,9 +122,13 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 
 	int port_to_conf = 0;
 
+	// used to retrieve link-level information of an
+    // Ethernet port. Aligned for atomic64 read/write
+    struct rte_eth_link link;
+
 	int ret = rte_eal_init(13, args);
 	if (ret < 0) {
-		printf("C: init error\n");
+		printf("C: EAL init error\n");
 		return ERROR;
 	}
 
@@ -83,7 +138,20 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 		printf("C: 0 ports error\n");
 		return ERROR;
 	}
-/*
+
+	// memset???
+	ret = rte_eth_dev_configure(port_to_conf, 1, 1, &port_conf);
+	if (ret < 0) {
+		printf("C: Cannot configure ethernet port\n");
+		return ERROR;
+	}
+	printf("C: Ethernet port configured\n");
+
+	// ID of the execution unit we are running on
+    unsigned cpu = rte_lcore_id();
+    // Get the ID of the physical socket of the specified lcore
+    unsigned socketid = rte_lcore_to_socket_id(cpu);
+
 	//TODO: Change cache size?
 	rx_pool = rte_mempool_create(
 						"rx_pool", //name of mempool
@@ -95,7 +163,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 						NULL,
 						rte_pktmbuf_init,
 						NULL,
-						rte_socket_id(),
+						socketid,
 						0);
 	if (rx_pool == NULL) {
 		printf("C: Cannot init mbuf pool\n");
@@ -103,16 +171,10 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 	}
 	printf("C: Mempool created\n");
 
-	ret = rte_eth_dev_configure(port_to_conf, 1, 1, &port_conf);
-	if (ret < 0) {
-		printf("C: Cannot configure ethernet port\n");
-		return ERROR;
-	}
-	printf("C: Ethernet port configured\n");
 
 	ret = rte_eth_rx_queue_setup(port_to_conf, 0, 256,
-								rte_eth_dev_socket_id(port_to_conf),
-								NULL, rx_pool);
+								socketid,
+								&rx_conf, rx_pool);
 	if (ret < 0) {
 		printf("C: Error setting up rx queue\n");
 		return ERROR;
@@ -126,62 +188,13 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 	}
 	printf("C: ethernet device started\n");
 
+	rte_eth_link_get(0, &link);
+    if (link.link_status == 0) {
+        rte_exit(EXIT_FAILURE, "DPDK interface is down: %d\n", ifidx);
+    }
+    printf("If %d is UP and RUNNING\n", ifidx);
+
 	printf("C: setup complete\n");*/
-
-
-	//memset(&eth_conf, 0, sizeof eth_conf);
-	// Configure an Ethernet device
-	ret = rte_eth_dev_configure(port_to_conf, 1, 1, &port_conf);
-	if (ret < 0) {
-		printf("C: Cannot configure device: error=%d, port=%d\n", ret, 0);
-		return ERROR;
-	}
-	printf("C: %d rte_eth_dev_configure() successful\n", port_to_conf);
-	// ID of the execution unit we are running on
-	unsigned cpu = rte_lcore_id();
-	// Get the ID of the physical socket of the specified lcore
-	unsigned socketid = rte_lcore_to_socket_id(cpu);
-
-	// creates a new mempool named 'rx_pool in memory.
-	rx_pool = rte_mempool_create("rx_pool", 8*1024, 2048, 0,
-								sizeof (struct rte_pktmbuf_pool_private),
-								rte_pktmbuf_pool_init, NULL,
-								rte_pktmbuf_init, NULL, socketid, 0);
-	if (rx_pool == NULL) {
-		printf("C: rte_mempool_create(): error\n");
-		return ERROR;
-	}
-
-	// Allocate and set up a receive queue for an Ethernet device.
-	ret = rte_eth_rx_queue_setup(port_to_conf, 0, 256, socketid, NULL, rx_pool);
-	if (ret < -1) {
-		printf("C: rte_eth_rx_dev_queue_setup(): error=%d, port=%d\n", ret, port_to_conf);
-		return ERROR;
-	}
-	printf("C: %d rte_eth_rx_queue_setup() successful\n", port_to_conf);
-
-
-	// Start an Ethernet device.
-	ret = rte_eth_dev_start(port_to_conf);
-	if (ret < 0) {
-		printf("C: rte_eth_dev_start(): error=%d, port=%d\n", ret, port_to_conf);
-		return ERROR;
-	}
-	printf("C: %d rte_eth_dev_start() successful\n", port_to_conf);
-
-	// used to retrieve link-level information of an
-	// Ethernet port. Aligned for atomic64 read/write
-	struct rte_eth_link link;
-
-	// Retrieve the status (ON/OFF), the speed (in Mbps) and the
-	// mode (HALF-DUPLEX or FULL-DUPLEX) of the physical link of
-	// an Ethernet device. It might need to wait up to 9 seconds in it.
-	rte_eth_link_get(port_to_conf, &link);
-	if (link.link_status == 0) {
-		printf("C: DPDK interface is down: %d\n", port_to_conf);
-		return ERROR;
-	}
-	printf("C: %d is UP and RUNNING\n", port_to_conf);
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass class, jlong pointer) {
