@@ -110,14 +110,14 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 
 	//jclass cls = (*env)->GetObjectClass(buffer);
 	//jmethodID mid = (*env)->GetMethodID(cls, "limit", "(I)Ljava/nio/Buffer;");
-	char *buf = (char*)(*env)->GetDirectBufferAddress(env, buffer);
+	//char *buf = (char*)(*env)->GetDirectBufferAddress(env, buffer);
 	//jlong capacity = (*env)->GetDirectBufferCapacity(buffer);
 	//int written = 0;
 
 	// Do something spectacular with the buffer...
 
 	//env->CallObjectMethod(buffer, mid, written);
-	buf[0] = 'H';
+	//buf[0] = 'H';
 	//buf[1] = 54;
 
 
@@ -270,6 +270,19 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf(JNIEnv *env, jclass
 	printf("HDR CHECKSUM %" PRIu16 "\n", *hdr_checksum);
 	printf("SRC ADDR %" PRIu32 "\n", *src_addr);
 	printf("DST ADDR %" PRIu32 "\n", *dst_addr);
+
+	uint8_t *buf = (uint8_t*)(*env)->GetDirectBufferAddress(env, buffer);
+	buf[0] = *version_ihl;
+	buf[1] = *type_of_service;
+	buf[2] = *total_length;
+	buf[4] = *packet_id;
+	buf[6] = *fragment_offset;
+	buf[8] = *time_to_live;
+	buf[9] = *next_proto_id;
+	buf[10] = *hdr_checksum;
+	buf[12] = *src_addr;
+	buf[16] = *dst_addr;
+
 	return 0;
 }
 

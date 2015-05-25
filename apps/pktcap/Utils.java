@@ -1,6 +1,6 @@
-public static class Utils {
+public class Utils {
 
-	private static short swapl2b(short value) {
+	public static short swapl2b(short value) {
         int b1 = value & 0xff;
         int b2 = (value >> 8) & 0xff;
         return (short) (b1 << 8 | b2 << 0);
@@ -27,15 +27,15 @@ public static class Utils {
 	}
 
 	public static float swapl2b(float value) {
-	    int intValue = Float.floatToIntBits (value);
-	    intValue = swap (intValue);
-	    return Float.intBitsToFloat (intValue);
+	    int intValue = Float.floatToIntBits(value);
+	    intValue = swapl2b(intValue);
+	    return Float.intBitsToFloat(intValue);
 	}
 
 	public static double swapl2b(double value) {
-    	long longValue = Double.doubleToLongBits (value);
-    	longValue = swap (longValue);
-    	return Double.longBitsToDouble (longValue);
+    	long longValue = Double.doubleToLongBits(value);
+    	longValue = swapl2b(longValue);
+    	return Double.longBitsToDouble(longValue);
 	}
 
 }
