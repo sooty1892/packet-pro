@@ -23,18 +23,22 @@ public class ApplicationStarter {
 		// here use jni calls to get various information needed later
 		// like size of structs, offsets and memory sizes needed
 		
-		System.out.println("JAVA: Starting receive queue polling");
+		/*System.out.println("JAVA: Starting receive queue polling");
 		//while (true) {
 			long pointer = unsafe.allocateMemory(12);
+			//unsafe.putShort(pointer, (short)5);
 			DpdkAccess.dpdk_receive_burst(pointer);
 			
-			int counter = unsafe.getInt(pointer);
+			//short counter = Utils.swap(unsafe.getShort(pointer));
+			short counter = unsafe.getShort(pointer);
+			byte test = unsafe.getByte(pointer+2);
 			System.out.println("JAVA: Count = " + counter);
+			System.out.println("JAVA: Test = " + test);
 			
 			// do something with packets
 			
 			//remember to free packets sometime
-		//}
+		//}*/
 	}
 	
 }

@@ -185,11 +185,16 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass class, jlong pointer) {
-	uint8_t *point = (uint_8*)pointer;
-	struct rte_mbuf *pkts_burst[MAX_PKT_BURST];
-	int nb_rx = rte_eth_rx_burst((uint8_t) 0, 0, pkts_burst, 256);
-	point[0] = nb_rx;
-	point[4] = pkts_burst;
+	uint8_t *point = (uint8_t*)pointer;
+	//printf("TEST: %" PRIu16 "\n", point[0]);
+	struct rte_mbuf *pkts_burst[128];
+	//int nb_rx = rte_eth_rx_burst((uint8_t) 0, 0, pkts_burst, 256);
+	uint16_t nb_rx = 1;
+	char lo = nb_rx & 0xFF;
+	char hi = nb_rx >> 8;
+	point[0] = lo;
+	point[1] = hi;
+	point[2] = (uint8_t)5;
 }
 
 
