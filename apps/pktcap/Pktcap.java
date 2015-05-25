@@ -52,7 +52,11 @@ public class Pktcap implements Runnable {
         f.setAccessible(true);
         Unsafe unsafe = (Unsafe)f.get(null);
        
-        Packet p = (Packet)unsafe.allocateInstance(Packet.class);
+        //Packet p = (Packet)unsafe.allocateInstance(Packet.class);
+        long pointer = unsafe.allocateMemory(1024);
+        DpdkAccess.test_unsafe(pointer);
+        byte num = unsafe.getByte(pointer);
+        System.out.println("Byte: " + num);
         
 	}
 	

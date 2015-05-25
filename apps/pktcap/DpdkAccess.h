@@ -7,9 +7,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-//char *int_to_ip(uint32_t);
-
 /*
  * Class:     DpdkAccess
  * Method:    nat_setup_and_conf
@@ -25,6 +22,14 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup_1and_1conf
  */
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1get_1packets
   (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_test_unsafe
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1test_1unsafe
+  (JNIEnv *, jclass, jlong);
 
 #ifdef __cplusplus
 }

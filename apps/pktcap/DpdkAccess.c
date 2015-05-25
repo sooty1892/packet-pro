@@ -327,3 +327,8 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1get_1packets(JNIEnv *env, jclass cla
 	}
 	return recv_cnt;
 }
+
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1test_1unsafe(JNIEnv *env, jclass class, jlong point) {
+	char *pointer = (char*)point;
+	pointer[0] = 15;
+}
