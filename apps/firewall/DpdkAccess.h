@@ -18,10 +18,10 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup
 /*
  * Class:     DpdkAccess
  * Method:    nat_receive_burst
- * Signature: ()I
+ * Signature: (J)I
  */
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1receive_1burst
-  (JNIEnv *, jclass);
+  (JNIEnv *, jclass, jlong);
 
 #ifdef __cplusplus
 }

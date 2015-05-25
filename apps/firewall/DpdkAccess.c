@@ -184,8 +184,12 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 	printf("C: %d is UP and RUNNING\n", port_to_conf);
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass class) {
-	return 0;
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass class, jlong pointer) {
+	uint8_t *point = (uint_8*)pointer;
+	struct rte_mbuf *pkts_burst[MAX_PKT_BURST];
+	int nb_rx = rte_eth_rx_burst((uint8_t) 0, 0, pkts_burst, 256);
+	point[0] = nb_rx;
+	point[4] = pkts_burst;
 }
 
 

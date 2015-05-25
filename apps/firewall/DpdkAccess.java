@@ -3,7 +3,7 @@
 public class DpdkAccess {
 	
 	private static native int nat_setup();
-	private static native int nat_receive_burst();
+	private static native void nat_receive_burst(long pointer);
 	
 	static {
 		System.loadLibrary("nat_dpdk");
@@ -13,8 +13,8 @@ public class DpdkAccess {
 		return nat_setup();
 	}
 	
-	public static int dpdk_receive_burst() {
-		return nat_receive_burst();
+	public static void dpdk_receive_burst(long pointer) {
+		nat_receive_burst(pointer);
 	}
 	
 }
