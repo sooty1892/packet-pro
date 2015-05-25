@@ -4,7 +4,7 @@ import sun.misc.Unsafe;
 // Starter class for firewall using DPDK
 public class ApplicationStarter {
 
-	public static void Main(String[] args) {
+	public static void main(String[] args) {
 		System.out.println("JAVA: Starting Firewall");
 		
 		int ret = DpdkAccess.dpdk_setup();
