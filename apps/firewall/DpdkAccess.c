@@ -42,7 +42,11 @@
 #define ERROR -1
 #define MBUF_SIZE (2048 + sizeof(struct rte_mbuf) + RTE_PKTMBUF_HEADROOM)
 #define NB_MBUF 8192
-#define MAX_PKT_BURST 32
+#define MAX_PKT_BURST 512
+#define NB_RX_QUEUE 1
+#define NB_TX_QUEUE 1
+#define	NB_RX_DESC 256
+#define	NB_TX_DESC 256
 
 
 struct rte_mempool *rx_pool = NULL;
@@ -113,7 +117,7 @@ static struct rte_eth_rxconf rx_conf = {
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 	char *args[] = {"Pktcap",
-					"-c", "0x3",
+					"-c", "0x7",
 					"-n", "3",
 					"-m", "128",
 					"--file-prefix", "fw",
@@ -140,7 +144,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 	}
 
 	// memset???
-	ret = rte_eth_dev_configure(port_to_conf, 1, 1, &port_conf);
+	ret = rte_eth_dev_configure(port_to_conf, 1, 1, &eth_conf);
 	if (ret < 0) {
 		printf("C: Cannot configure ethernet port\n");
 		return ERROR;
@@ -181,6 +185,13 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 	}
 	printf("C: RX queue setup\n");
 
+	// Allocate and set up a transmit queue for an Ethernet device.
+    ret = rte_eth_tx_queue_setup(0, 0, NB_TX_DESC, socketid, &tx_conf);
+    if (ret < 0) {
+        rte_exit(EXIT_FAILURE, "rte_eth_tx_queue_setup(): error=%d, port=%d\n", ret, 0);
+    }
+    printf("If %d rte_eth_tx_queue_setup() successful\n", 0);
+
 	ret = rte_eth_dev_start(port_to_conf);
 	if (ret < 0) {
 		printf("C: Cannot start ethernet device\n");
@@ -190,11 +201,11 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 
 	rte_eth_link_get(0, &link);
     if (link.link_status == 0) {
-        rte_exit(EXIT_FAILURE, "DPDK interface is down: %d\n", ifidx);
+        rte_exit(EXIT_FAILURE, "DPDK interface is down: %d\n", 0);
     }
-    printf("If %d is UP and RUNNING\n", ifidx);
+    printf("If %d is UP and RUNNING\n", 0);
 
-	printf("C: setup complete\n");*/
+	printf("C: setup complete\n");
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass class, jlong pointer) {

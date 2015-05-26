@@ -23,7 +23,7 @@ public class ApplicationStarter {
 		// here use jni calls to get various information needed later
 		// like size of structs, offsets and memory sizes needed
 		
-		/*System.out.println("JAVA: Starting receive queue polling");
+		System.out.println("JAVA: Starting receive queue polling");
 		//while (true) {
 			long pointer = unsafe.allocateMemory(12);
 			//unsafe.putShort(pointer, (short)5);
@@ -38,7 +38,7 @@ public class ApplicationStarter {
 			// do something with packets
 			
 			//remember to free packets sometime
-		//}*/
+		//}
 	}
 	
 }
