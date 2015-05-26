@@ -318,7 +318,7 @@ struct rte_mbuf {
 			/* uint64_t unused:8; */
 		};
 	};
-} __rte_cache_aligned;
+} __attribute__((__aligned__(RTE_CACHE_LINE_SIZE), __packed__));
 
 /**
  * Given the buf_addr returns the pointer to corresponding mbuf.
