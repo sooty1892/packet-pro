@@ -120,21 +120,26 @@ void insert8(uint8_t *pointer, int position, uint8_t value) {
 }
 
 void insert16(uint8_t *pointer, int position, uint16_t value) {
-	pointer[position] = (uint8_t)((value >> 8) & 0xFF) ;
-	pointer[position+1] = (uint8_t)((value) & 0xFF) ;
+	pointer[position+1] = (uint8_t)((value >> 8) & 0xFF) ;
+	pointer[position] = (uint8_t)((value) & 0xFF) ;
 }
 
 void insert32(uint8_t *pointer, int position, uint32_t value) {
-	pointer[position] = (uint8_t)((value >> 16) & 0xFF) ;
-	pointer[position+1] = (uint8_t)((value >> 8) & 0xFF) ;
-	pointer[position+2] = (uint8_t)((value) & 0XFF);
+	pointer[position+3] = (uint8_t)((value >> 24) & 0xFF) ;
+	pointer[position+2] = (uint8_t)((value >> 16) & 0xFF) ;
+	pointer[position+1] = (uint8_t)((value >> 8) & 0XFF);
+	pointer[position] = (uint8_t)((value) & 0XFF);
 }
 
 void insert64(uint8_t *pointer, int position, uint64_t value) {
-	pointer[position] = (uint8_t)((value >> 24) & 0xFF) ;
-	pointer[position+1] = (uint8_t)((value >> 16) & 0xFF) ;
-	pointer[position+2] = (uint8_t)((value >> 8) & 0XFF);
-	pointer[position+3] = (uint8_t)((value & 0XFF));
+	pointer[position+7] = (uint8_t)((value >> 56) & 0xFF) ;
+	pointer[position+6] = (uint8_t)((value >> 48) & 0xFF) ;
+	pointer[position+5] = (uint8_t)((value >> 40) & 0XFF);
+	pointer[position+4] = (uint8_t)((value >> 32) & 0XFF);
+	pointer[position+3] = (uint8_t)((value >> 24) & 0XFF);
+	pointer[position+2] = (uint8_t)((value >> 16) & 0XFF);
+	pointer[position+1] = (uint8_t)((value >> 8) & 0XFF);
+	pointer[position] = (uint8_t)((value) & 0XFF);
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
@@ -245,15 +250,20 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass c
 	point[2] = (uint8_t)5;
 	*/
 
-	//int nb_rx = rte_eth_rx_burst(0, 0, pkts_burst, MAX_PKT_BURST);
-	//printf("C: Received = %i", nb_rx);
+	int nb_rx = rte_eth_rx_burst(0, 0, pkts_burst, MAX_PKT_BURST);
+	printf("C: Received = %i\n", nb_rx);
 
 	uint16_t count = (uint16_t)nb_rx;
 	uint8_t *point = (uint8_t*)pointer;
-	insert8(point, 0, 1);
-	insert16(point, 1, 2);
-	insert32(point, 3, 3);
-	insert64(point, 7, 4);
+	//insert8(point, 0, 1);
+	//insert16(point, 1, 2);
+	//insert32(point, 3, 3);
+	//insert64(point, 7, 4);
+
+	insert16(point, 0, count);
+	insert64(point, 2, (uint64_t)pkts_burst);
+
+	printf("C: Add = %" PRIu64 "\n", pkts_burst);
 }
 
 

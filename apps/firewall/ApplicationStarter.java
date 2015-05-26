@@ -24,25 +24,35 @@ public class ApplicationStarter {
 		// like size of structs, offsets and memory sizes needed
 		
 		System.out.println("JAVA: Starting receive queue polling");
-		//while (true) {
+		boolean t = true;
+		while (t) {
 			long pointer = unsafe.allocateMemory(12);
 			//unsafe.putShort(pointer, (short)5);
 			DpdkAccess.dpdk_receive_burst(pointer);
 			
 			//short counter = Utils.swap(unsafe.getShort(pointer));
-			byte b = unsafe.getByte(pointer);
+			/*byte b = unsafe.getByte(pointer);
 			short c = unsafe.getShort(pointer+1);
 			int i = unsafe.getInt(pointer+3);
 			long l = unsafe.getLong(pointer+7);
 			System.out.println("JAVA: byte = " + b);
 			System.out.println("JAVA: short = " + c);
 			System.out.println("JAVA: int = " + i);
-			System.out.println("JAVA: long = " + l);
+			System.out.println("JAVA: long = " + l);*/
+
+			short count = unsafe.getShort(pointer);
+			long add = unsafe.getLong(pointer+2);
+
+			System.out.println("JAVA: count = " + count);
+			System.out.println("JAVA: add = " + add);
 			
 			// do something with packets
 			
 			//remember to free packets sometime
-		//}
+			if (count > 0) {
+				t = false;
+			}
+		}
 	}
 	
 }
