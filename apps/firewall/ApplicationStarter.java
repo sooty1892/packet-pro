@@ -20,6 +20,10 @@ public class ApplicationStarter {
 			return;
 		}
 		
+		int ether_hdr_size = DpdkAccess.dpdk_size_of_ether_hdr();
+		int mbuf_size = DpdkAccess.dpdk_size_of_mbuf();
+		int void_pointer_size = DpdkAccess.dpdk_size_of_void_pointer();
+		
 		// here use jni calls to get various information needed later
 		// like size of structs, offsets and memory sizes needed
 		
@@ -51,6 +55,16 @@ public class ApplicationStarter {
 			//remember to free packets sometime
 			if (count > 0) {
 				t = false;
+				for (int i = 0; i < count; i++) {
+					long mbuf_addr = add + (mbuf_size * i);
+					if (void_pointer_size == 2) {
+						short buf_addr = unsafe.getShort(mbuf_addr);
+						long ipv4_hdr = buf_addr + ether_hdr_size;
+						byte version_ihl = unsafe.getByte(ipv4_hdr);
+					} else {
+						System.out.println("JAVA: void pointer size not 2 so not doing anything");
+					}
+				}
 			}
 		}
 	}

@@ -266,6 +266,22 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass c
 	printf("C: Add = %" PRIu64 "\n", pkts_burst);
 }
 
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1ether_1hdr(JNIEnv *env, jclass class) {
+	return sizeof(struct ether_hdr);
+}
+
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1mbuf(JNIEnv *env, jclass class) {
+	return sizeof(struct rte_mbuf);
+}
+
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1void_1pointer(JNIEnv *env, jclass class) {
+	int num = 0;
+	void *ptr;
+	num = 15;
+	ptr = &num;
+	return sizeof(ptr);
+}
+
 
 
 

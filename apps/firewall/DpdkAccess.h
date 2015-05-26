@@ -18,10 +18,34 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup
 /*
  * Class:     DpdkAccess
  * Method:    nat_receive_burst
- * Signature: (J)I
+ * Signature: (J)V
  */
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1receive_1burst
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst
   (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_size_of_ether_hdr
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1ether_1hdr
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_size_of_mbuf
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1mbuf
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_size_of_void_pointer
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1void_1pointer
+  (JNIEnv *, jclass);
 
 #ifdef __cplusplus
 }
