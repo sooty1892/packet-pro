@@ -30,10 +30,14 @@ public class ApplicationStarter {
 			DpdkAccess.dpdk_receive_burst(pointer);
 			
 			//short counter = Utils.swap(unsafe.getShort(pointer));
-			short counter = unsafe.getShort(pointer);
-			byte test = unsafe.getByte(pointer+2);
-			System.out.println("JAVA: Count = " + counter);
-			System.out.println("JAVA: Test = " + test);
+			byte b = unsafe.getByte(pointer);
+			short c = unsafe.getShort(pointer+1);
+			int i = unsafe.getInt(pointer+3);
+			long l = unsafe.getLong(pointer+7);
+			System.out.println("JAVA: byte = " + b);
+			System.out.println("JAVA: short = " + c);
+			System.out.println("JAVA: int = " + i);
+			System.out.println("JAVA: long = " + l);
 			
 			// do something with packets
 			

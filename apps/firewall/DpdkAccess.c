@@ -113,7 +113,29 @@ static struct rte_eth_rxconf rx_conf = {
     },
     .rx_free_thresh = 64,
     .rx_drop_en = 0,
-}; 
+};
+
+void insert8(uint8_t *pointer, int position, uint8_t value) {
+	pointer[position] = value ;
+}
+
+void insert16(uint8_t *pointer, int position, uint16_t value) {
+	pointer[position] = (uint8_t)((value >> 8) & 0xFF) ;
+	pointer[position+1] = (uint8_t)((value) & 0xFF) ;
+}
+
+void insert32(uint8_t *pointer, int position, uint32_t value) {
+	pointer[position] = (uint8_t)((value >> 16) & 0xFF) ;
+	pointer[position+1] = (uint8_t)((value >> 8) & 0xFF) ;
+	pointer[position+2] = (uint8_t)((value) & 0XFF);
+}
+
+void insert64(uint8_t *pointer, int position, uint64_t value) {
+	pointer[position] = (uint8_t)((value >> 24) & 0xFF) ;
+	pointer[position+1] = (uint8_t)((value >> 16) & 0xFF) ;
+	pointer[position+2] = (uint8_t)((value >> 8) & 0XFF);
+	pointer[position+3] = (uint8_t)((value & 0XFF));
+}
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 	char *args[] = {"Pktcap",
@@ -209,16 +231,29 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass class, jlong pointer) {
-	uint8_t *point = (uint8_t*)pointer;
-	//printf("TEST: %" PRIu16 "\n", point[0]);
 	struct rte_mbuf *pkts_burst[128];
-	//int nb_rx = rte_eth_rx_burst((uint8_t) 0, 0, pkts_burst, 256);
+
+	/*
+	uint8_t *point = (uint8_t*)pointer;
+	printf("TEST: %" PRIu16 "\n", point[0]);
+	int nb_rx = rte_eth_rx_burst((uint8_t) 0, 0, pkts_burst, 256);
 	uint16_t nb_rx = 1;
 	char lo = nb_rx & 0xFF;
 	char hi = nb_rx >> 8;
 	point[0] = lo;
 	point[1] = hi;
 	point[2] = (uint8_t)5;
+	*/
+
+	//int nb_rx = rte_eth_rx_burst(0, 0, pkts_burst, MAX_PKT_BURST);
+	//printf("C: Received = %i", nb_rx);
+
+	uint16_t count = (uint16_t)nb_rx;
+	uint8_t *point = (uint8_t*)pointer;
+	insert8(point, 0, 1);
+	insert16(point, 1, 2);
+	insert32(point, 3, 3);
+	insert64(point, 7, 4);
 }
 
 
