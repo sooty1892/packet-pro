@@ -3,6 +3,11 @@ import sun.misc.Unsafe;
 
 // Starter class for firewall using DPDK
 public class ApplicationStarter {
+	
+	private static final int LONG_SIZE = Long.SIZE / Byte.SIZE;
+	private static final int INT_SIZE = Integer.SIZE / Byte.SIZE;
+	private static final int SHORT_SIZE = Short.SIZE / Byte.SIZE;
+	private static final int BYTE_SIZE = Byte.SIZE / Byte.SIZE;
 
 	public static void main(String[] args) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InterruptedException {
 		
@@ -32,54 +37,30 @@ public class ApplicationStarter {
 		// like size of structs, offsets and memory sizes needed
 		
 		System.out.println("JAVA: Starting receive queue polling");
-		boolean t = true;
-		while (t) {
-			long pointer = unsafe.allocateMemory(12);
-			//unsafe.putShort(pointer, (short)5);
-			DpdkAccess.dpdk_receive_burst(pointer);
+		while (true) {
+			int memory_size = ((Long.SIZE / Byte.SIZE) * 512) + 2;
+			long mem_pointer = unsafe.allocateMemory(memory_size);
 			
-			//short counter = Utils.swap(unsafe.getShort(pointer));
-			/*byte b = unsafe.getByte(pointer);
-			short c = unsafe.getShort(pointer+1);
-			int i = unsafe.getInt(pointer+3);
-			long l = unsafe.getLong(pointer+7);
-			System.out.println("JAVA: byte = " + b);
-			System.out.println("JAVA: short = " + c);
-			System.out.println("JAVA: int = " + i);
-			System.out.println("JAVA: long = " + l);*/
-
-			//short count = unsafe.getShort(pointer);
-			//long add = unsafe.getLong(pointer+2);
-
-			//System.out.println("JAVA: count = " + count);
-			//System.out.println("JAVA: add = " + add);
+			DpdkAccess.dpdk_receive_burst(mem_pointer);
 			
-			// do something with packets
-			short count = unsafe.getShort(pointer);
+			int offset = 0;
+			
+			short packet_count = unsafe.getShort(mem_pointer + offset);
+			offset += SHORT_SIZE;
+
 
 			//remember to free packets sometime
-			if (count > 0) {
-				t = false;
-				//short count = unsafe.getShort(pointer);
-				long p = unsafe.getLong(pointer+2);
-				//for (int i = 0; i < count; i++) {
-					/*System.out.println("JAVA: add = " + Long.toHexString(add));
-					long mbuf_addr =  unsafe.getLong(add+8); //add + (mbuf_size * i);
-					System.out.println("JAVA: mbuf_addr = " + Long.toHexString(mbuf_addr));
-					Thread.sleep(1000);
-					if (void_pointer_size == 8) {
-						long buf_addr = unsafe.getLong(mbuf_addr);
-						System.out.println("JAVA: buf_addr = " + Long.toHexString(buf_addr));
-						long ipv4_hdr = buf_addr + ether_hdr_size;
-						System.out.println("JAVA: ipv4_hdr = " + Long.toHexString(ipv4_hdr));
-						byte version_ihl = unsafe.getByte(ipv4_hdr);
-					} else {
-						System.out.println("JAVA: void pointer size not 8 so not doing anything");
-					}*/
-					//long p = DpdkAccess.dpdk_get_pointer();
-					System.out.println("JAVA: ip_hdr_add = " + Long.toHexString(p));
-					System.out.println("JAVA: version_ihl = " + unsafe.getByte(p));
-				//}
+			if (packet_count > 0) {
+				System.out.println("JAVA: Parsing " + packet_count + " packets!");
+				
+				for (int i = 0; i < packet_count; i++) {
+					long ip_hdr_pointer = unsafe.getLong(mem_pointer + offset + (i*LONG_SIZE));
+					System.out.println("JAVA: Packet " + i + " pointer = " + ip_hdr_pointer);
+				}
+				
+				System.out.println();
+				System.out.println();
+				Thread.sleep(1000);
 			}
 		}
 	}

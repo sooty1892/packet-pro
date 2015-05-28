@@ -237,50 +237,29 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 	printf("C: setup complete\n");
 }
 
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass class, jlong pointer) {
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass class, jlong mem_pointer) {
 	struct rte_mbuf *pkts_burst[128];
 
-	/*
-	uint8_t *point = (uint8_t*)pointer;
-	printf("TEST: %" PRIu16 "\n", point[0]);
-	int nb_rx = rte_eth_rx_burst((uint8_t) 0, 0, pkts_burst, 256);
-	uint16_t nb_rx = 1;
-	char lo = nb_rx & 0xFF;
-	char hi = nb_rx >> 8;
-	point[0] = lo;
-	point[1] = hi;
-	point[2] = (uint8_t)5;
-	*/
+	int offset = 0;
 
 	int nb_rx = rte_eth_rx_burst(0, 0, pkts_burst, MAX_PKT_BURST);
-	//printf("C: Received = %i\n", nb_rx);
 
-	uint16_t count = (uint16_t)nb_rx;
-	uint8_t *point = (uint8_t*)pointer;
-	//insert8(point, 0, 1);
-	//insert16(point, 1, 2);
-	//insert32(point, 3, 3);
-	//insert64(point, 7, 4);
+	uint16_t packet_count = (uint16_t)nb_rx;
+	uint8_t *point = (uint8_t*)mem_pointer;
 
-	insert16(point, 0, count);
-	//insert64(point, 2, (uint64_t)pkts_burst);
+	insert16(point, 0, packet_count);
+	offset += sizeof(uint16_t);
 
+	if (packet_count > 0) {
+		printf("C: Parsing " + packet_count + " packets!");
 
-
-	//mbuf_addr
-	//buf_addr
-	//ipv4_hdr
-	if (count > 0) {
-		//insert16(point, 0, count);
-		//insert64(point, 2, (uint64_t)pkts_burst[0]);
-		//printf("C: Add = %p\n", pkts_burst);
-		//printf("C: mbuf_addr = %p\n", pkts_burst[0]);
-		//printf("C: buf_addr = %p\n", pkts_burst[0]->buf_addr);
-		//printf("C: ipv4_hdr = %p\n", (struct ipv4_hdr *)rte_pktmbuf_adj(pkts_burst[0], (uint16_t)sizeof(struct ether_hdr)));
-		struct ipv4_hdr* ip = (struct ipv4_hdr *)(rte_pktmbuf_mtod(pkts_burst[0], unsigned char *) + sizeof(struct ether_hdr));
-		insert64(point, 2, (uint64_t)ip);
-		printf("C: ip_hdr_add = %p\n", ip);
-		printf("C: version_ihl = %" PRIu8 "\n", ip->version_ihl);
+		int i;
+		for (i = 0; i < packet_count; i++) {
+			struct ipv4_hdr* ip = (struct ipv4_hdr *)(rte_pktmbuf_mtod(pkts_burst[i], unsigned char *) + sizeof(struct ether_hdr));
+			insert64(point, offset, (uint64_t)ip);
+			printf("C: packet %d ip_hdr_add = %p\n", i, ip);
+			offset += sizeof(uint64_t);
+		}
 
 	}
 
