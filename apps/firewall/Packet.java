@@ -1,7 +1,9 @@
 public class Packet {
 	
-	private byte version_ihl;
-	private byte type_of_service;
+	private byte version;
+	private byte ihl;
+	private byte dscp;
+	private byte ecn;
 	private short total_length;
 	private short packet_id;
 	private short fragment_offset;
@@ -11,8 +13,10 @@ public class Packet {
 	private int src_addr;
 	private int dst_addr;
 	
-	public Packet(byte version_ihl,
-				byte type_of_service,
+	public Packet(byte version,
+				byte ihl,
+				byte dscp,
+				byte ecn,
 				short total_length,
 				short packet_id,
 				short fragment_offset,
@@ -21,8 +25,10 @@ public class Packet {
 				short hdr_checksum,
 				int src_addr,
 				int dst_addr) {
-		this.version_ihl = version_ihl;
-		this.type_of_service = type_of_service;
+		this.version = version;
+		this.ihl = ihl;
+		this.dscp = dscp;
+		this.ecn = ecn;
 		this.total_length = total_length;
 		this.packet_id = packet_id;
 		this.fragment_offset = fragment_offset;
@@ -32,7 +38,18 @@ public class Packet {
 		this.src_addr = src_addr;
 		this.dst_addr = dst_addr;
 	}
-	
+
+	public void set_version_ihl(byte version_ihl) {
+		version = (byte) ((version_ihl >> 4) & (byte) 0xF);
+		ihl = (byte) (version_ihl & 0xF);
+	}
+
+	public void set_dscp_ecn(byte dscp_ecn) {
+		dscp = (byte) ((dscp_ecn >> 2) & (byte) 0x3F);
+		ecn = (byte) (dscp_ecn & (byte) 0x3);
+	}
+
+	//TODO: fix this - not all fields done - needed?
 	public void swapAllEndian() {
 		total_length = Utils.swap(total_length);
 		packet_id = Utils.swap(packet_id);
@@ -42,12 +59,20 @@ public class Packet {
 		dst_addr = Utils.swap(dst_addr);
 	}
 
-	public byte getVersion_ihl() {
-		return version_ihl;
+	public byte getIhl() {
+		return ihl;
 	}
 
-	public byte getType_of_service() {
-		return type_of_service;
+	public byte getVersion() {
+		return version;
+	}
+
+	public byte getDscp() {
+		return dscp;
+	}
+
+	public byte getEcn() {
+		return ecn;
 	}
 
 	public short getTotal_length() {
@@ -82,12 +107,20 @@ public class Packet {
 		return dst_addr;
 	}
 
-	public void setVersion_ihl(byte version_ihl) {
-		this.version_ihl = version_ihl;
+	public void setVersion(byte version) {
+		this.version = version;
 	}
 
-	public void setType_of_service(byte type_of_service) {
-		this.type_of_service = type_of_service;
+	public void setIhl(byte ihl) {
+		this.ihl = ihl;
+	}
+
+	public void setDscp(byte dcsp) {
+		this.dscp = dscp;
+	}
+
+	public void setEcn(byte ecn) {
+		this.ecn = ecn;
 	}
 
 	public void setTotal_length(short total_length) {

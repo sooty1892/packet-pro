@@ -51,6 +51,8 @@
 
 struct rte_mempool *rx_pool = NULL;
 
+
+
 // ethernet port config - more options available
 static const struct rte_eth_conf port_conf = {
 	.rxmode = {
@@ -235,7 +237,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 	printf("C: setup complete\n");
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass class, jlong pointer) {
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass class, jlong pointer) {
 	struct rte_mbuf *pkts_burst[128];
 
 	/*
@@ -251,7 +253,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass c
 	*/
 
 	int nb_rx = rte_eth_rx_burst(0, 0, pkts_burst, MAX_PKT_BURST);
-	printf("C: Received = %i\n", nb_rx);
+	//printf("C: Received = %i\n", nb_rx);
 
 	uint16_t count = (uint16_t)nb_rx;
 	uint8_t *point = (uint8_t*)pointer;
@@ -261,9 +263,28 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass c
 	//insert64(point, 7, 4);
 
 	insert16(point, 0, count);
-	insert64(point, 2, (uint64_t)pkts_burst);
+	//insert64(point, 2, (uint64_t)pkts_burst);
 
-	printf("C: Add = %" PRIu64 "\n", pkts_burst);
+
+
+	//mbuf_addr
+	//buf_addr
+	//ipv4_hdr
+	if (count > 0) {
+		//insert16(point, 0, count);
+		//insert64(point, 2, (uint64_t)pkts_burst[0]);
+		//printf("C: Add = %p\n", pkts_burst);
+		//printf("C: mbuf_addr = %p\n", pkts_burst[0]);
+		//printf("C: buf_addr = %p\n", pkts_burst[0]->buf_addr);
+		//printf("C: ipv4_hdr = %p\n", (struct ipv4_hdr *)rte_pktmbuf_adj(pkts_burst[0], (uint16_t)sizeof(struct ether_hdr)));
+		struct ipv4_hdr* ip = (struct ipv4_hdr *)(rte_pktmbuf_mtod(pkts_burst[0], unsigned char *) + sizeof(struct ether_hdr));
+		insert64(point, 2, (uint64_t)ip);
+		printf("C: ip_hdr_add = %p\n", ip);
+		printf("C: version_ihl = %" PRIu8 "\n", ip->version_ihl);
+
+	}
+
+	
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1ether_1hdr(JNIEnv *env, jclass class) {
@@ -282,6 +303,10 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1void_1pointer(JNIEnv *env,
 	return sizeof(ptr);
 }
 
-
+JNIEXPORT jlong JNICALL Java_DpdkAccess_nat_1get_1pointer(JNIEnv *env, jclass class) {
+	//void* ip = (void*)rte_pktmbuf_adj(pkts_burst[0], (uint16_t)sizeof(struct ether_hdr));
+	//return (uint64_t)ip;
+	return 0;
+}
 
 

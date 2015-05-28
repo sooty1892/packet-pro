@@ -7,6 +7,7 @@ public class DpdkAccess {
 	private static native int nat_size_of_ether_hdr();
 	private static native int nat_size_of_mbuf();
 	private static native int nat_size_of_void_pointer();
+	private static native long nat_get_pointer();
 	
 	static {
 		System.loadLibrary("nat_dpdk");
@@ -30,6 +31,10 @@ public class DpdkAccess {
 	
 	public static int dpdk_size_of_void_pointer() {
 		return nat_size_of_void_pointer();
+	}
+
+	public static long dpdk_get_pointer() {
+		return nat_get_pointer();
 	}
 	
 }
