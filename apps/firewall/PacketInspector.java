@@ -10,11 +10,13 @@ public class PacketInspector {
 	
 	Packet p;
 	PacketSender ps;
+	PacketFreeer pf;
 	Set<Long> blacklist;
 	
 	public PacketInspector(Packet p) throws IOException {
 		this.p = p;
 		ps = new PacketSender();
+		pf = new PacketFreeer();
 		blacklist = new HashSet<Long>();
 		readBlacklist();
 		printBlacklist();
@@ -23,6 +25,7 @@ public class PacketInspector {
 	public PacketInspector() throws IOException {
 		p = null;
 		ps = new PacketSender();
+		pf = new PacketFreeer();
 		blacklist = new HashSet<Long>();
 		readBlacklist();
 		printBlacklist();
@@ -38,8 +41,13 @@ public class PacketInspector {
 	
 	public boolean inspectPacket() {
 		System.out.println("JAVA: Inspecting packet from " + Utils.intToIp(p.getSrc_addr()));
-		// forward packet or FREE packet
-		return false;
+		if (blacklist.contains(p.getSrc_addr())) {
+			pf.freePacket(p);
+			return false;
+		} else {
+			ps.sendPacket(p);
+			return true;
+		}
 	}
 	
 	private void readBlacklist() throws IOException {

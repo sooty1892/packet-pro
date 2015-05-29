@@ -12,6 +12,8 @@ public class Packet {
 	private int hdr_checksum;
 	private long src_addr;
 	private long dst_addr;
+	private long mbuf_pointer;
+	private long packet_pointer;
 
 	public Packet() {
 		this.version = 0;
@@ -26,6 +28,8 @@ public class Packet {
 		this.hdr_checksum = 0;
 		this.src_addr = 0;
 		this.dst_addr = 0;
+		this.mbuf_pointer = 0;
+		this.packet_pointer = 0;
 	}
 	
 	public Packet(byte version,
@@ -39,7 +43,9 @@ public class Packet {
 				byte next_proto_id,
 				short hdr_checksum,
 				int src_addr,
-				int dst_addr) {
+				int dst_addr,
+				long mbuf_pointer,
+				long packet_pointer) {
 		this.version = version;
 		this.ihl = ihl;
 		this.dscp = dscp;
@@ -52,6 +58,8 @@ public class Packet {
 		this.hdr_checksum = hdr_checksum;
 		this.src_addr = src_addr;
 		this.dst_addr = dst_addr;
+		this.mbuf_pointer = mbuf_pointer;
+		this.packet_pointer = packet_pointer;
 	}
 
 	public String toString() {
@@ -185,6 +193,22 @@ public class Packet {
 
 	public void setDst_addr(long dst_addr) {
 		this.dst_addr = dst_addr;
+	}
+
+	public long getMbuf_pointer() {
+		return mbuf_pointer;
+	}
+
+	public void setMbuf_pointer(long mbuf_pointer) {
+		this.mbuf_pointer = mbuf_pointer;
+	}
+
+	public long getPacket_pointer() {
+		return packet_pointer;
+	}
+
+	public void setPacket_pointer(long packet_pointer) {
+		this.packet_pointer = packet_pointer;
 	}
 
 	
