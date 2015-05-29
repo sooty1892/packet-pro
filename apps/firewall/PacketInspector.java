@@ -11,8 +11,15 @@ public class PacketInspector {
 		
 	}
 	
-	public boolean inspectNewPacket(Packet newPacket) {
-		p = newPacket;
+	public Packet getPacket() {
+		return p;
+	}
+	
+	public void setPacket(Packet p) {
+		this.p = p;
+	}
+	
+	public boolean inspectPacket() {
 		return false;
 	}
 	
