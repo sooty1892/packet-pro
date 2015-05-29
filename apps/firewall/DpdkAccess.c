@@ -316,4 +316,12 @@ JNIEXPORT jlong JNICALL Java_DpdkAccess_nat_1get_1pointer(JNIEnv *env, jclass cl
 	return 0;
 }
 
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packets(JNIEnv *, jclass, jlong) {
+
+}
+
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv *, jclass, jlong) {
+
+}
+
 

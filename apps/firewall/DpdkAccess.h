@@ -47,6 +47,22 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1mbuf
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1void_1pointer
   (JNIEnv *, jclass);
 
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_free_packets
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packets
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_send_packets
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets
+  (JNIEnv *, jclass, jlong);
+
 #ifdef __cplusplus
 }
 #endif

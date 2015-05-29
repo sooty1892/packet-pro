@@ -21,6 +21,26 @@ public class UnsafeAccess {
         offset = 0;
 	}
 	
+	public void putByte(int value) {
+		unsafe.putByte(currentPointer + offset, (byte)value);
+		offset += BYTE_SIZE;
+	}
+	
+	public void putShort(int value) {
+		unsafe.putShort(currentPointer + offset, (short)value);
+		offset += SHORT_SIZE;
+	}
+	
+	public void putInt(long value) {
+		unsafe.putInt(currentPointer + offset, (int)value);
+		offset += INT_SIZE;
+	}
+	
+	public void putLong(long value) {
+		unsafe.putLong(currentPointer + offset, value);
+		offset += LONG_SIZE;
+	}
+	
 	public int getShort() {
 		short temp = unsafe.getShort(currentPointer + offset);
 		offset += SHORT_SIZE;
@@ -46,7 +66,7 @@ public class UnsafeAccess {
 		return temp;
 	}
 	
-	public long allocateMemory(int num_of_bytes) {
+	public long allocateMemory(long num_of_bytes) {
 		return unsafe.allocateMemory(num_of_bytes);
 	}
 	

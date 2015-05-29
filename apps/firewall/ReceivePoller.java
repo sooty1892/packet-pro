@@ -6,7 +6,7 @@ public class ReceivePoller {
 	PacketInspector pi;
 	long all_packet_count;
 
-	public ReceivePoller(UnsafeAccess ua) throws IOException {
+	public ReceivePoller(UnsafeAccess ua) throws IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		this.ua = ua;
 		pi = new PacketInspector();
 		all_packet_count = 0;
@@ -68,6 +68,7 @@ public class ReceivePoller {
 
 				b = false;
 			}
+			//TODO: release memory?
 		}
 	}
 	

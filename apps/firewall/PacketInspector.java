@@ -13,7 +13,7 @@ public class PacketInspector {
 	PacketFreeer pf;
 	Set<Long> blacklist;
 	
-	public PacketInspector(Packet p) throws IOException {
+	public PacketInspector(Packet p) throws IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		this.p = p;
 		ps = new PacketSender();
 		pf = new PacketFreeer();
@@ -22,7 +22,7 @@ public class PacketInspector {
 		printBlacklist();
 	}
 	
-	public PacketInspector() throws IOException {
+	public PacketInspector() throws IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		p = null;
 		ps = new PacketSender();
 		pf = new PacketFreeer();
