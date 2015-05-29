@@ -147,7 +147,7 @@ public class Packet {
 		this.ihl = ihl;
 	}
 
-	public void setDscp(int dcsp) {
+	public void setDscp(int dscp) {
 		this.dscp = dscp;
 	}
 
