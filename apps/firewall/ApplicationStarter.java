@@ -9,6 +9,7 @@ public class ApplicationStarter {
 	private static final int SHORT_SIZE = Short.SIZE / Byte.SIZE;
 	private static final int BYTE_SIZE = Byte.SIZE / Byte.SIZE;
 
+
 	public static void main(String[] args) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InterruptedException {
 		
 		System.out.println("JAVA: Setting up unsafe memory");
@@ -32,12 +33,18 @@ public class ApplicationStarter {
 		System.out.println("JAVA: ether_hdr_size = " + ether_hdr_size);
 		System.out.println("JAVA: mbuf_size = " + mbuf_size);
 		System.out.println("JAVA: void_pointer_size = " + void_pointer_size);
+
+		System.out.println("JAVA: Byte size = " + BYTE_SIZE);
+		System.out.println("JAVA: Short size = " + SHORT_SIZE);
+		System.out.println("JAVA: Int size = " + INT_SIZE);
+		System.out.println("JAVA: Long size = " + LONG_SIZE);
 		
 		// here use jni calls to get various information needed later
 		// like size of structs, offsets and memory sizes needed
 		
 		System.out.println("JAVA: Starting receive queue polling");
-		while (true) {
+		boolean b = true;
+		while (b) {
 			int memory_size = ((Long.SIZE / Byte.SIZE) * 512) + 2;
 			long mem_pointer = unsafe.allocateMemory(memory_size);
 			
@@ -55,12 +62,43 @@ public class ApplicationStarter {
 				
 				for (int i = 0; i < packet_count; i++) {
 					long ip_hdr_pointer = unsafe.getLong(mem_pointer + offset + (i*LONG_SIZE));
-					System.out.println("JAVA: Packet " + i + " pointer = " + ip_hdr_pointer);
+					System.out.println("JAVA: Packet " + i + " version_ihl = " + Long.toHexString(ip_hdr_pointer));
+					int indv_offset = 0;
+					//indv_offset += LONG_SIZE;
+					System.out.println("JAVA: Packet " + i + " version_ihl = " + unsafe.getByte(ip_hdr_pointer + indv_offset) + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+					indv_offset += BYTE_SIZE;
+					System.out.println("JAVA: Packet " + i + " type_of_service = " + unsafe.getByte(ip_hdr_pointer + indv_offset) + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+					indv_offset += BYTE_SIZE;
+					System.out.println("JAVA: Packet " + i + " total_length = " + unsafe.getShort(ip_hdr_pointer + indv_offset) + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+					indv_offset += SHORT_SIZE;
+					System.out.println("JAVA: Packet " + i + " packet_id = " + unsafe.getShort(ip_hdr_pointer + indv_offset) + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+					indv_offset += SHORT_SIZE;
+					System.out.println("JAVA: Packet " + i + " fragment_offset = " + unsafe.getShort(ip_hdr_pointer + indv_offset) + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+					indv_offset += SHORT_SIZE;
+					System.out.println("JAVA: Packet " + i + " time_to_live = " + unsafe.getByte(ip_hdr_pointer + indv_offset) + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+					indv_offset += BYTE_SIZE;
+					System.out.println("JAVA: Packet " + i + " next_proto_id = " + unsafe.getByte(ip_hdr_pointer + indv_offset) + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+					indv_offset += BYTE_SIZE;
+					System.out.println("JAVA: Packet " + i + " hdr_checksum = " + unsafe.getShort(ip_hdr_pointer + indv_offset) + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+					indv_offset += SHORT_SIZE;
+					int temp = unsafe.getInt(ip_hdr_pointer + indv_offset);
+					System.out.println("JAVA: Packet " + i + " src_addr = " + temp + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+					long trying = temp & 0xFFFFFFFFL;
+					System.out.println("TRY: " + trying);
+					indv_offset += INT_SIZE;
+					temp = unsafe.getInt(ip_hdr_pointer + indv_offset);
+					System.out.println("JAVA: Packet " + i + " dst_addr = " + temp + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+					trying = temp & 0xFFFFFFFFL;
+					System.out.println("TRY: " + trying);
+					//indv_offset += INT_SIZE;
 				}
 				
 				System.out.println();
 				System.out.println();
+				//TODO: TAKE THIS OUT!!!
 				Thread.sleep(1000);
+
+				b = false;
 			}
 		}
 	}

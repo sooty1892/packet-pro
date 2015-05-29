@@ -117,6 +117,33 @@ static struct rte_eth_rxconf rx_conf = {
     .rx_drop_en = 0,
 };
 
+void printIpv4Data(struct ipv4_hdr* hdr, int packet_num) {
+	printf("C: Packet %d version_ihl = %" PRIu8 " : %p\n", packet_num, hdr->version_ihl, &hdr->version_ihl);
+	printf("C: Packet %d type_of_service = %" PRIu8 " : %p\n", packet_num, hdr->type_of_service, &hdr->type_of_service);
+	printf("C: Packet %d total_length = %" PRIu16 " : %p\n", packet_num, hdr->total_length, &hdr->total_length);
+	printf("C: Packet %d packet_id = %" PRIu16 " : %p\n", packet_num, hdr->packet_id, &hdr->packet_id);
+	printf("C: Packet %d fragment_offset = %" PRIu16 " : %p\n", packet_num, hdr->fragment_offset, &hdr->fragment_offset);
+	printf("C: Packet %d time_to_live = %" PRIu8 " : %p\n", packet_num, hdr->time_to_live, &hdr->time_to_live);
+	printf("C: Packet %d next_proto_id = %" PRIu8 " : %p\n", packet_num, hdr->next_proto_id, &hdr->next_proto_id);
+	printf("C: Packet %d hdr_checksum = %" PRIu16 " : %p\n", packet_num, hdr->hdr_checksum, &hdr->hdr_checksum);
+	printf("C: Packet %d src_addr = %" PRIu32 " : %p\n", packet_num, hdr->src_addr, &hdr->src_addr);
+	int i;
+	unsigned int maxpow = 1 << (sizeof(uint32_t)*8 - 1);
+	uint32_t num = hdr->src_addr;
+	for (i = 0; i < sizeof(uint32_t)*8; ++i) {
+		printf("%u ", num * maxpow ? 1 : 0);
+		num = num >> 1;
+	}
+	printf("\n");
+	printf("C: Packet %d dst_addr = %" PRIu32 " : %p\n", packet_num, hdr->dst_addr, &hdr->dst_addr);
+	num = hdr->dst_addr;
+	for (i = 0; i < sizeof(uint32_t)*8; ++i) {
+		printf("%u ", num * maxpow ? 1 : 0);
+		num = num >> 1;
+	}
+	printf("\n");
+}
+
 void insert8(uint8_t *pointer, int position, uint8_t value) {
 	pointer[position] = value ;
 }
@@ -251,19 +278,20 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass c
 	offset += sizeof(uint16_t);
 
 	if (packet_count > 0) {
-		printf("C: Parsing " + packet_count + " packets!");
+		printf("C: Parsing %d packets!\n", packet_count);
 
 		int i;
 		for (i = 0; i < packet_count; i++) {
 			struct ipv4_hdr* ip = (struct ipv4_hdr *)(rte_pktmbuf_mtod(pkts_burst[i], unsigned char *) + sizeof(struct ether_hdr));
 			insert64(point, offset, (uint64_t)ip);
-			printf("C: packet %d ip_hdr_add = %p\n", i, ip);
+			printf("C: Packet %d ip_hdr_add = %p\n", i, ip);
 			offset += sizeof(uint64_t);
+
+			printIpv4Data(ip, i);
 		}
 
 	}
 
-	
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1ether_1hdr(JNIEnv *env, jclass class) {
