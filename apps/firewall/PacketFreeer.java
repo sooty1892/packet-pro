@@ -21,16 +21,20 @@ public class PacketFreeer {
 		}
 	}
 	
-	private void freeBurst(int num) {
+	//TODO: make private
+	public void freeBurst(int num) {
 		long memory_needed = (num * ua.longSize()) + 2;
 		long pointer = ua.allocateMemory(memory_needed);
 		ua.setCurrentPointer(pointer);
 		
 		ua.putShort(num);
+		/*
 		for (int i = 0; i < num; i++) {
 			ua.putLong(list.get(i).getMbuf_pointer());
 		}
-		list.subList(0, num).clear();
+		list.subList(0, num).clear();*/
+		
+		DpdkAccess.dpdk_free_packets(pointer);
 	}
 
 }

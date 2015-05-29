@@ -310,17 +310,14 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1void_1pointer(JNIEnv *env,
 	return sizeof(ptr);
 }
 
-JNIEXPORT jlong JNICALL Java_DpdkAccess_nat_1get_1pointer(JNIEnv *env, jclass class) {
-	//void* ip = (void*)rte_pktmbuf_adj(pkts_burst[0], (uint16_t)sizeof(struct ether_hdr));
-	//return (uint64_t)ip;
-	return 0;
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packets(JNIEnv *env, jclass class, jlong mem_pointer) {
+	uint8_t *point = (uint8_t*)mem_pointer;
+
+	uint16_t packet_count = *point;
+	printf("C: count = %d\n", packet_count);
 }
 
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packets(JNIEnv *, jclass, jlong) {
-
-}
-
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv *, jclass, jlong) {
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv *env, jclass class, jlong mem_pointer) {
 
 }
 

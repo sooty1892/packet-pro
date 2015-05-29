@@ -23,9 +23,14 @@ public class ApplicationStarter {
 		// here use jni calls to get various information needed later
 		// like size of structs, offsets and memory sizes needed
 		
-		System.out.println("JAVA: Starting receive queue polling");
-		ReceivePoller rp = new ReceivePoller(ua);
-		rp.start();
+		//System.out.println("JAVA: Starting receive queue polling");
+		//ReceivePoller rp = new ReceivePoller(ua);
+		//rp.start();
+		
+		System.out.println();
+		System.out.println("JAVA: Testing freeing packets");
+		PacketFreeer ps = new PacketFreeer();
+		ps.freeBurst(55);
 	}
 	
 }
