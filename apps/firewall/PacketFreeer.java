@@ -21,7 +21,7 @@ public class PacketFreeer {
 		}
 	}
 	
-	//TODO: make private
+	//TODO: make private and uncomment
 	public void freeBurst(int num) {
 		long memory_needed = (num * ua.longSize()) + 2;
 		long pointer = ua.allocateMemory(memory_needed);
@@ -35,6 +35,8 @@ public class PacketFreeer {
 		list.subList(0, num).clear();*/
 		
 		DpdkAccess.dpdk_free_packets(pointer);
+		
+		//TODO: free memory
 	}
 
 }

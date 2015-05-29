@@ -312,9 +312,18 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1void_1pointer(JNIEnv *env,
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packets(JNIEnv *env, jclass class, jlong mem_pointer) {
 	uint8_t *point = (uint8_t*)mem_pointer;
+	int offset = 0;
 
 	uint16_t packet_count = *point;
-	printf("C: count = %d\n", packet_count);
+	printf("C: free count = %d\n", packet_count);
+	offset += sizeof(uint16_t);
+
+	int i;
+	for (i = 0; i < packet_count; i++) {
+		printf("C: freeing at %p", *(point + offset));
+		rte_pktmbuf_free(*(point + offset));
+		offset += sizeof(uint64_t);
+	}
 }
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv *env, jclass class, jlong mem_pointer) {
