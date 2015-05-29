@@ -20,6 +20,7 @@ public class PacketInspector {
 	}
 	
 	public boolean inspectPacket() {
+		System.out.println("JAVA: Inspecting packet from " + Utils.intToIp(p.getSrc_addr()));
 		return false;
 	}
 	

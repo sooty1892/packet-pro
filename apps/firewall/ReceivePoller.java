@@ -3,10 +3,16 @@ public class ReceivePoller {
 	
 	UnsafeAccess ua;
 	PacketInspector pi;
+	long all_packet_count;
 
 	public ReceivePoller(UnsafeAccess ua) {
 		this.ua = ua;
 		pi = new PacketInspector();
+		all_packet_count = 0;
+	}
+	
+	public long getPacketCount() {
+		return all_packet_count;
 	}
 	
 	public void start() throws InterruptedException {
@@ -20,6 +26,7 @@ public class ReceivePoller {
 			ua.setCurrentPointer(mem_pointer);
 			
 			int packet_count = ua.getShort();
+			all_packet_count += packet_count; 
 			
 			mem_pointer += ua.getOffset();
 
@@ -46,7 +53,7 @@ public class ReceivePoller {
 					p.setSrc_addr(ua.getLong());
 					p.setDst_addr(ua.getLong());
 					
-					System.out.println(p.toString());
+					//System.out.println(p.toString());
 					
 					pi.setPacket(p);
 					pi.inspectPacket();
