@@ -283,6 +283,8 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass c
 		int i;
 		for (i = 0; i < packet_count; i++) {
 			struct ipv4_hdr* ip = (struct ipv4_hdr *)(rte_pktmbuf_mtod(pkts_burst[i], unsigned char *) + sizeof(struct ether_hdr));
+			insert64(point, offset, (uint64_t)pkts_burst[i])
+			offset += sizeof(uint64_t);
 			insert64(point, offset, (uint64_t)ip);
 			//printf("C: Packet %d ip_hdr_add = %p\n", i, ip);
 			offset += sizeof(uint64_t);

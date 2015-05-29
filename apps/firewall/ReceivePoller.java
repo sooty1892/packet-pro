@@ -18,7 +18,7 @@ public class ReceivePoller {
 	
 	public void start() throws InterruptedException {
 		boolean b = true;
-		int memory_size = ((Long.SIZE / Byte.SIZE) * 512) + 2;
+		int memory_size = ((Long.SIZE / Byte.SIZE) * 512 * 2) + 2;
 		while (b) {
 			long mem_pointer = ua.allocateMemory(memory_size);
 			
@@ -38,7 +38,12 @@ public class ReceivePoller {
 				for (int i = 0; i < packet_count; i++) {
 					Packet p = new Packet();
 					
-					ua.setCurrentPointer(mem_pointer + (i*ua.longSize()));
+					long mbuf_pointer = mem_pointer + (2*i*ua.longSize());
+					p.setMbuf_pointer(mbuf_pointer);
+					long packet_pointer = mem_pointer + (2*i*ua.longSize()) + 8;
+					p.setPacket_pointer(packet_pointer);
+					
+					ua.setCurrentPointer(packet_pointer);
 					long ip_hdr_pointer = ua.getLong();
 					
 					ua.setCurrentPointer(ip_hdr_pointer);
