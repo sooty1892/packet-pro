@@ -38,4 +38,38 @@ public class Utils {
     	return Double.longBitsToDouble(longValue);
 	}
 
+	public static int signToUnsign(byte value) {
+		return value & (int)0xFF;
+	}
+
+	public static int signToUnsign(short value) {
+		return value & (int)0xFFFF;
+	}
+
+	public static long signToUnsign(int value) {
+		return value & 0xFFFFFFFFL;
+	}
+
+	public static String intToIp(long value) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(((value >> 24) & 0xFF));
+		sb.append(".");
+		sb.append(((value >> 16) & 0xFF));
+		sb.append(".");
+		sb.append(((value >> 8) & 0xFF));
+		sb.append(".");
+		sb.append(((value) & 0xFF));
+		return sb.toString();
+	}
+
+	public static long IpToInt(String value) {
+		String[] parts = value.split("\\.");
+		long n = 0;
+		for (int i = 0; i < parts.length; i++) {
+			int power = 3-i;
+			n += Integer.parseInt(parts[i]) % 256 * Math.pow(256, power);
+		}
+		return n;
+	}
+
 }

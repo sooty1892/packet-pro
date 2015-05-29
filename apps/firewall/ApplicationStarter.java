@@ -61,36 +61,30 @@ public class ApplicationStarter {
 				System.out.println("JAVA: Parsing " + packet_count + " packets!");
 				
 				for (int i = 0; i < packet_count; i++) {
+					Packet p = new Packet();
 					long ip_hdr_pointer = unsafe.getLong(mem_pointer + offset + (i*LONG_SIZE));
-					System.out.println("JAVA: Packet " + i + " version_ihl = " + Long.toHexString(ip_hdr_pointer));
 					int indv_offset = 0;
-					//indv_offset += LONG_SIZE;
-					System.out.println("JAVA: Packet " + i + " version_ihl = " + unsafe.getByte(ip_hdr_pointer + indv_offset) + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+
+					p.set_version_ihl(Utils.signToUnsign(unsafe.getByte(ip_hdr_pointer + indv_offset)));
 					indv_offset += BYTE_SIZE;
-					System.out.println("JAVA: Packet " + i + " type_of_service = " + unsafe.getByte(ip_hdr_pointer + indv_offset) + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+					p.set_dscp_ecn(Utils.signToUnsign(unsafe.getByte(ip_hdr_pointer + indv_offset)));
 					indv_offset += BYTE_SIZE;
-					System.out.println("JAVA: Packet " + i + " total_length = " + unsafe.getShort(ip_hdr_pointer + indv_offset) + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+					p.setTotal_length(Utils.signToUnsign(unsafe.getShort(ip_hdr_pointer + indv_offset)));
 					indv_offset += SHORT_SIZE;
-					System.out.println("JAVA: Packet " + i + " packet_id = " + unsafe.getShort(ip_hdr_pointer + indv_offset) + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+					p.setPacket_id(Utils.signToUnsign(unsafe.getShort(ip_hdr_pointer + indv_offset)));
 					indv_offset += SHORT_SIZE;
-					System.out.println("JAVA: Packet " + i + " fragment_offset = " + unsafe.getShort(ip_hdr_pointer + indv_offset) + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+					p.setFragment_offset(Utils.signToUnsign(unsafe.getShort(ip_hdr_pointer + indv_offset)));
 					indv_offset += SHORT_SIZE;
-					System.out.println("JAVA: Packet " + i + " time_to_live = " + unsafe.getByte(ip_hdr_pointer + indv_offset) + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+					p.setTime_to_live(Utils.signToUnsign(unsafe.getByte(ip_hdr_pointer + indv_offset)));
 					indv_offset += BYTE_SIZE;
-					System.out.println("JAVA: Packet " + i + " next_proto_id = " + unsafe.getByte(ip_hdr_pointer + indv_offset) + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+					p.setNext_proto_id(Utils.signToUnsign(unsafe.getByte(ip_hdr_pointer + indv_offset)));
 					indv_offset += BYTE_SIZE;
-					System.out.println("JAVA: Packet " + i + " hdr_checksum = " + unsafe.getShort(ip_hdr_pointer + indv_offset) + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
+					p.setHdr_checksum(Utils.signToUnsign(unsafe.getShort(ip_hdr_pointer + indv_offset)));
 					indv_offset += SHORT_SIZE;
-					int temp = unsafe.getInt(ip_hdr_pointer + indv_offset);
-					System.out.println("JAVA: Packet " + i + " src_addr = " + temp + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
-					long trying = temp & 0xFFFFFFFFL;
-					System.out.println("TRY: " + trying);
+					p.setSrc_addr(Utils.signToUnsign(unsafe.getInt(ip_hdr_pointer + indv_offset)));
 					indv_offset += INT_SIZE;
-					temp = unsafe.getInt(ip_hdr_pointer + indv_offset);
-					System.out.println("JAVA: Packet " + i + " dst_addr = " + temp + " : " + Long.toHexString(ip_hdr_pointer + indv_offset));
-					trying = temp & 0xFFFFFFFFL;
-					System.out.println("TRY: " + trying);
-					//indv_offset += INT_SIZE;
+					p.setDst_addr(Utils.signToUnsign(unsafe.getInt(ip_hdr_pointer + indv_offset)));
+					System.out.println(p.toString());
 				}
 				
 				System.out.println();

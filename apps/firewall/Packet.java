@@ -1,17 +1,32 @@
 public class Packet {
 	
-	private byte version;
-	private byte ihl;
-	private byte dscp;
-	private byte ecn;
-	private short total_length;
-	private short packet_id;
-	private short fragment_offset;
-	private byte time_to_live;
-	private byte next_proto_id;
-	private short hdr_checksum;
-	private int src_addr;
-	private int dst_addr;
+	private int version;
+	private int ihl;
+	private int dscp;
+	private int ecn;
+	private int total_length;
+	private int packet_id;
+	private int fragment_offset;
+	private int time_to_live;
+	private int next_proto_id;
+	private int hdr_checksum;
+	private long src_addr;
+	private long dst_addr;
+
+	public Packet() {
+		this.version = 0;
+		this.ihl = 0;
+		this.dscp = 0;
+		this.ecn = 0;
+		this.total_length = 0;
+		this.packet_id = 0;
+		this.fragment_offset = 0;
+		this.time_to_live = 0;
+		this.next_proto_id = 0;
+		this.hdr_checksum = 0;
+		this.src_addr = 0;
+		this.dst_addr = 0;
+	}
 	
 	public Packet(byte version,
 				byte ihl,
@@ -39,14 +54,31 @@ public class Packet {
 		this.dst_addr = dst_addr;
 	}
 
-	public void set_version_ihl(byte version_ihl) {
-		version = (byte) ((version_ihl >> 4) & (byte) 0xF);
-		ihl = (byte) (version_ihl & 0xF);
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Version: " + version + "\n");
+		sb.append("Ihl: " + ihl + "\n");
+		sb.append("Dscp: " + dscp + "\n");
+		sb.append("Ecn: " + ecn + "\n");
+		sb.append("Total Length: " + total_length + "\n");
+		sb.append("Packed Id: " + packet_id + "\n");
+		sb.append("Fragment Offset: " + fragment_offset + "\n");
+		sb.append("Time To Live: " + time_to_live + "\n");
+		sb.append("Next Proto Id: " + next_proto_id + "\n");
+		sb.append("Hdr Checksum: " + hdr_checksum + "\n");
+		sb.append("Src Addr: " + src_addr + "\n");
+		sb.append("Dst Addr: " + dst_addr + "\n");
+		return sb.toString();
 	}
 
-	public void set_dscp_ecn(byte dscp_ecn) {
-		dscp = (byte) ((dscp_ecn >> 2) & (byte) 0x3F);
-		ecn = (byte) (dscp_ecn & (byte) 0x3);
+	public void set_version_ihl(int version_ihl) {
+		version = (int) ((version_ihl >> 4) & (byte) 0xF);
+		ihl = (int) (version_ihl & (byte) 0xF);
+	}
+
+	public void set_dscp_ecn(int dscp_ecn) {
+		dscp = (int) ((dscp_ecn >> 2) & (byte) 0x3F);
+		ecn = (int) (dscp_ecn & (byte) 0x3);
 	}
 
 	//TODO: fix this - not all fields done - needed?
@@ -59,99 +91,99 @@ public class Packet {
 		dst_addr = Utils.swap(dst_addr);
 	}
 
-	public byte getIhl() {
+	public int getIhl() {
 		return ihl;
 	}
 
-	public byte getVersion() {
+	public int getVersion() {
 		return version;
 	}
 
-	public byte getDscp() {
+	public int getDscp() {
 		return dscp;
 	}
 
-	public byte getEcn() {
+	public int getEcn() {
 		return ecn;
 	}
 
-	public short getTotal_length() {
+	public int getTotal_length() {
 		return total_length;
 	}
 
-	public short getPacket_id() {
+	public int getPacket_id() {
 		return packet_id;
 	}
 
-	public short getFragment_offset() {
+	public int getFragment_offset() {
 		return fragment_offset;
 	}
 
-	public byte getTime_to_live() {
+	public int getTime_to_live() {
 		return time_to_live;
 	}
 
-	public byte getNext_proto_id() {
+	public int getNext_proto_id() {
 		return next_proto_id;
 	}
 
-	public short getHdr_checksum() {
+	public int getHdr_checksum() {
 		return hdr_checksum;
 	}
 
-	public int getSrc_addr() {
+	public long getSrc_addr() {
 		return src_addr;
 	}
 
-	public int getDst_addr() {
+	public long getDst_addr() {
 		return dst_addr;
 	}
 
-	public void setVersion(byte version) {
+	public void setVersion(int version) {
 		this.version = version;
 	}
 
-	public void setIhl(byte ihl) {
+	public void setIhl(int ihl) {
 		this.ihl = ihl;
 	}
 
-	public void setDscp(byte dcsp) {
+	public void setDscp(int dcsp) {
 		this.dscp = dscp;
 	}
 
-	public void setEcn(byte ecn) {
+	public void setEcn(int ecn) {
 		this.ecn = ecn;
 	}
 
-	public void setTotal_length(short total_length) {
+	public void setTotal_length(int total_length) {
 		this.total_length = total_length;
 	}
 
-	public void setPacket_id(short packet_id) {
+	public void setPacket_id(int packet_id) {
 		this.packet_id = packet_id;
 	}
 
-	public void setFragment_offset(short fragment_offset) {
+	public void setFragment_offset(int fragment_offset) {
 		this.fragment_offset = fragment_offset;
 	}
 
-	public void setTime_to_live(byte time_to_live) {
+	public void setTime_to_live(int time_to_live) {
 		this.time_to_live = time_to_live;
 	}
 
-	public void setNext_proto_id(byte next_proto_id) {
+	public void setNext_proto_id(int next_proto_id) {
 		this.next_proto_id = next_proto_id;
 	}
 
-	public void setHdr_checksum(short hdr_checksum) {
+	public void setHdr_checksum(int hdr_checksum) {
 		this.hdr_checksum = hdr_checksum;
 	}
 
-	public void setSrc_addr(int src_addr) {
+	public void setSrc_addr(long src_addr) {
 		this.src_addr = src_addr;
 	}
 
-	public void setDst_addr(int dst_addr) {
+	public void setDst_addr(long dst_addr) {
 		this.dst_addr = dst_addr;
 	}
 
