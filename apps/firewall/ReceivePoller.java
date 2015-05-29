@@ -1,3 +1,4 @@
+import java.io.IOException;
 
 public class ReceivePoller {
 	
@@ -5,7 +6,7 @@ public class ReceivePoller {
 	PacketInspector pi;
 	long all_packet_count;
 
-	public ReceivePoller(UnsafeAccess ua) {
+	public ReceivePoller(UnsafeAccess ua) throws IOException {
 		this.ua = ua;
 		pi = new PacketInspector();
 		all_packet_count = 0;

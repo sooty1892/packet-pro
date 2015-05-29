@@ -20,8 +20,12 @@ public class PacketInspector {
 		printBlacklist();
 	}
 	
-	public PacketInspector() {
-		
+	public PacketInspector() throws IOException {
+		p = null;
+		ps = new PacketSender();
+		blacklist = new HashSet<Long>();
+		readBlacklist();
+		printBlacklist();
 	}
 	
 	public Packet getPacket() {
