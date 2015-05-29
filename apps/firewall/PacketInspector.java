@@ -41,13 +41,15 @@ public class PacketInspector {
 	
 	public boolean inspectPacket() {
 		System.out.println("JAVA: Inspecting packet from " + Utils.intToIp(p.getSrc_addr()));
-		if (blacklist.contains(p.getSrc_addr())) {
+		/*if (blacklist.contains(p.getSrc_addr())) {
 			pf.freePacket(p);
 			return false;
 		} else {
 			ps.sendPacket(p);
 			return true;
-		}
+		}*/
+		pf.freePacket(p);
+		return false;
 	}
 	
 	private void readBlacklist() throws IOException {

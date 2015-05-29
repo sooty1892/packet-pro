@@ -16,8 +16,8 @@ public class PacketFreeer {
 	public void freePacket(Packet p) {
 		list.add(p);
 		//TODO time delay on this as well - also in packet sender
-		if (list.size() >= 256) {
-			freeBurst(256);
+		if (list.size() >= 5) {
+			freeBurst(5);
 		}
 	}
 	
@@ -28,11 +28,14 @@ public class PacketFreeer {
 		ua.setCurrentPointer(pointer);
 		
 		ua.putShort(num);
-		/*
+		
+		System.out.println();
+
 		for (int i = 0; i < num; i++) {
+			System.out.println(list.get(i).getMbuf_pointer());
 			ua.putLong(list.get(i).getMbuf_pointer());
 		}
-		list.subList(0, num).clear();*/
+		list.subList(0, num).clear();
 		
 		DpdkAccess.dpdk_free_packets(pointer);
 		

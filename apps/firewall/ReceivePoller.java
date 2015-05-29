@@ -55,18 +55,18 @@ public class ReceivePoller {
 					p.setDst_addr(ua.getLong());
 					
 					//System.out.println(p.toString());
-					
+			
 					pi.setPacket(p);
 					pi.inspectPacket();
 					
 					
-					System.out.println();
-					System.out.println();
+					
 					//TODO: TAKE THIS OUT!!!
-					Thread.sleep(1000);
+					//Thread.sleep(1000);
 				}
+				System.out.println();
 
-				b = false;
+				//b = false;
 			}
 			//TODO: release memory?
 		}
