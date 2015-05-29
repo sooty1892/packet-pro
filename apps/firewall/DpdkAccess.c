@@ -327,7 +327,19 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packets(JNIEnv *env, jclass cl
 }
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv *env, jclass class, jlong mem_pointer) {
+	uint8_t *point = (uint8_t*)mem_pointer;
+	int offset = 0;
 
+	uint16_t packet_count = *point;
+	printf("C: send count = %d\n", packet_count);
+	offset += sizeof(uint16_t);
+
+	struct rte_mbuf *packets[packet_count];
+
+	int i;
+	for (i = 0; i < packet_count; i++) {
+		rte_eth_tx_burst(0, 0, packets, packet_count);
+	}
 }
 
 
