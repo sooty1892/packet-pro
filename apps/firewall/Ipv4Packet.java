@@ -4,7 +4,7 @@ public class Ipv4Packet extends Packet {
 	private static final int VERSION_IHL_OFFSET = 0;
 	private static final int TYPE_OF_SERVICE_OFFSET = 1;
 	private static final int TOTAL_LENGTH_OFFSET = 2;
-	private static final int PACKED_ID_OFFSET = 4;
+	private static final int PACKET_ID_OFFSET = 4;
 	private static final int FRAGMENT_OFFSET_OFFSET = 6;
 	private static final int TIME_TO_LIVE_OFFSET = 8;
 	private static final int NEXT_PROTO_ID_OFFSET = 9;
@@ -14,6 +14,56 @@ public class Ipv4Packet extends Packet {
 
 	public Ipv4Packet(long mbuf, long packet) {
 		super(mbuf, packet);
+	}
+	
+	public void setVersionIhl(int version_ihl) {
+		ua.setCurrentPointer(packet_pointer + VERSION_IHL_OFFSET);
+		ua.putByte(version_ihl);
+	}
+	
+	public void setTypeOfService(int type_of_service) {
+		ua.setCurrentPointer(packet_pointer + TYPE_OF_SERVICE_OFFSET);
+		ua.putByte(type_of_service);
+	}
+	
+	public void setTotalLength(int total_length) {
+		ua.setCurrentPointer(packet_pointer + TOTAL_LENGTH_OFFSET);
+		ua.putShort(total_length);
+	}
+	
+	public void setPacketID(int packet_id) {
+		ua.setCurrentPointer(packet_pointer + PACKET_ID_OFFSET);
+		ua.putShort(packet_id);
+	}
+	
+	public void setFragmentOffset(int fragment_offset) {
+		ua.setCurrentPointer(packet_pointer + FRAGMENT_OFFSET_OFFSET);
+		ua.putShort(fragment_offset);
+	}
+	
+	public void setTimeToLive(int time_to_live) {
+		ua.setCurrentPointer(packet_pointer + TIME_TO_LIVE_OFFSET);
+		ua.putByte(time_to_live);
+	}
+	
+	public void setNextProtoID(int next_proto_id) {
+		ua.setCurrentPointer(packet_pointer + NEXT_PROTO_ID_OFFSET);
+		ua.putByte(next_proto_id);
+	}
+	
+	public void setHdrChecksum(int hdr_checksum) {
+		ua.setCurrentPointer(packet_pointer + HDR_CHECKSUM_OFFSET);
+		ua.putShort(hdr_checksum);
+	}
+	
+	public void setSrcAddr(long src_addr) {
+		ua.setCurrentPointer(packet_pointer + SRC_ADDR_OFFSET);
+		ua.putInt(src_addr);
+	}
+	
+	public void setDstAddr(long dst_addr) {
+		ua.setCurrentPointer(packet_pointer + DST_ADDR_OFFSET);
+		ua.putInt(dst_addr);
 	}
 	
 	public int getVersionIhl() {
@@ -31,8 +81,8 @@ public class Ipv4Packet extends Packet {
 		return ua.getShort();
 	}
 	
-	public int getPackedId() {
-		ua.setCurrentPointer(packet_pointer + PACKED_ID_OFFSET);
+	public int getPacketId() {
+		ua.setCurrentPointer(packet_pointer + PACKET_ID_OFFSET);
 		return ua.getShort();
 	}
 	

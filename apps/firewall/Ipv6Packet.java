@@ -14,6 +14,40 @@ public class Ipv6Packet extends Packet {
 	
 	//check struct is packed
 	
+	public void setVtcFlow(long vtc_flow) {
+		ua.setCurrentPointer(packet_pointer + VTC_FLOW_OFFSET);
+		ua.putInt(vtc_flow);
+	}
+	
+	public void setPayloadLength(int payload_length) {
+		ua.setCurrentPointer(packet_pointer + PAYLOAD_LENGTH_OFFSET);
+		ua.putShort(payload_length);
+	}
+	
+	public void setProto(int proto) {
+		ua.setCurrentPointer(packet_pointer + PROTO_OFFSET);
+		ua.putByte(proto);
+	}
+	
+	public void setHopLimits(int hop_limits) {
+		ua.setCurrentPointer(packet_pointer + HOP_LIMITS_OFFSET);
+		ua.putByte(hop_limits);
+	}
+	
+	public void setSrcAddr(byte[] src_addr) {
+		ua.setCurrentPointer(packet_pointer + SRC_ADDR_OFFSET);
+		for (int i = 0; i < 16; i++) {
+			ua.putByte(src_addr[i]);
+		}
+	}
+	
+	public void setDstAddr(byte[] dst_addr) {
+		ua.setCurrentPointer(packet_pointer + DST_ADDR_OFFSET);
+		for (int i = 0; i < 16; i++) {
+			ua.putByte(dst_addr[i]);
+		}
+	}
+	
 	public long getVtcFlow() {
 		ua.setCurrentPointer(packet_pointer + VTC_FLOW_OFFSET);
 		return ua.getInt();

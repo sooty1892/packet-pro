@@ -14,8 +14,8 @@ public class PacketSender {
 	
 	public void sendPacket(Packet p) {
 		list.add(p);
-		if (list.size() >= 256) {
-			sendBurst(256);
+		if (list.size() >= 5) {
+			sendBurst(5);
 		}
 	}
 	
@@ -29,9 +29,17 @@ public class PacketSender {
 		for (int i = 0; i < num; i++) {
 			ua.putLong(list.get(i).getMbuf_pointer());
 		}
+		
+		/*ua.setCurrentPointer(pointer+2);
+		for (int i = 0; i < num; i++) {
+			System.out.println("CHECK: " + Long.toHexString(ua.getLong()));
+		}*/
+		
 		list.subList(0, num).clear();
 		
 		DpdkAccess.dpdk_send_packets(pointer);
+		
+		ua.freeMemory(pointer);
 	}
 
 }

@@ -28,17 +28,17 @@ public class PacketFreeer {
 		
 		ua.putShort(num);
 		
-		System.out.println();
+		//System.out.println();
 
 		for (int i = 0; i < num; i++) {
 			System.out.println(Long.toHexString(list.get(i).getMbuf_pointer()));
 			ua.putLong(list.get(i).getMbuf_pointer());
 		}
 
-		ua.setCurrentPointer(pointer+2);
+		/*ua.setCurrentPointer(pointer+2);
 		for (int i = 0; i < num; i++) {
 			System.out.println("CHECK: " + Long.toHexString(ua.getLong()));
-		}
+		}*/
 
 		list.subList(0, num).clear();
 		
