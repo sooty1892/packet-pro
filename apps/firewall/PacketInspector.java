@@ -40,17 +40,35 @@ public class PacketInspector {
 		this.p = p;
 	}
 	
-	public boolean inspectPacket() {
-		System.out.println("JAVA: Inspecting packet from " + Utils.intToIp(p.getSrc_addr()));
-		/*if (blacklist.contains(p.getSrc_addr())) {
+	private boolean inspect() {
+		int version = p.whichIP();
+		assert(version == 4 || version == 6);
+		
+		if (version == 4) {
+			Ipv4Packet cp = (Ipv4Packet)p;
+			if (blacklist.contains(cp.getSrcAddr())) {
+				pf.freePacket(p);
+				return false;
+			} else {
+				ps.sendPacket(p);
+				return true;
+			}
+		} else {
+			Ipv6Packet cp = (Ipv6Packet)p;
+			System.out.println("NOT HANDLING IPv6 ATM");
 			pf.freePacket(p);
 			return false;
-		} else {
-			ps.sendPacket(p);
-			return true;
-		}*/
-		pf.freePacket(p);
-		return false;
+		}
+		
+	}
+	
+	public boolean inspectCurrentPacket() {
+		return inspect();
+	}
+	
+	public boolean inspectNewPacket(Packet p) {
+		this.p = p;
+		return inspect();
 	}
 	
 	private void readBlacklist() {

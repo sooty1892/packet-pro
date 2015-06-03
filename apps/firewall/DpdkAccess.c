@@ -382,6 +382,8 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv *env, jclass cl
 	for (i = 0; i < packet_count; i++) {
 		rte_eth_tx_burst(0, 0, packets, packet_count);
 	}
+
+	//free packets
 }
 
 

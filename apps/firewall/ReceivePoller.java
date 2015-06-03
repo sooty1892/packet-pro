@@ -42,17 +42,19 @@ public class ReceivePoller {
 				System.out.println("JAVA: Parsing " + packet_count + " packets!");
 				
 				for (int i = 0; i < packet_count; i++) {
-					Packet p = new Packet();
+					//Packet p = new Packet();
 					
 					long new_pointer = mem_pointer + (2*i*ua.longSize());
 					ua.setCurrentPointer(new_pointer);
-					p.setMbuf_pointer(ua.getLong());
-					p.setPacket_pointer(ua.getLong());
+					long mbuf = ua.getLong();
+					long packet = ua.getLong();
+					
+					Packet p = new Packet(mbuf, packet);
 
 					//System.out.println("JAVA: mbuf_pointer = " + p.getMbuf_pointer());
 					//System.out.println("JAVA: packet_pointer = " + p.getPacket_pointer());
 					
-					ua.setCurrentPointer(new_pointer + 8);
+					/*ua.setCurrentPointer(new_pointer + 8);
 					long ip_hdr_pointer = ua.getLong();
 					
 					ua.setCurrentPointer(ip_hdr_pointer);
@@ -66,12 +68,11 @@ public class ReceivePoller {
 					p.setNext_proto_id(ua.getByte());
 					p.setHdr_checksum(ua.getShort());
 					p.setSrc_addr(ua.getInt());
-					p.setDst_addr(ua.getInt());
+					p.setDst_addr(ua.getInt());*/
 					
 					//System.out.println(p.toString());
 			
-					pi.setPacket(p);
-					pi.inspectPacket();
+					pi.inspectNewPacket(p);
 					
 					
 					
