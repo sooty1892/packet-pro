@@ -312,6 +312,7 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass c
 
 		int i;
 		for (i = 0; i < packet_count; i++) {
+			printf("NEED TO CHECK FOR IP VERSION IN C");
 			struct ipv4_hdr* ip = (struct ipv4_hdr *)(rte_pktmbuf_mtod(pkts_burst[i], unsigned char *) + sizeof(struct ether_hdr));
 			printf("C: %p\n", pkts_burst[i]);
 			insert64(point, offset, (uint64_t)pkts_burst[i]);
@@ -321,7 +322,7 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass c
 			offset += sizeof(uint64_t);
 			//printf("C: Packet %d mbuf_add = %" PRIu64 "\n", i, pkts_burst[i]);
 			//printf("C: Packet %d ip_hdr_add = %" PRIu64 "\n", i, ip);
-			//printIpv4Data(ip, i);
+			printIpv4Data(ip, i);
 		}
 
 	}

@@ -49,7 +49,7 @@ public class ReceivePoller {
 					long mbuf = ua.getLong();
 					long packet = ua.getLong();
 					
-					Packet p = new Packet(mbuf, packet);
+					Ipv4Packet p = new Ipv4Packet(mbuf, packet);
 
 					//System.out.println("JAVA: mbuf_pointer = " + p.getMbuf_pointer());
 					//System.out.println("JAVA: packet_pointer = " + p.getPacket_pointer());
@@ -71,6 +71,8 @@ public class ReceivePoller {
 					p.setDst_addr(ua.getInt());*/
 					
 					//System.out.println(p.toString());
+
+					System.out.println(p.toString());
 			
 					pi.inspectNewPacket(p);
 					

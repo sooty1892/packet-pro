@@ -15,6 +15,21 @@ public class Ipv4Packet extends Packet {
 	public Ipv4Packet(long mbuf, long packet) {
 		super(mbuf, packet);
 	}
+
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Version_ihl: " + getVersionIhl() + "\n");
+		sb.append("Type Of Service: " + getTypeOfService() + "\n");
+		sb.append("Total Length: " + getTotalLength() + "\n");
+		sb.append("Packet Id: " + getPacketId() + "\n");
+		sb.append("Fragment Offset: " + getFragmentOffset() + "\n");
+		sb.append("Time To Live: " + getTimeToLive() + "\n");
+		sb.append("Next Proto Id: " + getNextProtoId() + "\n");
+		sb.append("Hdr Checksum: " + getHdrChecksum() + "\n");
+		sb.append("Src Addr: " + getSrcAddr() + "\n");
+		sb.append("Dst Addr: " + getDst_Addr() + "\n");
+		return sb.toString();
+	}
 	
 	public void setVersionIhl(int version_ihl) {
 		ua.setCurrentPointer(packet_pointer + VERSION_IHL_OFFSET);
