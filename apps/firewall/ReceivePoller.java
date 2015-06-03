@@ -5,6 +5,7 @@ public class ReceivePoller {
 	UnsafeAccess ua;
 	PacketInspector pi;
 	long all_packet_count;
+	//long mem_pointer;
 
 	public ReceivePoller(UnsafeAccess ua) {
 		this.ua = ua;
@@ -15,13 +16,18 @@ public class ReceivePoller {
 	public long getPacketCount() {
 		return all_packet_count;
 	}
+
+	public void stop() {
+		//ua.freeMemory(mem_pointer);
+	}
 	
 	public void start() {
 		boolean b = true;
-		int memory_size = ((Long.SIZE / Byte.SIZE) * 512 * 2) + 2;
 		while (b) {
+			int memory_size = ((Long.SIZE / Byte.SIZE) * 512 * 2) + 2;
 			long mem_pointer = ua.allocateMemory(memory_size);
-			
+			long orig = mem_pointer;
+
 			DpdkAccess.dpdk_receive_burst(mem_pointer);
 			
 			ua.setCurrentPointer(mem_pointer);
@@ -77,6 +83,7 @@ public class ReceivePoller {
 				//b = false;
 			}
 			//TODO: release memory?
+			ua.freeMemory(orig);
 		}
 
 		System.out.println("OUT OF WHILE");

@@ -44,7 +44,7 @@ public class PacketFreeer {
 		
 		DpdkAccess.dpdk_free_packets(pointer);
 		
-		//TODO: free memory
+		ua.freeMemory(pointer);
 	}
 
 }

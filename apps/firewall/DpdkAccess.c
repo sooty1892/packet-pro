@@ -42,7 +42,7 @@
 #define ERROR -1
 #define MBUF_SIZE (2048 + sizeof(struct rte_mbuf) + RTE_PKTMBUF_HEADROOM)
 #define NB_MBUF 8192
-#define MAX_PKT_BURST 512
+#define MAX_PKT_BURST 128
 #define NB_RX_QUEUE 1
 #define NB_TX_QUEUE 1
 #define	NB_RX_DESC 256

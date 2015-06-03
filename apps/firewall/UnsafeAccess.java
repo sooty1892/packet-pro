@@ -87,6 +87,10 @@ public class UnsafeAccess {
 	public long allocateMemory(long num_of_bytes) {
 		return unsafe.allocateMemory(num_of_bytes);
 	}
+
+	public void freeMemory(long pointer) {
+		unsafe.freeMemory(pointer);
+	}
 	
 	public void setCurrentPointer(long currentPointer) {
 		this.currentPointer = currentPointer;
