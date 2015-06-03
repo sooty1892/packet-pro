@@ -1,0 +1,41 @@
+\documentclass[a4paper, titlepage]{article}
+
+\usepackage{packet}
+\usepackage{subfiles}
+
+
+\begin{document}
+
+%\todo{Some note or other}
+%\todo[noline]{Another note}
+%\todo[inline]{And another one}
+%\missingfigure{Add my picture here}
+
+\listoftodos
+
+\subfile{title}
+\newpage
+\subfile{abstract}
+\newpage
+\subfile{acknowledgements}
+\newpage
+\tableofcontents
+\newpage
+\subfile{introduction}
+\newpage
+\subfile{background}
+\newpage
+\subfile{body}
+\newpage
+\subfile{evaluation}
+\newpage
+\subfile{conclusion}
+\newpage
+
+%\bibliographystyle{plain}
+%\bibliography{packet}
+
+\newpage
+\subfile{user_guide}
+
+\end{document}
