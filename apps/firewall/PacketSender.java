@@ -7,7 +7,7 @@ public class PacketSender {
 	private List<Packet> list;
 	UnsafeAccess ua;
 	
-	public PacketSender() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public PacketSender() {
 		list = new ArrayList<Packet>();
 		ua = new UnsafeAccess();
 	}

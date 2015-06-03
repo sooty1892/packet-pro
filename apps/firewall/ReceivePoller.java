@@ -6,7 +6,7 @@ public class ReceivePoller {
 	PacketInspector pi;
 	long all_packet_count;
 
-	public ReceivePoller(UnsafeAccess ua) throws IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public ReceivePoller(UnsafeAccess ua) {
 		this.ua = ua;
 		pi = new PacketInspector();
 		all_packet_count = 0;
@@ -16,7 +16,7 @@ public class ReceivePoller {
 		return all_packet_count;
 	}
 	
-	public void start() throws InterruptedException {
+	public void start() {
 		boolean b = true;
 		int memory_size = ((Long.SIZE / Byte.SIZE) * 512 * 2) + 2;
 		while (b) {

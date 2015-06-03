@@ -8,7 +8,7 @@ public class PacketFreeer {
 	private List<Packet> list;
 	UnsafeAccess ua;
 	
-	public PacketFreeer() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public PacketFreeer() {
 		list = new ArrayList<Packet>();
 		ua = new UnsafeAccess();
 	}

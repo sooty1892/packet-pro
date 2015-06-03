@@ -3,7 +3,7 @@ import java.io.IOException;
 // Starter class for firewall using DPDK
 public class ApplicationStarter {
 
-	public static void main(String[] args) throws IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InterruptedException {
+	public static void main(String[] args) {
 		
 		System.out.println("JAVA: Setting up unsafe memory");
         UnsafeAccess ua = new UnsafeAccess();

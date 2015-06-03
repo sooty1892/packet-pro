@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
@@ -13,7 +14,7 @@ public class PacketInspector {
 	PacketFreeer pf;
 	Set<Long> blacklist;
 	
-	public PacketInspector(Packet p) throws IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public PacketInspector(Packet p) {
 		this.p = p;
 		ps = new PacketSender();
 		pf = new PacketFreeer();
@@ -22,7 +23,7 @@ public class PacketInspector {
 		printBlacklist();
 	}
 	
-	public PacketInspector() throws IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public PacketInspector() {
 		p = null;
 		ps = new PacketSender();
 		pf = new PacketFreeer();
@@ -52,15 +53,31 @@ public class PacketInspector {
 		return false;
 	}
 	
-	private void readBlacklist() throws IOException {
+	private void readBlacklist() {
 		File file = new File("blacklist.txt");
-		FileReader fileReader = new FileReader(file);
-		BufferedReader bufferedReader = new BufferedReader(fileReader);
-		String line;
-		while ((line = bufferedReader.readLine()) != null) {
-			blacklist.add(Utils.IpToInt(line));
+		FileReader fileReader;
+		try {
+			fileReader = new FileReader(file);
+			BufferedReader bufferedReader = new BufferedReader(fileReader);
+			String line;
+			try {
+				while ((line = bufferedReader.readLine()) != null) {
+					blacklist.add(Utils.IpToInt(line));
+				}
+			} catch (IOException e1) {
+				System.out.println("IO EXCEPTION");
+				e1.printStackTrace();
+			}
+			try {
+				fileReader.close();
+			} catch (IOException e) {
+				System.out.println("IO EXCEPTION");
+				e.printStackTrace();
+			}
+		} catch (FileNotFoundException e) {
+			System.out.println("FILE NOT FOUND EXCEPTION");
+			e.printStackTrace();
 		}
-		fileReader.close();
 	}
 	
 	private void printBlacklist() {
