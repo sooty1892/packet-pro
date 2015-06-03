@@ -21,8 +21,7 @@ public class PacketFreeer {
 		}
 	}
 	
-	//TODO: make private and uncomment
-	public void freeBurst(int num) {
+	private void freeBurst(int num) {
 		long memory_needed = (num * ua.longSize()) + 2;
 		long pointer = ua.allocateMemory(memory_needed);
 		ua.setCurrentPointer(pointer);
@@ -32,9 +31,15 @@ public class PacketFreeer {
 		System.out.println();
 
 		for (int i = 0; i < num; i++) {
-			System.out.println(list.get(i).getMbuf_pointer());
+			System.out.println(Long.toHexString(list.get(i).getMbuf_pointer()));
 			ua.putLong(list.get(i).getMbuf_pointer());
 		}
+
+		ua.setCurrentPointer(pointer+2);
+		for (int i = 0; i < num; i++) {
+			System.out.println("CHECK: " + Long.toHexString(ua.getLong()));
+		}
+
 		list.subList(0, num).clear();
 		
 		DpdkAccess.dpdk_free_packets(pointer);

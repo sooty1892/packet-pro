@@ -26,6 +26,7 @@ public class ApplicationStarter {
 		System.out.println("JAVA: Starting receive queue polling");
 		ReceivePoller rp = new ReceivePoller(ua);
 		rp.start();
+		System.out.println("JAVA: ENDING");
 		
 		/*System.out.println();
 		System.out.println("JAVA: Testing freeing packets");

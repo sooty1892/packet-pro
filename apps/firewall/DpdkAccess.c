@@ -1,5 +1,3 @@
-HELLO VINAY
-
 #include "DpdkAccess.h"
 
 #include <stdio.h>
@@ -129,21 +127,51 @@ void printIpv4Data(struct ipv4_hdr* hdr, int packet_num) {
 	printf("C: Packet %d next_proto_id = %" PRIu8 " : %p\n", packet_num, hdr->next_proto_id, &hdr->next_proto_id);
 	printf("C: Packet %d hdr_checksum = %" PRIu16 " : %p\n", packet_num, hdr->hdr_checksum, &hdr->hdr_checksum);
 	printf("C: Packet %d src_addr = %" PRIu32 " : %p\n", packet_num, hdr->src_addr, &hdr->src_addr);
-	int i;
+	/*int i;
 	unsigned int maxpow = 1 << (sizeof(uint32_t)*8 - 1);
 	uint32_t num = hdr->src_addr;
 	for (i = 0; i < sizeof(uint32_t)*8; ++i) {
 		printf("%u ", num * maxpow ? 1 : 0);
 		num = num >> 1;
 	}
-	printf("\n");
+	printf("\n");*/
 	printf("C: Packet %d dst_addr = %" PRIu32 " : %p\n", packet_num, hdr->dst_addr, &hdr->dst_addr);
-	num = hdr->dst_addr;
+	/*num = hdr->dst_addr;
 	for (i = 0; i < sizeof(uint32_t)*8; ++i) {
 		printf("%u ", num * maxpow ? 1 : 0);
 		num = num >> 1;
-	}
+	}*/
 	printf("\n");
+}
+
+uint8_t get8(uint8_t *pointer, int position) {
+	return pointer[position];
+}
+
+uint16_t get16(uint8_t *pointer, int position) {
+	uint16_t value = pointer[position+1] << 8;
+	value = value + pointer[position];
+	return value;
+}
+
+uint32_t get32(uint8_t *pointer, int position) {
+	uint32_t value = pointer[position+3] << 24;
+	value = value + (pointer[position+2] << 16);
+	value = value + (pointer[position+1] << 8);
+	value = value + pointer[position];
+	return value;
+}
+
+uint64_t get64(uint8_t *pointer, int position) {
+	uint64_t value = (uint64_t)(pointer[position+7]) << 56;
+	value = value + ((uint64_t)(pointer[position+6]) << 48);
+	value = value + ((uint64_t)(pointer[position+5]) << 40);
+	value = value + ((uint64_t)(pointer[position+4]) << 32);
+	value = value + ((uint64_t)(pointer[position+3]) << 24);
+	value = value + ((uint64_t)(pointer[position+2]) << 16);
+	value = value + ((uint64_t)(pointer[position+1]) << 8);
+	value = value + (uint64_t)(pointer[position]);
+	return value;
 }
 
 void insert8(uint8_t *pointer, int position, uint8_t value) {
@@ -151,20 +179,20 @@ void insert8(uint8_t *pointer, int position, uint8_t value) {
 }
 
 void insert16(uint8_t *pointer, int position, uint16_t value) {
-	pointer[position+1] = (uint8_t)((value >> 8) & 0xFF) ;
-	pointer[position] = (uint8_t)((value) & 0xFF) ;
+	pointer[position+1] = (uint8_t)((value >> 8) & 0xFF);
+	pointer[position] = (uint8_t)((value) & 0xFF);
 }
 
 void insert32(uint8_t *pointer, int position, uint32_t value) {
-	pointer[position+3] = (uint8_t)((value >> 24) & 0xFF) ;
-	pointer[position+2] = (uint8_t)((value >> 16) & 0xFF) ;
+	pointer[position+3] = (uint8_t)((value >> 24) & 0xFF);
+	pointer[position+2] = (uint8_t)((value >> 16) & 0xFF);
 	pointer[position+1] = (uint8_t)((value >> 8) & 0XFF);
 	pointer[position] = (uint8_t)((value) & 0XFF);
 }
 
 void insert64(uint8_t *pointer, int position, uint64_t value) {
-	pointer[position+7] = (uint8_t)((value >> 56) & 0xFF) ;
-	pointer[position+6] = (uint8_t)((value >> 48) & 0xFF) ;
+	pointer[position+7] = (uint8_t)((value >> 56) & 0xFF);
+	pointer[position+6] = (uint8_t)((value >> 48) & 0xFF);
 	pointer[position+5] = (uint8_t)((value >> 40) & 0XFF);
 	pointer[position+4] = (uint8_t)((value >> 32) & 0XFF);
 	pointer[position+3] = (uint8_t)((value >> 24) & 0XFF);
@@ -276,7 +304,7 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass c
 	uint16_t packet_count = (uint16_t)nb_rx;
 	uint8_t *point = (uint8_t*)mem_pointer;
 
-	insert16(point, 0, packet_count);
+	insert16(point, offset, packet_count);
 	offset += sizeof(uint16_t);
 
 	if (packet_count > 0) {
@@ -285,12 +313,14 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass c
 		int i;
 		for (i = 0; i < packet_count; i++) {
 			struct ipv4_hdr* ip = (struct ipv4_hdr *)(rte_pktmbuf_mtod(pkts_burst[i], unsigned char *) + sizeof(struct ether_hdr));
+			printf("C: %p\n", pkts_burst[i]);
 			insert64(point, offset, (uint64_t)pkts_burst[i]);
 			offset += sizeof(uint64_t);
 			insert64(point, offset, (uint64_t)ip);
 			//printf("C: Packet %d ip_hdr_add = %p\n", i, ip);
 			offset += sizeof(uint64_t);
-
+			//printf("C: Packet %d mbuf_add = %" PRIu64 "\n", i, pkts_burst[i]);
+			//printf("C: Packet %d ip_hdr_add = %" PRIu64 "\n", i, ip);
 			//printIpv4Data(ip, i);
 		}
 
@@ -318,14 +348,22 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packets(JNIEnv *env, jclass cl
 	uint8_t *point = (uint8_t*)mem_pointer;
 	int offset = 0;
 
-	uint16_t packet_count = *point;
+	uint16_t packet_count = get16(point, 0);
 	printf("C: free count = %d\n", packet_count);
 	offset += sizeof(uint16_t);
 
+	//get64(point, 2);
+	//printf("C: freeing at %" PRIu64 "\n", get64(point, 2));
+
+	//uint8_t *np = point+2;
+
 	int i;
 	for (i = 0; i < packet_count; i++) {
-		//printf("C: freeing at %p", *(point + offset));
-		rte_pktmbuf_free((struct rte_mbuf*)*(&point + offset));
+		//struct rte_mbuf **hi = (struct rte_mbuf *)point[2];
+		//struct rte_mbuf *freeing = hi[0];
+		struct rte_mbuf *freeing = (struct rte_mbuf*)get64(point, offset);
+		printf("C: freeing at %p\n", freeing);
+		rte_pktmbuf_free(freeing);
 		offset += sizeof(uint64_t);
 	}
 }

@@ -38,12 +38,15 @@ public class ReceivePoller {
 				for (int i = 0; i < packet_count; i++) {
 					Packet p = new Packet();
 					
-					long mbuf_pointer = mem_pointer + (2*i*ua.longSize());
-					p.setMbuf_pointer(mbuf_pointer);
-					long packet_pointer = mem_pointer + (2*i*ua.longSize()) + 8;
-					p.setPacket_pointer(packet_pointer);
+					long new_pointer = mem_pointer + (2*i*ua.longSize());
+					ua.setCurrentPointer(new_pointer);
+					p.setMbuf_pointer(ua.getLong());
+					p.setPacket_pointer(ua.getLong());
+
+					//System.out.println("JAVA: mbuf_pointer = " + p.getMbuf_pointer());
+					//System.out.println("JAVA: packet_pointer = " + p.getPacket_pointer());
 					
-					ua.setCurrentPointer(packet_pointer);
+					ua.setCurrentPointer(new_pointer + 8);
 					long ip_hdr_pointer = ua.getLong();
 					
 					ua.setCurrentPointer(ip_hdr_pointer);
@@ -56,8 +59,8 @@ public class ReceivePoller {
 					p.setTime_to_live(ua.getByte());
 					p.setNext_proto_id(ua.getByte());
 					p.setHdr_checksum(ua.getShort());
-					p.setSrc_addr(ua.getLong());
-					p.setDst_addr(ua.getLong());
+					p.setSrc_addr(ua.getInt());
+					p.setDst_addr(ua.getInt());
 					
 					//System.out.println(p.toString());
 			
@@ -75,6 +78,8 @@ public class ReceivePoller {
 			}
 			//TODO: release memory?
 		}
+
+		System.out.println("OUT OF WHILE");
 	}
 	
 }
