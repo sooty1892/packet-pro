@@ -1,6 +1,7 @@
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -15,10 +16,11 @@ public class ApplicationStarter {
 		
 		System.out.println("JAVA: Starting Firewall");
 		
-		List<ReceivePoller> receivers = null;
-		List<PacketSender> transmitters = null;
+		List<ReceivePoller> receivers = new ArrayList<ReceivePoller>();
+		List<PacketSender> transmitters = new ArrayList<PacketSender>();
 		
 		Stats stats = new Stats(receivers, transmitters);
+		// everything should be started together - lastly
 		new Thread(stats).start();
 		
 		/*int ret = DpdkAccess.dpdk_setup();

@@ -1,6 +1,6 @@
 import java.io.IOException;
 
-public class ReceivePoller {
+public class ReceivePoller implements Runnable{
 	
 	UnsafeAccess ua;
 	PacketInspector pi;
@@ -9,43 +9,19 @@ public class ReceivePoller {
 	long packet_interval;
 	long packet_interval_size;
 
-	public ReceivePoller(UnsafeAccess ua) {
+	public ReceivePoller(UnsafeAccess ua, PacketInspector pi) {
 		this.ua = ua;
-		pi = new PacketInspector();
+		this.pi = pi;
 		packet_all = 0;
 		packet_all_size = 0;
 		packet_interval = 0;
 		packet_interval_size = 0;
 	}
 	
-	public long getPacketAll() {
-		return packet_all;
-	}
-	
-	public long getPacketAllSize() {
-		return packet_all_size;
-	}
-	
-	public long getPacketInterval() {
-		return packet_interval;
-	}
-	
-	public long getPacketIntervalSize() {
-		return packet_interval_size;
-	}
-	
-	public void resetInterval() {
-		packet_interval = 0;
-		packet_interval_size = 0;
-	}
-
-	public void stop() {
-		//ua.freeMemory(mem_pointer);
-	}
-	
-	public void start() {
-		boolean b = true;
-		while (b) {
+	//thread issues with multiple jni calls to same native methods?
+	@Override
+	public void run() {
+		while (true) {
 			int memory_size = ((Long.SIZE / Byte.SIZE) * 512 * 2) + 2;
 			long mem_pointer = ua.allocateMemory(memory_size);
 			long orig = mem_pointer;
@@ -78,22 +54,37 @@ public class ReceivePoller {
 					packet_interval_size += p.getTotalLength();
 		
 					pi.inspectNewPacket(p);
-					
-					
-					
-					//TODO: TAKE THIS OUT!!!
-					//Thread.sleep(1000);
 				}
-				System.out.println();
-
-				//b = false;
+				//System.out.println();
 			}
 			//TODO: release memory?
-			
 			ua.freeMemory(orig);
 		}
+	}
+	
+	public long getPacketAll() {
+		return packet_all;
+	}
+	
+	public long getPacketAllSize() {
+		return packet_all_size;
+	}
+	
+	public long getPacketInterval() {
+		return packet_interval;
+	}
+	
+	public long getPacketIntervalSize() {
+		return packet_interval_size;
+	}
+	
+	public void resetInterval() {
+		packet_interval = 0;
+		packet_interval_size = 0;
+	}
 
-		System.out.println("OUT OF WHILE");
+	public void stop() {
+		//ua.freeMemory(mem_pointer);
 	}
 	
 }
