@@ -5,12 +5,13 @@ public class ReceivePoller {
 	UnsafeAccess ua;
 	PacketInspector pi;
 	long all_packet_count;
-	//long mem_pointer;
+	long all_data_count;
 
 	public ReceivePoller(UnsafeAccess ua) {
 		this.ua = ua;
 		pi = new PacketInspector();
 		all_packet_count = 0;
+		all_data_count = 0;
 	}
 	
 	public long getPacketCount() {
@@ -73,6 +74,8 @@ public class ReceivePoller {
 					//System.out.println(p.toString());
 
 					System.out.println(p.toString());
+					
+					all_data_count += p.getTotalLength(); // plus ethernet header?
 			
 					pi.inspectNewPacket(p);
 					
@@ -86,6 +89,12 @@ public class ReceivePoller {
 				//b = false;
 			}
 			//TODO: release memory?
+			
+			if (all_packet_count == 1000) {
+				System.out.println("JAVA PACKETS: " + all_packet_count);
+				System.out.println("JAVA PACKETS SIZE: " + all_data_count);
+			}
+			
 			ua.freeMemory(orig);
 		}
 
