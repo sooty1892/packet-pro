@@ -7,21 +7,36 @@ public class PacketFreeer {
 	
 	private List<Packet> list;
 	UnsafeAccess ua;
+	long past_freed;
+	
+	private static final int BURST = 5;
 	
 	public PacketFreeer() {
 		list = new ArrayList<Packet>();
 		ua = new UnsafeAccess();
+		past_freed = System.nanoTime();
+	}
+	
+	private boolean isTimedOut() {
+		return (System.nanoTime() - past_freed) >= 1000000000;
 	}
 	
 	public void freePacket(Packet p) {
 		list.add(p);
 		//TODO time delay on this as well - also in packet sender
-		if (list.size() >= 5) {
-			freeBurst(5);
+		if (list.size() >= BURST || isTimedOut()) {
+			freeBurst();
+			past_freed = System.nanoTime();
 		}
 	}
 	
-	private void freeBurst(int num) {
+	private void freeBurst() {
+		int num = 0;
+		if (list.size() > BURST) {
+			num = BURST;
+		} else {
+			num = list.size();
+		}
 		long memory_needed = (num * ua.longSize()) + 2;
 		long pointer = ua.allocateMemory(memory_needed);
 		ua.setCurrentPointer(pointer);

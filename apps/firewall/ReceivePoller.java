@@ -4,21 +4,39 @@ public class ReceivePoller {
 	
 	UnsafeAccess ua;
 	PacketInspector pi;
-	long all_packet_count;
-	long all_data_count;
-	long sec_data_count;
-	long past;
+	long packet_all;
+	long packet_all_size;
+	long packet_interval;
+	long packet_interval_size;
 
 	public ReceivePoller(UnsafeAccess ua) {
 		this.ua = ua;
 		pi = new PacketInspector();
-		all_packet_count = 0;
-		all_data_count = 0;
-		sec_data_count = 0;
+		packet_all = 0;
+		packet_all_size = 0;
+		packet_interval = 0;
+		packet_interval_size = 0;
 	}
 	
-	public long getPacketCount() {
-		return all_packet_count;
+	public long getPacketAll() {
+		return packet_all;
+	}
+	
+	public long getPacketAllSize() {
+		return packet_all_size;
+	}
+	
+	public long getPacketInterval() {
+		return packet_interval;
+	}
+	
+	public long getPacketIntervalSize() {
+		return packet_interval_size;
+	}
+	
+	public void resetInterval() {
+		packet_interval = 0;
+		packet_interval_size = 0;
 	}
 
 	public void stop() {
@@ -26,7 +44,6 @@ public class ReceivePoller {
 	}
 	
 	public void start() {
-		past = System.nanoTime();
 		boolean b = true;
 		while (b) {
 			int memory_size = ((Long.SIZE / Byte.SIZE) * 512 * 2) + 2;
@@ -38,7 +55,8 @@ public class ReceivePoller {
 			ua.setCurrentPointer(mem_pointer);
 			
 			int packet_count = ua.getShort();
-			all_packet_count += packet_count; 
+			packet_all += packet_count; 
+			packet_interval += packet_count;
 			
 			mem_pointer += ua.getOffset();
 
@@ -55,33 +73,10 @@ public class ReceivePoller {
 					long packet = ua.getLong();
 					
 					Ipv4Packet p = new Ipv4Packet(mbuf, packet);
-
-					//System.out.println("JAVA: mbuf_pointer = " + p.getMbuf_pointer());
-					//System.out.println("JAVA: packet_pointer = " + p.getPacket_pointer());
 					
-					/*ua.setCurrentPointer(new_pointer + 8);
-					long ip_hdr_pointer = ua.getLong();
-					
-					ua.setCurrentPointer(ip_hdr_pointer);
-
-					p.set_version_ihl(ua.getByte());
-					p.set_dscp_ecn(ua.getByte());
-					p.setTotal_length(ua.getShort());
-					p.setPacket_id(ua.getShort());
-					p.setFragment_offset(ua.getShort());
-					p.setTime_to_live(ua.getByte());
-					p.setNext_proto_id(ua.getByte());
-					p.setHdr_checksum(ua.getShort());
-					p.setSrc_addr(ua.getInt());
-					p.setDst_addr(ua.getInt());*/
-					
-					//System.out.println(p.toString());
-
-					//System.out.println(p.toString());
-					
-					all_data_count += p.getTotalLength(); // plus ethernet header?
-					sec_data_count += p.getTotalLength();
-			
+					packet_all_size += p.getTotalLength(); // plus ethernet header?
+					packet_interval_size += p.getTotalLength();
+		
 					pi.inspectNewPacket(p);
 					
 					
@@ -94,18 +89,6 @@ public class ReceivePoller {
 				//b = false;
 			}
 			//TODO: release memory?
-
-			if (System.nanoTime() - past >= 1000000000) {
-				System.out.println("JAVA PACKETS SIZE: " + sec_data_count);
-				System.out.println("JAVA PACKETS: " + all_packet_count);
-				past = System.nanoTime();
-				sec_data_count = 0;
-			}
-			
-			// if (all_packet_count % 1000 == 0 && all_packet_count != 0) {
-			// 	System.out.println("JAVA PACKETS: " + all_packet_count);
-			// 	System.out.println("JAVA PACKETS SIZE: " + all_data_count);
-			// }
 			
 			ua.freeMemory(orig);
 		}

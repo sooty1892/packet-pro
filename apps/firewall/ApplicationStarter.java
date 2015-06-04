@@ -1,6 +1,7 @@
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 
 
@@ -14,7 +15,13 @@ public class ApplicationStarter {
 		
 		System.out.println("JAVA: Starting Firewall");
 		
-		int ret = DpdkAccess.dpdk_setup();
+		List<ReceivePoller> receivers = null;
+		List<PacketSender> transmitters = null;
+		
+		Stats stats = new Stats(receivers, transmitters);
+		new Thread(stats).start();
+		
+		/*int ret = DpdkAccess.dpdk_setup();
 		if (ret < 0) {
 			System.out.println("JAVA: Error in DPDK setup");
 			return;
@@ -29,7 +36,7 @@ public class ApplicationStarter {
 		
 		System.out.println("JAVA: Starting receive queue polling");
 		ReceivePoller rp = new ReceivePoller(ua);
-		rp.start();
+		rp.start();*/
 	}
 	
 	public static void readConfig() {

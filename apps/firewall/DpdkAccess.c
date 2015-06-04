@@ -353,15 +353,8 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packets(JNIEnv *env, jclass cl
 	printf("C: free count = %d\n", packet_count);
 	offset += sizeof(uint16_t);
 
-	//get64(point, 2);
-	//printf("C: freeing at %" PRIu64 "\n", get64(point, 2));
-
-	//uint8_t *np = point+2;
-
 	int i;
 	for (i = 0; i < packet_count; i++) {
-		//struct rte_mbuf **hi = (struct rte_mbuf *)point[2];
-		//struct rte_mbuf *freeing = hi[0];
 		struct rte_mbuf *freeing = (struct rte_mbuf*)get64(point, offset);
 		printf("C: freeing at %p\n", freeing);
 		rte_pktmbuf_free(freeing);
@@ -373,16 +366,19 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv *env, jclass cl
 	uint8_t *point = (uint8_t*)mem_pointer;
 	int offset = 0;
 
-	uint16_t packet_count = *point;
+	uint16_t packet_count = get16(point, 0);
 	printf("C: send count = %d\n", packet_count);
 	offset += sizeof(uint16_t);
 
-	struct rte_mbuf *packets[packet_count];
-
-	int i;
+	//TODO: DO THIS
+	/*int i;
 	for (i = 0; i < packet_count; i++) {
 		rte_eth_tx_burst(0, 0, packets, packet_count);
-	}
+		struct rte_mbuf *freeing = (struct rte_mbuf*)get64(point, offset);
+		printf("C: freeing at %p\n", freeing);
+		rte_pktmbuf_free(freeing);
+		offset += sizeof(uint64_t);
+	}*/
 
 	//free packets
 }
