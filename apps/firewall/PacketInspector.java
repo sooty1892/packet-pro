@@ -50,12 +50,13 @@ public class PacketInspector {
 				pf.freePacket(p);
 				return false;
 			} else {
-				ps.sendPacket(p);
+				//ps.sendPacket(p);
+				pf.freePacket(p);
 				return true;
 			}
 		} else {
-			Ipv6Packet cp = (Ipv6Packet)p;
-			System.out.println("NOT HANDLING IPv6 ATM");
+			//Ipv6Packet cp = (Ipv6Packet)p;
+			//System.out.println("NOT HANDLING IPv6 ATM");
 			pf.freePacket(p);
 			return false;
 		}

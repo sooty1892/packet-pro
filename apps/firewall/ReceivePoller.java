@@ -6,12 +6,15 @@ public class ReceivePoller {
 	PacketInspector pi;
 	long all_packet_count;
 	long all_data_count;
+	long sec_data_count;
+	long past;
 
 	public ReceivePoller(UnsafeAccess ua) {
 		this.ua = ua;
 		pi = new PacketInspector();
 		all_packet_count = 0;
 		all_data_count = 0;
+		sec_data_count = 0;
 	}
 	
 	public long getPacketCount() {
@@ -23,6 +26,7 @@ public class ReceivePoller {
 	}
 	
 	public void start() {
+		past = System.nanoTime();
 		boolean b = true;
 		while (b) {
 			int memory_size = ((Long.SIZE / Byte.SIZE) * 512 * 2) + 2;
@@ -40,7 +44,7 @@ public class ReceivePoller {
 
 			//remember to free packets sometime
 			if (packet_count > 0) {
-				System.out.println("JAVA: Parsing " + packet_count + " packets!");
+				//System.out.println("JAVA: Parsing " + packet_count + " packets!");
 				
 				for (int i = 0; i < packet_count; i++) {
 					//Packet p = new Packet();
@@ -73,9 +77,10 @@ public class ReceivePoller {
 					
 					//System.out.println(p.toString());
 
-					System.out.println(p.toString());
+					//System.out.println(p.toString());
 					
 					all_data_count += p.getTotalLength(); // plus ethernet header?
+					sec_data_count += p.getTotalLength();
 			
 					pi.inspectNewPacket(p);
 					
@@ -89,11 +94,18 @@ public class ReceivePoller {
 				//b = false;
 			}
 			//TODO: release memory?
-			
-			if (all_packet_count == 1000) {
+
+			if (System.nanoTime() - past >= 1000000000) {
+				System.out.println("JAVA PACKETS SIZE: " + sec_data_count);
 				System.out.println("JAVA PACKETS: " + all_packet_count);
-				System.out.println("JAVA PACKETS SIZE: " + all_data_count);
+				past = System.nanoTime();
+				sec_data_count = 0;
 			}
+			
+			// if (all_packet_count % 1000 == 0 && all_packet_count != 0) {
+			// 	System.out.println("JAVA PACKETS: " + all_packet_count);
+			// 	System.out.println("JAVA PACKETS SIZE: " + all_data_count);
+			// }
 			
 			ua.freeMemory(orig);
 		}

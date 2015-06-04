@@ -39,7 +39,7 @@ public abstract class Packet {
 		if (version == 4 || version == 6) {
 			return version;
 		} else {
-			System.out.println("ERROR - VERSION NOT 6 or 4");
+			//System.out.println("ERROR - VERSION NOT 6 or 4");
 			return 0;
 		}
 	}
