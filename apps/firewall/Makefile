@@ -11,7 +11,7 @@ include $(RTE_SDK)/mk/rte.vars.mk
 SHARED = libnat_dpdk.so
 
 # all source are stored in SRCS-y
-SRCS-y := DpdkAccess.c
+SRCS-y := DpdkAccess.c Utils.c
 
 RTE_BUILD_SHARED_LIB=y
 

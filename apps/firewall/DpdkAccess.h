@@ -25,30 +25,6 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst
 
 /*
  * Class:     DpdkAccess
- * Method:    nat_size_of_ether_hdr
- * Signature: ()I
- */
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1ether_1hdr
-  (JNIEnv *, jclass);
-
-/*
- * Class:     DpdkAccess
- * Method:    nat_size_of_mbuf
- * Signature: ()I
- */
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1mbuf
-  (JNIEnv *, jclass);
-
-/*
- * Class:     DpdkAccess
- * Method:    nat_size_of_void_pointer
- * Signature: ()I
- */
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1void_1pointer
-  (JNIEnv *, jclass);
-
-/*
- * Class:     DpdkAccess
  * Method:    nat_free_packets
  * Signature: (J)V
  */
@@ -62,6 +38,62 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packets
  */
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets
   (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_set_core_mask
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1core_1mask
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_set_port_mask
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1port_1mask
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_set_program_name
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1name
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_set_memory_channels
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1memory_1channels
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_set_memory
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1memory
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_set_program_id
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1id
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_set_blacklist
+ * Signature: ([Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1blacklist
+  (JNIEnv *, jclass, jobjectArray);
 
 #ifdef __cplusplus
 }

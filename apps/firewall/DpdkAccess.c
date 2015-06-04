@@ -1,4 +1,5 @@
 #include "DpdkAccess.h"
+#include "Utils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,9 +50,10 @@
 #define	NB_TX_DESC 256
 
 
-struct rte_mempool *rx_pool = NULL;
+struct rte_mempool *pktmbuf_pool = NULL;
 
-
+/* list of enabled ports */
+static uint32_t enabled_ports[16];
 
 // ethernet port config - more options available
 static const struct rte_eth_conf port_conf = {
@@ -117,98 +119,76 @@ static struct rte_eth_rxconf rx_conf = {
     .rx_drop_en = 0,
 };
 
-void printIpv4Data(struct ipv4_hdr* hdr, int packet_num) {
-	printf("C: Packet %d version_ihl = %" PRIu8 " : %p\n", packet_num, hdr->version_ihl, &hdr->version_ihl);
-	printf("C: Packet %d type_of_service = %" PRIu8 " : %p\n", packet_num, hdr->type_of_service, &hdr->type_of_service);
-	printf("C: Packet %d total_length = %" PRIu16 " : %p\n", packet_num, hdr->total_length, &hdr->total_length);
-	printf("C: Packet %d packet_id = %" PRIu16 " : %p\n", packet_num, hdr->packet_id, &hdr->packet_id);
-	printf("C: Packet %d fragment_offset = %" PRIu16 " : %p\n", packet_num, hdr->fragment_offset, &hdr->fragment_offset);
-	printf("C: Packet %d time_to_live = %" PRIu8 " : %p\n", packet_num, hdr->time_to_live, &hdr->time_to_live);
-	printf("C: Packet %d next_proto_id = %" PRIu8 " : %p\n", packet_num, hdr->next_proto_id, &hdr->next_proto_id);
-	printf("C: Packet %d hdr_checksum = %" PRIu16 " : %p\n", packet_num, hdr->hdr_checksum, &hdr->hdr_checksum);
-	printf("C: Packet %d src_addr = %" PRIu32 " : %p\n", packet_num, hdr->src_addr, &hdr->src_addr);
-	/*int i;
-	unsigned int maxpow = 1 << (sizeof(uint32_t)*8 - 1);
-	uint32_t num = hdr->src_addr;
-	for (i = 0; i < sizeof(uint32_t)*8; ++i) {
-		printf("%u ", num * maxpow ? 1 : 0);
-		num = num >> 1;
+char program_name[100];
+char core_mask[10];
+char port_mask[10];
+char memory_channels[2];
+char memory[4];
+char program_id[5];
+char blacklist[10][10];
+int blacklist_count = 0;
+
+
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1core_1mask(JNIEnv *env, jclass class, jstring value)
+	core_mask = (*env)->GetStringUTFChars(env, value, JNI_TRUE);
+	//(*env)->ReleaseStringUTFChars(env, javaString, nativeString);
+}
+
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1port_1mask(JNIEnv *env, jclass class, jstring value) {
+	port_mask = (*env)->GetStringUTFChars(env, value, JNI_TRUE);
+}
+
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1name(JJNIEnv *env, jclass class, jstring value) {
+	program_name = (*env)->GetStringUTFChars(env, value, JNI_TRUE);
+}
+
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1memory_1channels(JNIEnv *env, jclass class, jstring value) {
+	memory_channels = (*env)->GetStringUTFChars(env, value, JNI_TRUE);
+}
+
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1memory(JNIEnv *env, jclass class, jstring value) {
+	memory = (*env)->GetStringUTFChars(env, value, JNI_TRUE);
+}
+
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1id(JNIEnv *env, jclass class, jstring value) {
+	program_id = (*env)->GetStringUTFChars(env, value, JNI_TRUE);
+}
+
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1blacklist(JNIEnv *env, jclass class, jobjectArray values) {
+	blacklist_count = (*env)->GetArrayLength(env, values);
+
+	for (int i=0; i < blacklist_count; i++) {
+		jstring string = (jstring) (*env)->GetObjectArrayElement(env, values, i);
+		blacklist[i] = (*env)->GetStringUTFChars(env, string, 0);
+		// Don't forget to call `ReleaseStringUTFChars` when you're done.
 	}
-	printf("\n");*/
-	printf("C: Packet %d dst_addr = %" PRIu32 " : %p\n", packet_num, hdr->dst_addr, &hdr->dst_addr);
-	/*num = hdr->dst_addr;
-	for (i = 0; i < sizeof(uint32_t)*8; ++i) {
-		printf("%u ", num * maxpow ? 1 : 0);
-		num = num >> 1;
-	}*/
-	printf("\n");
 }
 
-uint8_t get8(uint8_t *pointer, int position) {
-	return pointer[position];
-}
-
-uint16_t get16(uint8_t *pointer, int position) {
-	uint16_t value = pointer[position+1] << 8;
-	value = value + pointer[position];
-	return value;
-}
-
-uint32_t get32(uint8_t *pointer, int position) {
-	uint32_t value = pointer[position+3] << 24;
-	value = value + (pointer[position+2] << 16);
-	value = value + (pointer[position+1] << 8);
-	value = value + pointer[position];
-	return value;
-}
-
-uint64_t get64(uint8_t *pointer, int position) {
-	uint64_t value = (uint64_t)(pointer[position+7]) << 56;
-	value = value + ((uint64_t)(pointer[position+6]) << 48);
-	value = value + ((uint64_t)(pointer[position+5]) << 40);
-	value = value + ((uint64_t)(pointer[position+4]) << 32);
-	value = value + ((uint64_t)(pointer[position+3]) << 24);
-	value = value + ((uint64_t)(pointer[position+2]) << 16);
-	value = value + ((uint64_t)(pointer[position+1]) << 8);
-	value = value + (uint64_t)(pointer[position]);
-	return value;
-}
-
-void insert8(uint8_t *pointer, int position, uint8_t value) {
-	pointer[position] = value ;
-}
-
-void insert16(uint8_t *pointer, int position, uint16_t value) {
-	pointer[position+1] = (uint8_t)((value >> 8) & 0xFF);
-	pointer[position] = (uint8_t)((value) & 0xFF);
-}
-
-void insert32(uint8_t *pointer, int position, uint32_t value) {
-	pointer[position+3] = (uint8_t)((value >> 24) & 0xFF);
-	pointer[position+2] = (uint8_t)((value >> 16) & 0xFF);
-	pointer[position+1] = (uint8_t)((value >> 8) & 0XFF);
-	pointer[position] = (uint8_t)((value) & 0XFF);
-}
-
-void insert64(uint8_t *pointer, int position, uint64_t value) {
-	pointer[position+7] = (uint8_t)((value >> 56) & 0xFF);
-	pointer[position+6] = (uint8_t)((value >> 48) & 0xFF);
-	pointer[position+5] = (uint8_t)((value >> 40) & 0XFF);
-	pointer[position+4] = (uint8_t)((value >> 32) & 0XFF);
-	pointer[position+3] = (uint8_t)((value >> 24) & 0XFF);
-	pointer[position+2] = (uint8_t)((value >> 16) & 0XFF);
-	pointer[position+1] = (uint8_t)((value >> 8) & 0XFF);
-	pointer[position] = (uint8_t)((value) & 0XFF);
-}
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
-	char *args[] = {"Pktcap",
+	int argc = 1 + // program name
+			   2 + // core mask and flag
+			   2 + // memory channels and flag
+			   2 + // file prefix and flag
+			   2 + // memory and flag
+			   (2*blacklist_count); // flag and port for each blacklisted port
+	char **argv;
+
+	//malloc is ok at start of program
+
+	argv = malloc(argc * sizeof(char*));
+	for (int i = 0; i < argc; i++) {
+		//overkill but works
+		argv[i] = malloc(120 * sizeof(char));
+	}
+
+	/*char *argv[] = {"Pktcap",
 					"-c", "0x7",
 					"-n", "3",
 					"-m", "128",
 					"--file-prefix", "fw",
 					"-b", "00:08.0",
-					"-b", "00:03.0"};
+					"-b", "00:03.0"};*/
 
 	int port_to_conf = 0;
 
@@ -216,35 +196,31 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
     // Ethernet port. Aligned for atomic64 read/write
     struct rte_eth_link link;
 
-	int ret = rte_eal_init(13, args);
+	int ret = rte_eal_init(argc, argv);
 	if (ret < 0) {
 		printf("C: EAL init error\n");
+		// free args
+		for (int i = 0; i < argc; i++) {
+			dealloc(argv[i]);
+		}
+		dealloc(argv);
 		return ERROR;
+	} else {
+		// free args
+		for (int i = 0; i < argc; i++) {
+			dealloc(argv[i]);
+		}
+		dealloc(argv);
 	}
-
-	int nb_ports = rte_eth_dev_count();
-	printf("C: %d ports enabled\n", nb_ports);
-	if (nb_ports == 0) {
-		printf("C: 0 ports error\n");
-		return ERROR;
-	}
-
-	// memset???
-	ret = rte_eth_dev_configure(port_to_conf, 1, 1, &eth_conf);
-	if (ret < 0) {
-		printf("C: Cannot configure ethernet port\n");
-		return ERROR;
-	}
-	printf("C: Ethernet port configured\n");
 
 	// ID of the execution unit we are running on
-    unsigned cpu = rte_lcore_id();
-    // Get the ID of the physical socket of the specified lcore
-    unsigned socketid = rte_lcore_to_socket_id(cpu);
+	unsigned cpu = rte_lcore_id();
+	// Get the ID of the physical socket of the specified lcore
+	unsigned socketid = rte_lcore_to_socket_id(cpu);
 
 	//TODO: Change cache size?
-	rx_pool = rte_mempool_create(
-						"rx_pool", //name of mempool
+	pktmbuf_pool = rte_mempool_create(
+						"mbuf_pool", //name of mempool
 						NB_MBUF, //number of elements in mempool
 						MBUF_SIZE, //size of element
 						0, // cache_size
@@ -260,6 +236,36 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 		return ERROR;
 	}
 	printf("C: Mempool created\n");
+
+
+	int nb_ports = rte_eth_dev_count();
+	printf("C: %d ports enabled\n", nb_ports);
+	if (nb_ports == 0) {
+		printf("C: 0 ports error\n");
+		return ERROR;
+	}
+
+	//reset enabled ports
+	for (int portid = 0; portid < nb_ports; portid++) {
+		enabled_ports[portid] = 0;
+	}
+
+
+	// configure
+
+
+	// memset???
+	ret = rte_eth_dev_configure(port_to_conf, 1, 1, &eth_conf);
+	if (ret < 0) {
+		printf("C: Cannot configure ethernet port\n");
+		return ERROR;
+	}
+	printf("C: Ethernet port configured\n");
+
+
+
+
+
 
 
 	ret = rte_eth_rx_queue_setup(port_to_conf, 0, 256,
@@ -329,21 +335,6 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass c
 
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1ether_1hdr(JNIEnv *env, jclass class) {
-	return sizeof(struct ether_hdr);
-}
-
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1mbuf(JNIEnv *env, jclass class) {
-	return sizeof(struct rte_mbuf);
-}
-
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1size_1of_1void_1pointer(JNIEnv *env, jclass class) {
-	int num = 0;
-	void *ptr;
-	num = 15;
-	ptr = &num;
-	return sizeof(ptr);
-}
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packets(JNIEnv *env, jclass class, jlong mem_pointer) {
 	uint8_t *point = (uint8_t*)mem_pointer;
