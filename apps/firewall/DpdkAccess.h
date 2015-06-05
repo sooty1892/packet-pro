@@ -95,6 +95,14 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1id
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1blacklist
   (JNIEnv *, jclass, jobjectArray);
 
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_set_thread_affinity
+ * Signature: (JI)Z
+ */
+JNIEXPORT jboolean JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity
+  (JNIEnv *, jclass, jlong, jint);
+
 #ifdef __cplusplus
 }
 #endif

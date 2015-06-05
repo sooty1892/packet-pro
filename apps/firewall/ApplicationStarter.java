@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-
-// Starter class for firewall using DPDK
 public class ApplicationStarter {
 	
 	private static final String PACKET_INSPECTOR = "packetinspector";
@@ -27,15 +25,26 @@ public class ApplicationStarter {
 	
 
 	public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		//TODO: make all java output to gui
+		
+		Map<String, String> config_map = readConfig();
+		
+		int num_available_cores = Runtime.getRuntime().availableProcessors();
+		//System.out.println("CORES: " + num_of_cores);
+		
+		int num_cores_selected = Integer.bitCount(Integer.decode(config_map.get(CORE_MASK)));
+
+		if (num_available_cores < num_cores_selected) {
+			System.out.println("Coremask > num_of_cores on machine");
+			System.exit(-1);
+		}
+		
+		sendDPDKInformation(config_map);
 		
 		//System.out.println("JAVA: Setting up unsafe memory");
         UnsafeAccess ua = new UnsafeAccess();
 		
-		//System.out.println("JAVA: Starting Firewall");
-		
-		Map<String, String> config_map = readConfig();
-		
-		int num_of_cores = Integer.bitCount(Integer.decode(config_map.get(CORE_MASK)));
+		//System.out.println("JAVA: Starting application " + config_map.get(PROGRAM_NAME));
 		
 		List<ReceivePoller> receivers = new ArrayList<ReceivePoller>();
 		List<PacketSender> transmitters = new ArrayList<PacketSender>();
@@ -48,7 +57,9 @@ public class ApplicationStarter {
 		
 		Stats stats = new Stats(receivers, transmitters);
 		// everything should be started together - lastly
-		new Thread(stats).start();
+		Thread t = new Thread(stats);
+		long i = t.getId();
+		boolean res = DpdkAccess.set_thread_affinity(i, 1);
 		
 		/*int ret = DpdkAccess.dpdk_setup();
 		if (ret < 0) {
@@ -64,7 +75,19 @@ public class ApplicationStarter {
 		rp.start();*/
 	}
 	
-	public static Map<String, String> readConfig() {
+	private static void sendDPDKInformation(Map<String, String> map) {
+		DpdkAccess.dpdk_set_core_mask(map.get(CORE_MASK));
+		DpdkAccess.dpdk_set_port_mask(map.get(PORT_MASK));
+		DpdkAccess.dpdk_set_program_name(map.get(PROGRAM_NAME));
+		DpdkAccess.dpdk_set_memory_channels(map.get(MEMORY_CHANNELS));
+		DpdkAccess.dpdk_set_memory(map.get(MEMORY));
+		DpdkAccess.dpdk_set_program_id(map.get(PROGRAM_ID));
+		String[] bl = map.get(BLACKLIST).split(",");
+		System.out.println(bl.toString());
+		DpdkAccess.dpdk_set_blacklist(bl);
+	}
+	
+	private static Map<String, String> readConfig() {
 		Properties prop = new Properties();
 		InputStream input = null;
 		Map<String, String> map = new HashMap<String, String>();

@@ -11,6 +11,8 @@
 #include <stdarg.h>
 #include <errno.h>
 #include <getopt.h>
+#include <pthread.h>
+
 
 #include <rte_common.h>
 #include <rte_byteorder.h>
@@ -372,6 +374,38 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv *env, jclass cl
 	}*/
 
 	//free packets
+}
+
+JNIEXPORT jboolean JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity(JNIEnv *env, jclass class, jlong tid, jint mask) {
+
+	cpu_set_t cpuset;
+	uint64_t thead_id = (uint64_t)tid;
+
+	CPU_ZERO(&cpuset);
+	/*for (j = 0; j < 8; j++) {
+		CPU_SET(j, &cpuset);
+	}*/
+	CPU_SET(1, &cpuset);
+
+	int s = pthread_setaffinity_np(thead_id, sizeof(cpu_set_t), &cpuset);
+	if (s != 0) {
+		printf("AFFINITY ERROR 1");
+		return (bool) false;
+	}
+
+   /* Check the actual affinity mask assigned to the thread */
+
+   s = pthread_getaffinity_np(thead_id, sizeof(cpu_set_t), &cpuset);
+   if (s != 0) {
+	   printf("AFFINITY ERROR 2");
+	   return (bool) false;
+   }
+
+   printf("Set returned by pthread_getaffinity_np() contained:\n");
+   for (j = 0; j < CPU_SETSIZE; j++)
+	   if (CPU_ISSET(j, &cpuset))
+		   printf("    CPU %d\n", j);
+   return (bool) true;
 }
 
 
