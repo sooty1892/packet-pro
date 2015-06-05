@@ -57,7 +57,7 @@
 struct rte_mempool *pktmbuf_pool = NULL;
 
 int num_ports;
-unsigned socket_id;
+unsigned socketid;
 
 const char *program_name;
 const char *core_mask;
@@ -151,15 +151,15 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1create_1mempool(JNIEnv *env, jclass 
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports(JNIEnv *env, jclass class) {
 	num_ports = rte_eth_dev_count();
-	printf("C: %d ports enabled\n", nb_ports);
-	if (nb_ports == 0) {
+	printf("C: %d ports enabled\n", num_ports);
+	if (num_ports == 0) {
 		printf("C: 0 ports error\n");
 		return ERROR;
 	}
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1dev(JNIEnv *env, jclass class, jint port_id, jint rx_num, jint tx_num) {
-	ret = rte_eth_dev_configure(port_id, rx_num, tx_num, &port_conf);
+	int ret = rte_eth_dev_configure(port_id, rx_num, tx_num, &port_conf);
 	if (ret < 0) {
 		printf("C: Cannot configure ethernet port\n");
 		return ERROR;
@@ -168,7 +168,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1dev(JNIEnv *env, jclass c
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue(JNIEnv *env, jclass class, jint port_id, jint rx_id) {
-	ret = rte_eth_rx_queue_setup(port_id, rx_id, 256,
+	int ret = rte_eth_rx_queue_setup(port_id, rx_id, 256,
 								socketid,
 								&rx_conf, pktmbuf_pool);
 	if (ret < 0) {
@@ -178,8 +178,8 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue(JNIEnv *env, jc
 	printf("C: RX queue setup\n");
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue(JNIEnv *, jclass class, jint port_id, jint tx_id) {
-	ret = rte_eth_tx_queue_setup(port_id, tx_id, 256, socketid, &tx_conf);
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue(JNIEnv *env, jclass class, jint port_id, jint tx_id) {
+	int ret = rte_eth_tx_queue_setup(port_id, tx_id, 256, socketid, &tx_conf);
 	if (ret < 0) {
 		rte_exit(EXIT_FAILURE, "rte_eth_tx_queue_setup(): error=%d, port=%d\n", ret, 0);
 	}
@@ -187,7 +187,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue(JNIEnv *, jclas
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1dev_1start(JNIEnv *env, jclass class, jint port_id) {
-	ret = rte_eth_dev_start(port_id);
+	int ret = rte_eth_dev_start(port_id);
 	if (ret < 0) {
 		printf("C: Cannot start ethernet device\n");
 		return ERROR;
@@ -202,9 +202,9 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status(JNIEnv *e
 
 	for (count = 0; count <= MAX_CHECK_TIME; count++) {
 		all_ports_up = 1;
-		for (portid = 0; portid < port_num; portid++) {
-			if ((port_mask & (1 << portid)) == 0)
-				continue;
+		for (portid = 0; portid < num_ports; portid++) {
+			//if ((port_mask & (1 << portid)) == 0)
+			//	continue;
 			memset(&link, 0, sizeof(link));
 			rte_eth_link_get_nowait(portid, &link);
 			/* print link status if flag set */

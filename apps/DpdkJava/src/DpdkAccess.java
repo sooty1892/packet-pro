@@ -48,7 +48,7 @@ public class DpdkAccess {
 	}
 	
 	public static int dpdk_configure_tx_queue(int port_id, int tx_id) {
-		return nat_configure_rx_queue(port_id, tx_id);
+		return nat_configure_tx_queue(port_id, tx_id);
 	}
 	
 	public static int dpdk_dev_start(int port_id) {

@@ -1,7 +1,7 @@
 #include "Vars.h"
 
 // ethernet port config - more options available
-static const struct rte_eth_conf port_conf = {
+const struct rte_eth_conf port_conf = {
 	.rxmode = {
 		.split_hdr_size = 0,
 		.header_split   = 0, /**< Header Split disabled */
@@ -16,7 +16,7 @@ static const struct rte_eth_conf port_conf = {
 };
 
  // Configures a TX ring of an Ethernet port
-static struct rte_eth_txconf tx_conf = {
+const struct rte_eth_txconf tx_conf = {
     .tx_thresh = {
         .pthresh = 36,
         .hthresh = 0,
@@ -32,7 +32,7 @@ static struct rte_eth_txconf tx_conf = {
 };
 
 // Configures a RX ring of an Ethernet port
-static struct rte_eth_rxconf rx_conf = {
+const struct rte_eth_rxconf rx_conf = {
     .rx_thresh = {
         .pthresh = 8,
         .hthresh = 8,

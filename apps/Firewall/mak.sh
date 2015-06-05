@@ -8,14 +8,14 @@ make
 sudo \cp /home/dpdk64/packet-pro/apps/Firewall/build/lib/libnat_dpdk.so /usr/lib/x86_64-linux-gnu
 sudo ldconfig
 
-find . -path ./app -prune -o -name "*.class" > classes.txt
+find ./src/  -name "*.class" > classes.txt
 find ../DpdkJava/ -name "*.class" >> classes.txt
 while read line
 do
-	cp $line app
+	cp $line ./app
 done < classes.txt
 
-cp src/blacklist.txt app
-cp src/config.properties app
+cp src/blacklist.txt ./app/
+cp src/config.properties ./app/
 
 rm -r classes.txt
