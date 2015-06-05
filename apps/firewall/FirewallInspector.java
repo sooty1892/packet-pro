@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class FirewallInspector extends PacketInspector {
+public class FirewallInspector extends PacketProcessor {
 	
 	Set<Long> blacklist;
 	

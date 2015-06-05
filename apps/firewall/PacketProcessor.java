@@ -7,13 +7,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public abstract class PacketInspector {
+public abstract class PacketProcessor {
 	
 	Packet currentPacket;
 	PacketSender ps;
 	PacketFreeer pf;
 	
-	public PacketInspector(PacketSender ps, PacketFreeer pf) {
+	public PacketProcessor(PacketSender ps, PacketFreeer pf) {
 		this.ps = ps;
 		this.pf = pf;
 	}

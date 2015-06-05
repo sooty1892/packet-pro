@@ -13,8 +13,7 @@ public class DpdkAccess {
 	private static native void nat_set_memory(String value);
 	private static native void nat_set_program_id(String value);
 	private static native void nat_set_blacklist(String[] value);
-	private static native boolean nat_set_thread_affinity(long tid, int mask);
-	private static native int nat_get_thread_id();
+	private static native boolean nat_set_thread_affinity(int core, int avail);
 	
 	static {
 		System.loadLibrary("nat_dpdk");
@@ -64,12 +63,8 @@ public class DpdkAccess {
 		nat_set_blacklist(value);
 	}
 	
-	public static boolean set_thread_affinity(long tid, int mask) {
-		return nat_set_thread_affinity(tid, mask);
-	}
-
-	public static int get_thread_id() {
-		return nat_get_thread_id();
+	public static boolean set_thread_affinity(int core, int avail) {
+		return nat_set_thread_affinity(core, avail);
 	}
 	
 }

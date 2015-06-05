@@ -53,11 +53,14 @@ public class ApplicationStarter {
 		Constructor<?> con = cla.getConstructor(PacketSender.class, PacketFreeer.class);
 		Object object = con.newInstance(new Object[] {null, null});
 		
-		PacketInspector pi = (PacketInspector)object;
+		PacketProcessor pi = (PacketProcessor)object;
 		
 		Stats stats = new Stats(receivers, transmitters);
 		// everything should be started together - lastly
-		CustomThread t = new CustomThread(stats);
+		AffinityThread t = new AffinityThread(stats, 0, num_available_cores);
+		if (!t.ifWorked()) {
+			System.out.println("DOESNT WORK");
+		}
 		/*int i = t.getThreadId();
 		System.out.println("ID: " + i);
 		//Thread.sleep(10000);

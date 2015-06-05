@@ -180,6 +180,9 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 
 	//malloc is ok at start of program
 
+	// i think core mask should just be 1 as we don't want
+	// c threads creating
+
 	argv = malloc(argc * sizeof(char*));
 	int i;
 	for (i = 0; i < argc; i++) {
@@ -381,21 +384,15 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv *env, jclass cl
 	//free packets
 }
 
-JNIEXPORT jboolean JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity(JNIEnv *env, jclass class, jlong tid, jint mask) {
+JNIEXPORT jboolean JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity(JNIEnv *env, jclass class, jint core, jint avail) {
 
 	cpu_set_t cpuset;
-	//unsigned long thread_id = (unsigned long)tid;
-
-	//printf("C: %" PRIu64 "\n", thread_id);
 
 	pthread_t thread_id = pthread_self();
 
-	int j;
 	CPU_ZERO(&cpuset);
-	for (j = 0; j < 2; j++) {
-		CPU_SET(j, &cpuset);
-	}
-	//CPU_SET(0, &cpuset);
+
+	CPU_SET(core, &cpuset);
 
 	int s = pthread_setaffinity_np(thread_id, sizeof(cpu_set_t), &cpuset);
 	if (s != 0) {
@@ -403,25 +400,17 @@ JNIEXPORT jboolean JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity(JNIEnv *en
 		return 0;
 	}
 
-   /* Check the actual affinity mask assigned to the thread */
-
    s = pthread_getaffinity_np(thread_id, sizeof(cpu_set_t), &cpuset);
    if (s != 0) {
 	   printf("AFFINITY ERROR 2");
 	   return 0;
    }
 
-   printf("Set returned by pthread_getaffinity_np() contained:\n");
-   //int j;
-   for (j = 0; j < 2; j++)
-	   if (CPU_ISSET(j, &cpuset))
-		   printf("    CPU %d\n", j);
-	 printf("WORKED\n");
+   if (!CPU_ISSET(core, &cpuset)) {
+	   printf("AFFINITY ERROR 3");
+	   return 0;
+   }
+
    return 1;
-}
-
-
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1get_1thread_1id(JNIEnv *env, jclass class) {
-	return syscall(__NR_gettid);
 }
 

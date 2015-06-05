@@ -3,13 +3,13 @@ import java.io.IOException;
 public class ReceivePoller implements Runnable{
 	
 	UnsafeAccess ua;
-	PacketInspector pi;
+	PacketProcessor pi;
 	long packet_all;
 	long packet_all_size;
 	long packet_interval;
 	long packet_interval_size;
 
-	public ReceivePoller(UnsafeAccess ua, PacketInspector pi) {
+	public ReceivePoller(UnsafeAccess ua, PacketProcessor pi) {
 		this.ua = ua;
 		this.pi = pi;
 		packet_all = 0;
