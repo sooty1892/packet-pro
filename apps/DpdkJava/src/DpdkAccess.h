@@ -9,10 +9,66 @@ extern "C" {
 #endif
 /*
  * Class:     DpdkAccess
- * Method:    nat_setup
+ * Method:    nat_init_eal
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_create_mempool
+ * Signature: (Ljava/lang/String;II)I
+ */
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1create_1mempool
+  (JNIEnv *, jclass, jstring, jint, jint);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_check_ports
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_configure_dev
+ * Signature: (III)I
+ */
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1dev
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_configure_rx_queue
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_configure_tx_queue
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_dev_start
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1dev_1start
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_check_ports_link_status
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status
   (JNIEnv *, jclass);
 
 /*
@@ -98,9 +154,9 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1blacklist
 /*
  * Class:     DpdkAccess
  * Method:    nat_set_thread_affinity
- * Signature: (II)Z
+ * Signature: (II)I
  */
-JNIEXPORT jboolean JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity
   (JNIEnv *, jclass, jint, jint);
 
 #ifdef __cplusplus

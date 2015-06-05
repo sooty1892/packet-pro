@@ -2,6 +2,7 @@
 
 #include "DpdkAccess.h"
 #include "Utils.h"
+#include "Vars.h"
 
 #include <sched.h>
 #include <sys/types.h>
@@ -12,7 +13,6 @@
 #include <getopt.h>
 #include <pthread.h>
 #include <syscall.h>
-
 
 #include <rte_common.h>
 #include <rte_byteorder.h>
@@ -51,75 +51,13 @@
 #define	NB_RX_DESC 256
 #define	NB_TX_DESC 256
 
+#define CHECK_INTERVAL 100 /* 100ms */
+#define MAX_CHECK_TIME 90 /* 9s (90 * 100ms) in total */
 
 struct rte_mempool *pktmbuf_pool = NULL;
 
-/* list of enabled ports */
-static uint32_t enabled_ports[16];
-
-// ethernet port config - more options available
-static const struct rte_eth_conf port_conf = {
-	.rxmode = {
-		.split_hdr_size = 0,
-		.header_split   = 0, /**< Header Split disabled */
-		.hw_ip_checksum = 0, /**< IP checksum offload disabled */
-		.hw_vlan_filter = 0, /**< VLAN filtering disabled */
-		.jumbo_frame    = 0, /**< Jumbo Frame Support disabled */
-		.hw_strip_crc   = 0, /**< CRC stripped by hardware */
-	},
-	.txmode = {
-		.mq_mode = ETH_MQ_TX_NONE,
-	},
-};
-
-// For configuring an ethernet port
-static struct rte_eth_conf eth_conf = { 
-    .rxmode = { 
-        .mq_mode = ETH_MQ_RX_RSS,
-        .split_hdr_size = 0, 
-        .header_split = 0, 
-        .hw_ip_checksum = 1, 
-        .hw_vlan_filter = 0, 
-        .jumbo_frame = 0,
-        .hw_strip_crc = 0, 
-    }, 
-    .rx_adv_conf = {
-        .rss_conf = {
-            .rss_key = NULL,
-            .rss_hf = ETH_RSS_IP,
-        },
-    },
-    .txmode = { 
-        .mq_mode = ETH_MQ_TX_NONE, 
-    }, 
- };
-
- // Configures a TX ring of an Ethernet port
-static struct rte_eth_txconf tx_conf = {
-    .tx_thresh = {
-        .pthresh = 36,
-        .hthresh = 0,
-        .wthresh = 0,
-    },
-    .tx_rs_thresh = 0,
-    .tx_free_thresh = 0,
-    //.txq_flags = (ETH_TXQ_FLAGS_NOMULTSEGS |
-    //		ETH_TXQ_FLAGS_NOVLANOFFL |
-    //		ETH_TXQ_FLAGS_NOXSUMSCTP |
-    //		ETH_TXQ_FLAGS_NOXSUMUDP  |
-    //		ETH_TXQ_FLAGS_NOXSUMTCP)
-};
-
-// Configures a RX ring of an Ethernet port
-static struct rte_eth_rxconf rx_conf = {
-    .rx_thresh = {
-        .pthresh = 8,
-        .hthresh = 8,
-        .wthresh = 4,
-    },
-    .rx_free_thresh = 64,
-    .rx_drop_en = 0,
-};
+int num_ports;
+unsigned socket_id;
 
 const char *program_name;
 const char *core_mask;
@@ -130,6 +68,181 @@ const char *program_id;
 const char **blacklist;
 int blacklist_count = 0;
 
+
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal(JNIEnv *env, jclass class) {
+	int argc = 1 + // program name
+			   2 + // core mask and flag
+			   2 + // memory channels and flag
+			   2 + // file prefix and flag
+			   2 + // memory and flag
+			   (2*blacklist_count); // flag and port for each blacklisted port
+	//char **argv;
+
+	//malloc is ok at start of program
+
+	// i think core mask should just be 1 as we don't want
+	// c threads creating
+
+	/*argv = malloc(argc * sizeof(char*));
+	int i;
+	for (i = 0; i < argc; i++) {
+		//overkill but works
+		argv[i] = malloc(120 * sizeof(char));
+	}*/
+
+	char *argv[] = {"Pktcap",
+					"-c", "0x1",
+					"-n", "3",
+					"-m", "128",
+					"--file-prefix", "fw",
+					"-b", "00:08.0",
+					"-b", "00:03.0"};
+
+	int port_to_conf = 0;
+
+
+	int ret = rte_eal_init(argc, argv);
+	if (ret < 0) {
+		printf("C: EAL init error\n");
+		// free args
+		/*int i;
+		for (i = 0; i < argc; i++) {
+			dealloc(argv[i]);
+		}
+		dealloc(argv);*/
+		return ERROR;
+	} /*else {
+		// free args
+		int i;
+		for (i = 0; i < argc; i++) {
+			dealloc(argv[i]);
+		}
+		dealloc(argv);
+	}*/
+}
+
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1create_1mempool(JNIEnv *env, jclass class, jstring name, jint num_el, jint cache_size) {
+	const char *n = (*env)->GetStringUTFChars(env, name, 0);
+
+	// ID of the execution unit we are running on
+	unsigned cpu = rte_lcore_id();
+	// Get the ID of the physical socket of the specified lcore
+	socketid = rte_lcore_to_socket_id(cpu);
+
+	//TODO: Change cache size?
+	pktmbuf_pool = rte_mempool_create(
+						n, //name of mempool
+						num_el, //number of elements in mempool
+						MBUF_SIZE, //size of element
+						cache_size, // cache_size
+						sizeof(struct rte_pktmbuf_pool_private),
+						rte_pktmbuf_pool_init,
+						NULL,
+						rte_pktmbuf_init,
+						NULL,
+						socketid,
+						0);
+	if (pktmbuf_pool == NULL) {
+		printf("C: Cannot init mbuf pool\n");
+		return ERROR;
+	}
+	printf("C: Mempool created\n");
+}
+
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports(JNIEnv *env, jclass class) {
+	num_ports = rte_eth_dev_count();
+	printf("C: %d ports enabled\n", nb_ports);
+	if (nb_ports == 0) {
+		printf("C: 0 ports error\n");
+		return ERROR;
+	}
+}
+
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1dev(JNIEnv *env, jclass class, jint port_id, jint rx_num, jint tx_num) {
+	ret = rte_eth_dev_configure(port_id, rx_num, tx_num, &port_conf);
+	if (ret < 0) {
+		printf("C: Cannot configure ethernet port\n");
+		return ERROR;
+	}
+	printf("C: Ethernet port configured\n");
+}
+
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue(JNIEnv *env, jclass class, jint port_id, jint rx_id) {
+	ret = rte_eth_rx_queue_setup(port_id, rx_id, 256,
+								socketid,
+								&rx_conf, pktmbuf_pool);
+	if (ret < 0) {
+		printf("C: Error setting up rx queue\n");
+		return ERROR;
+	}
+	printf("C: RX queue setup\n");
+}
+
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue(JNIEnv *, jclass class, jint port_id, jint tx_id) {
+	ret = rte_eth_tx_queue_setup(port_id, tx_id, 256, socketid, &tx_conf);
+	if (ret < 0) {
+		rte_exit(EXIT_FAILURE, "rte_eth_tx_queue_setup(): error=%d, port=%d\n", ret, 0);
+	}
+	printf("If %d rte_eth_tx_queue_setup() successful\n", 0);
+}
+
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1dev_1start(JNIEnv *env, jclass class, jint port_id) {
+	ret = rte_eth_dev_start(port_id);
+	if (ret < 0) {
+		printf("C: Cannot start ethernet device\n");
+		return ERROR;
+	}
+	printf("C: ethernet device started\n");
+}
+
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status(JNIEnv *env, jclass class) {
+	struct rte_eth_link link;
+
+	uint8_t portid, count, all_ports_up, print_flag = 0;
+
+	for (count = 0; count <= MAX_CHECK_TIME; count++) {
+		all_ports_up = 1;
+		for (portid = 0; portid < port_num; portid++) {
+			if ((port_mask & (1 << portid)) == 0)
+				continue;
+			memset(&link, 0, sizeof(link));
+			rte_eth_link_get_nowait(portid, &link);
+			/* print link status if flag set */
+			if (print_flag == 1) {
+				if (link.link_status)
+					printf("Port %d Link Up - speed %u "
+						"Mbps - %s\n", (uint8_t)portid,
+						(unsigned)link.link_speed,
+				(link.link_duplex == ETH_LINK_FULL_DUPLEX) ?
+					("full-duplex") : ("half-duplex\n"));
+				else
+					printf("Port %d Link Down\n",
+						(uint8_t)portid);
+				continue;
+			}
+			/* clear all_ports_up flag if any link down */
+			if (link.link_status == 0) {
+				all_ports_up = 0;
+				break;
+			}
+		}
+		/* after finally printing all link status, get out */
+		if (print_flag == 1)
+			break;
+
+		if (all_ports_up == 0) {
+			printf(".");
+			fflush(stdout);
+			rte_delay_ms(CHECK_INTERVAL);
+		}
+
+		/* set the print_flag if all ports up or timeout */
+		if (all_ports_up == 1 || count == (MAX_CHECK_TIME - 1)) {
+			print_flag = 1;
+			printf("done\n");
+		}
+	}
+}
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1core_1mask(JNIEnv *env, jclass class, jstring value) {
 	core_mask = (*env)->GetStringUTFChars(env, value, 0);
@@ -166,148 +279,6 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1blacklist(JNIEnv *env, jclass c
 		//blacklist[i] = (*env)->GetStringUTFChars(env, string, 0);
 		// Don't forget to call `ReleaseStringUTFChars` when you're done.
 	}
-}
-
-
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
-	int argc = 1 + // program name
-			   2 + // core mask and flag
-			   2 + // memory channels and flag
-			   2 + // file prefix and flag
-			   2 + // memory and flag
-			   (2*blacklist_count); // flag and port for each blacklisted port
-	char **argv;
-
-	//malloc is ok at start of program
-
-	// i think core mask should just be 1 as we don't want
-	// c threads creating
-
-	argv = malloc(argc * sizeof(char*));
-	int i;
-	for (i = 0; i < argc; i++) {
-		//overkill but works
-		argv[i] = malloc(120 * sizeof(char));
-	}
-
-	/*char *argv[] = {"Pktcap",
-					"-c", "0x7",
-					"-n", "3",
-					"-m", "128",
-					"--file-prefix", "fw",
-					"-b", "00:08.0",
-					"-b", "00:03.0"};*/
-
-	int port_to_conf = 0;
-
-	// used to retrieve link-level information of an
-    // Ethernet port. Aligned for atomic64 read/write
-    struct rte_eth_link link;
-
-	int ret = rte_eal_init(argc, argv);
-	if (ret < 0) {
-		printf("C: EAL init error\n");
-		// free args
-		for (i = 0; i < argc; i++) {
-			dealloc(argv[i]);
-		}
-		dealloc(argv);
-		return ERROR;
-	} else {
-		// free args
-		int i;
-		for (i = 0; i < argc; i++) {
-			dealloc(argv[i]);
-		}
-		dealloc(argv);
-	}
-
-	// ID of the execution unit we are running on
-	unsigned cpu = rte_lcore_id();
-	// Get the ID of the physical socket of the specified lcore
-	unsigned socketid = rte_lcore_to_socket_id(cpu);
-
-	//TODO: Change cache size?
-	pktmbuf_pool = rte_mempool_create(
-						"mbuf_pool", //name of mempool
-						NB_MBUF, //number of elements in mempool
-						MBUF_SIZE, //size of element
-						0, // cache_size
-						sizeof(struct rte_pktmbuf_pool_private),
-						rte_pktmbuf_pool_init,
-						NULL,
-						rte_pktmbuf_init,
-						NULL,
-						socketid,
-						0);
-	if (pktmbuf_pool == NULL) {
-		printf("C: Cannot init mbuf pool\n");
-		return ERROR;
-	}
-	printf("C: Mempool created\n");
-
-
-	int nb_ports = rte_eth_dev_count();
-	printf("C: %d ports enabled\n", nb_ports);
-	if (nb_ports == 0) {
-		printf("C: 0 ports error\n");
-		return ERROR;
-	}
-
-	//reset enabled ports
-	int portid;
-	for (portid = 0; portid < nb_ports; portid++) {
-		enabled_ports[portid] = 0;
-	}
-
-
-	// configure
-
-
-	// memset???
-	ret = rte_eth_dev_configure(port_to_conf, 1, 1, &eth_conf);
-	if (ret < 0) {
-		printf("C: Cannot configure ethernet port\n");
-		return ERROR;
-	}
-	printf("C: Ethernet port configured\n");
-
-
-
-
-
-
-
-	ret = rte_eth_rx_queue_setup(port_to_conf, 0, 256,
-								socketid,
-								&rx_conf, pktmbuf_pool);
-	if (ret < 0) {
-		printf("C: Error setting up rx queue\n");
-		return ERROR;
-	}
-	printf("C: RX queue setup\n");
-
-	// Allocate and set up a transmit queue for an Ethernet device.
-    ret = rte_eth_tx_queue_setup(0, 0, NB_TX_DESC, socketid, &tx_conf);
-    if (ret < 0) {
-        rte_exit(EXIT_FAILURE, "rte_eth_tx_queue_setup(): error=%d, port=%d\n", ret, 0);
-    }
-    printf("If %d rte_eth_tx_queue_setup() successful\n", 0);
-
-	ret = rte_eth_dev_start(port_to_conf);
-	if (ret < 0) {
-		printf("C: Cannot start ethernet device\n");
-		return ERROR;
-	}
-	printf("C: ethernet device started\n");
-
-	rte_eth_link_get(0, &link);
-    if (link.link_status == 0) {
-        rte_exit(EXIT_FAILURE, "DPDK interface is down: %d\n", 0);
-    }
-    printf("If %d is UP and RUNNING\n", 0);
-
-	printf("C: setup complete\n");
 }
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass class, jlong mem_pointer) {
@@ -384,7 +355,7 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv *env, jclass cl
 	//free packets
 }
 
-JNIEXPORT jboolean JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity(JNIEnv *env, jclass class, jint core, jint avail) {
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity(JNIEnv *env, jclass class, jint core, jint avail) {
 
 	cpu_set_t cpuset;
 

@@ -59,11 +59,57 @@ public class ApplicationStarter {
 		}*/
 	}
 	
-	public void DpdkSetup() {
-		int ret = DpdkAccess.dpdk_setup();
-		if (ret < 0) {
-			System.out.println("JAVA: Error in DPDK setup");
-			return;
+	private void exit_with_error(String error) {
+		System.out.println(error);
+		System.exit(-1);
+	}
+	
+	public void dpdk_init_eal() {
+		if (DpdkAccess.dpdk_init_eal() < 0) {
+			exit_with_error("JAVA: Error in DPDK setup");
+		}
+	}
+	
+	//TODO: currently c code only handles 1 mempool
+	public void dpdk_create_mempool(String name, int num_el, int cache_size) {
+		if (DpdkAccess.dpdk_create_mempool(name, num_el, cache_size) < 0) {
+			exit_with_error("JAVA: Error in DPDK setup");
+		}
+	}
+	
+	public void dpdk_check_ports() {
+		if (DpdkAccess.dpdk_check_ports() < 0) {
+			exit_with_error("JAVA: Error in DPDK setup");
+		}
+	}
+	
+	public void dpdk_configure_dev(int port_id, int rx_num, int tx_num) {
+		if (DpdkAccess.dpdk_configure_dev(port_id, rx_num, rx_num) < 0) {
+			exit_with_error("JAVA: Error in DPDK setup");
+		}
+	}
+	
+	public void dpdk_configure_rx_queue(int port_id, int rx_id) {
+		if (DpdkAccess.dpdk_configure_rx_queue(port_id, rx_id) < 0) {
+			exit_with_error("JAVA: Error in DPDK setup");
+		}
+	}
+	
+	public void dpdk_configure_tx_queue(int port_id, int tx_id) {
+		if (DpdkAccess.dpdk_configure_tx_queue(port_id, tx_id) < 0) {
+			exit_with_error("JAVA: Error in DPDK setup");
+		}
+	}
+	
+	public void dpdk_dev_start(int port_id) {
+		if (DpdkAccess.dpdk_dev_start(port_id) < 0) {
+			exit_with_error("JAVA: Error in DPDK setup");
+		}
+	}
+	
+	public void dpdk_check_ports_link_status() {
+		if (DpdkAccess.dpdk_check_ports_link_status() < 0) {
+			exit_with_error("JAVA: Error in DPDK setup");
 		}
 	}
 	
@@ -72,6 +118,7 @@ public class ApplicationStarter {
 		//TODO: access to ethernet header?
 		//TODO: burst parametes everywhere
 		//TODO: get rid of thrown exceptions - catch them
+		//TODO: sort out error messages
 		
 		//System.out.println("JAVA: Starting application " + config_map.get(PROGRAM_NAME));
 		

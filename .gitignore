@@ -21,6 +21,8 @@
 # build folders
 **/build/
 
+**/bin/
+
 *.so
 *.swp
 *.tmp

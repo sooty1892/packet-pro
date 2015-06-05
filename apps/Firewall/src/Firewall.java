@@ -29,7 +29,14 @@ public class Firewall {
 		
 		as.createAffinityThreads(threads);
 		
-		as.DpdkSetup();
+		as.dpdk_init_eal();
+		as.dpdk_create_mempool("mbufs", 8192, 32);
+		as.dpdk_check_ports();
+		as.dpdk_configure_dev(0, 1, 1);
+		as.dpdk_configure_rx_queue(0, 0);
+		as.dpdk_configure_tx_queue(0, 0);
+		as.dpdk_dev_start(0);
+		as.dpdk_check_ports_link_status();
 		
 		//as.setupStats();
 		

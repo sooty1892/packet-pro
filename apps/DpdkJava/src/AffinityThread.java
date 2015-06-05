@@ -5,12 +5,12 @@ public class AffinityThread extends Thread {
 
 	public AffinityThread(Runnable r, int core, int avail) {
 		super(r);
-		worked = DpdkAccess.set_thread_affinity(core, avail);
+		worked = DpdkAccess.set_thread_affinity(core, avail) == 1;
 		this.avail = avail;
 	}
 	
 	public boolean setNewAffinity(int core) {
-		worked = DpdkAccess.set_thread_affinity(core, avail);
+		worked = DpdkAccess.set_thread_affinity(core, avail) == 1;
 		return worked;
 	}
 	
