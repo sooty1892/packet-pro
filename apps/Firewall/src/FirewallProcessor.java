@@ -4,32 +4,22 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
-public class FirewallInspector extends PacketProcessor {
+public class FirewallProcessor extends PacketProcessor {
 	
 	Set<Long> blacklist;
 	
-	public FirewallInspector(PacketSender ps, PacketFreeer pf) {
-		super(ps, pf);
+	public FirewallProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp) {
+		super(ps, pf, rp);
 		blacklist = new HashSet<Long>();
 		readBlacklist();
 		printBlacklist();
 	}
-	
-	@Override
-	public boolean inspectCurrentPacket() {
-		return inspect();
-	}
-	
-	@Override
-	public boolean inspectNewPacket(Packet p) {
-		this.currentPacket = p;
-		return inspect();
-	}
 
-	private boolean inspect() {
+	private boolean inspect(Packet currentPacket) {
 		int version = currentPacket.whichIP();
 		assert(version == 4 || version == 6);
 		
@@ -82,6 +72,16 @@ public class FirewallInspector extends PacketProcessor {
 		System.out.println("Blacklist contains:");
 		for (Long l : blacklist) {
 			System.out.println(Utils.intToIp(l));
+		}
+	}
+
+	@Override
+	public void run() {
+		while (true) {
+			List<Packet> packets = rp.getBurst();
+			for (Packet p : packets) {
+				inspect(p);
+			}
 		}
 	}
 	

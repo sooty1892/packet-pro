@@ -69,7 +69,9 @@ public class ApplicationStarter {
 	
 	public void startAll() throws InterruptedException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		//TODO: make all java output to gui
-		
+		//TODO: access to ethernet header?
+		//TODO: burst parametes everywhere
+		//TODO: get rid of thrown exceptions - catch them
 		
 		//System.out.println("JAVA: Starting application " + config_map.get(PROGRAM_NAME));
 		

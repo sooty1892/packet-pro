@@ -11,10 +11,12 @@ public class PacketSender {
 	long packet_interval;
 	long packet_interval_size;
 	long past_sent;
+	int port_id;
+	int queue_id;
 	
 	private static final int BURST = 5;
 	
-	public PacketSender() {
+	public PacketSender(int port_id, int queue_id) {
 		list = new ArrayList<Packet>();
 		ua = new UnsafeAccess();
 		packet_all = 0;
@@ -22,6 +24,8 @@ public class PacketSender {
 		packet_interval = 0;
 		packet_interval_size = 0;
 		past_sent = System.nanoTime();
+		this.port_id = port_id;
+		this.queue_id = queue_id;
 	}
 	
 	private boolean isTimedOut() {

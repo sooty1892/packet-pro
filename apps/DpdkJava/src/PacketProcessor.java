@@ -7,26 +7,40 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public abstract class PacketProcessor {
+public abstract class PacketProcessor extends CoreThread {
 	
-	Packet currentPacket;
 	PacketSender ps;
 	PacketFreeer pf;
+	ReceivePoller rp;
 	
-	public PacketProcessor(PacketSender ps, PacketFreeer pf) {
+	public PacketProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp) {
 		this.ps = ps;
+		this.pf = pf;
+		this.rp = rp;
+	}
+	
+	public void setPacketSender(PacketSender ps) {
+		this.ps = ps;
+	}
+	
+	public void setPacketFreeer(PacketFreeer pf) {
 		this.pf = pf;
 	}
 	
-	public Packet getCurrentPacket() {
-		return currentPacket;
+	public void setReceivePoller(ReceivePoller rp) {
+		this.rp = rp;
 	}
 	
-	public void setCurrentPacket(Packet p) {
-		this.currentPacket = p;
+	public PacketSender getPacketSender() {
+		return ps;
 	}
 	
-	public abstract boolean inspectCurrentPacket();
-	public abstract boolean inspectNewPacket(Packet newPacket);
+	public PacketFreeer getPacketFreeer() {
+		return pf;
+	}
+	
+	public ReceivePoller getReceivePoller() {
+		return rp;
+	}
 	
 }

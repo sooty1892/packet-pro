@@ -1,10 +1,6 @@
 
-public class CoreThread implements Runnable {
-
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		
-	}
+public abstract class CoreThread implements Runnable {
+	
+	public abstract void run();
 
 }
