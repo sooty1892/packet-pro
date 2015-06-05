@@ -44,12 +44,7 @@
 
 #define ERROR -1
 #define MBUF_SIZE (2048 + sizeof(struct rte_mbuf) + RTE_PKTMBUF_HEADROOM)
-#define NB_MBUF 8192
-#define MAX_PKT_BURST 128
-#define NB_RX_QUEUE 1
-#define NB_TX_QUEUE 1
-#define	NB_RX_DESC 256
-#define	NB_TX_DESC 256
+
 
 #define CHECK_INTERVAL 100 /* 100ms */
 #define MAX_CHECK_TIME 90 /* 9s (90 * 100ms) in total */
@@ -60,13 +55,12 @@ int num_ports;
 unsigned socketid;
 
 const char *program_name;
-const char *core_mask;
-const char *port_mask;
 const char *memory_channels;
 const char *memory;
 const char *program_id;
 const char **blacklist;
 int blacklist_count = 0;
+int get_burst = 32;
 
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal(JNIEnv *env, jclass class) {
@@ -244,14 +238,8 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status(JNIEnv *e
 	}
 }
 
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1core_1mask(JNIEnv *env, jclass class, jstring value) {
-	core_mask = (*env)->GetStringUTFChars(env, value, 0);
-	//strcpy(core_mask, (*env)->GetStringUTFChars(env, value, JNI_TRUE));
-	//(*env)->ReleaseStringUTFChars(env, javaString, nativeString);
-}
-
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1port_1mask(JNIEnv *env, jclass class, jstring value) {
-	port_mask = (*env)->GetStringUTFChars(env, value, 0);
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1receive_1burst(JNIEnv *env, jclass class, jint value) {
+	get_burst = value;
 }
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1name(JNIEnv *env, jclass class, jstring value) {
@@ -286,7 +274,7 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass c
 
 	int offset = 0;
 
-	int nb_rx = rte_eth_rx_burst(0, 0, pkts_burst, MAX_PKT_BURST);
+	int nb_rx = rte_eth_rx_burst(0, 0, pkts_burst, get_burst);
 
 	uint16_t packet_count = (uint16_t)nb_rx;
 	uint8_t *point = (uint8_t*)mem_pointer;

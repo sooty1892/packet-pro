@@ -14,8 +14,8 @@ public class DpdkAccess {
 	private static native void nat_receive_burst(long pointer);
 	private static native void nat_free_packets(long pointer);
 	private static native void nat_send_packets(long pointer);
-	private static native void nat_set_core_mask(String value);
-	private static native void nat_set_port_mask(String value);
+	
+	private static native void nat_set_receive_burst(int value);
 	private static native void nat_set_program_name(String value);
 	private static native void nat_set_memory_channels(String value);
 	private static native void nat_set_memory(String value);
@@ -71,12 +71,8 @@ public class DpdkAccess {
 		nat_send_packets(pointer);
 	}
 	
-	public static void dpdk_set_core_mask(String value) {
-		nat_set_core_mask(value);
-	}
-	
-	public static void dpdk_set_port_mask(String value) {
-		nat_set_port_mask(value);
+	public static void dpdk_set_receive_burst(int value) {
+		nat_set_receive_burst(value);
 	}
 	
 	public static void dpdk_set_program_name(String value) {

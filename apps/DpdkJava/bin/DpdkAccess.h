@@ -97,19 +97,11 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets
 
 /*
  * Class:     DpdkAccess
- * Method:    nat_set_core_mask
- * Signature: (Ljava/lang/String;)V
+ * Method:    nat_set_receive_burst
+ * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1core_1mask
-  (JNIEnv *, jclass, jstring);
-
-/*
- * Class:     DpdkAccess
- * Method:    nat_set_port_mask
- * Signature: (Ljava/lang/String;)V
- */
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1port_1mask
-  (JNIEnv *, jclass, jstring);
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1receive_1burst
+  (JNIEnv *, jclass, jint);
 
 /*
  * Class:     DpdkAccess

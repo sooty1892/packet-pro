@@ -7,6 +7,8 @@ public class Ipv6Packet extends Packet {
 	private static final int HOP_LIMITS_OFFSET = 7;
 	private static final int SRC_ADDR_OFFSET = 8;
 	private static final int DST_ADDR_OFFSET = 24;
+	
+	private static final int BYTES_IPV6 = 16;
 
 	public Ipv6Packet(long mbuf, long packet) {
 		super(mbuf, packet);
@@ -81,8 +83,8 @@ public class Ipv6Packet extends Packet {
 	
 	public byte[] getSrcAddr() {
 		ua.setCurrentPointer(packet_pointer + SRC_ADDR_OFFSET);
-		byte[] res = new byte[16];
-		for (int i = 0; i < 16; i++) {
+		byte[] res = new byte[BYTES_IPV6];
+		for (int i = 0; i < BYTES_IPV6; i++) {
 			res[i] = (byte)ua.getByte();
 		}
 		return res;
@@ -90,8 +92,8 @@ public class Ipv6Packet extends Packet {
 	
 	public byte[] getDstAddr() {
 		ua.setCurrentPointer(packet_pointer + DST_ADDR_OFFSET);
-		byte[] res = new byte[16];
-		for (int i = 0; i < 16; i++) {
+		byte[] res = new byte[BYTES_IPV6];
+		for (int i = 0; i < BYTES_IPV6; i++) {
 			res[i] = (byte)ua.getByte();
 		}
 		return res;

@@ -44,12 +44,7 @@
 
 #define ERROR -1
 #define MBUF_SIZE (2048 + sizeof(struct rte_mbuf) + RTE_PKTMBUF_HEADROOM)
-#define NB_MBUF 8192
-#define MAX_PKT_BURST 128
-#define NB_RX_QUEUE 1
-#define NB_TX_QUEUE 1
-#define	NB_RX_DESC 256
-#define	NB_TX_DESC 256
+
 
 #define CHECK_INTERVAL 100 /* 100ms */
 #define MAX_CHECK_TIME 90 /* 9s (90 * 100ms) in total */
@@ -57,16 +52,15 @@
 struct rte_mempool *pktmbuf_pool = NULL;
 
 int num_ports;
-unsigned socket_id;
+unsigned socketid;
 
 const char *program_name;
-const char *core_mask;
-const char *port_mask;
 const char *memory_channels;
 const char *memory;
 const char *program_id;
 const char **blacklist;
 int blacklist_count = 0;
+int get_burst = 32;
 
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal(JNIEnv *env, jclass class) {
@@ -151,15 +145,15 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1create_1mempool(JNIEnv *env, jclass 
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports(JNIEnv *env, jclass class) {
 	num_ports = rte_eth_dev_count();
-	printf("C: %d ports enabled\n", nb_ports);
-	if (nb_ports == 0) {
+	printf("C: %d ports enabled\n", num_ports);
+	if (num_ports == 0) {
 		printf("C: 0 ports error\n");
 		return ERROR;
 	}
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1dev(JNIEnv *env, jclass class, jint port_id, jint rx_num, jint tx_num) {
-	ret = rte_eth_dev_configure(port_id, rx_num, tx_num, &port_conf);
+	int ret = rte_eth_dev_configure(port_id, rx_num, tx_num, &port_conf);
 	if (ret < 0) {
 		printf("C: Cannot configure ethernet port\n");
 		return ERROR;
@@ -168,7 +162,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1dev(JNIEnv *env, jclass c
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue(JNIEnv *env, jclass class, jint port_id, jint rx_id) {
-	ret = rte_eth_rx_queue_setup(port_id, rx_id, 256,
+	int ret = rte_eth_rx_queue_setup(port_id, rx_id, 256,
 								socketid,
 								&rx_conf, pktmbuf_pool);
 	if (ret < 0) {
@@ -178,8 +172,8 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue(JNIEnv *env, jc
 	printf("C: RX queue setup\n");
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue(JNIEnv *, jclass class, jint port_id, jint tx_id) {
-	ret = rte_eth_tx_queue_setup(port_id, tx_id, 256, socketid, &tx_conf);
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue(JNIEnv *env, jclass class, jint port_id, jint tx_id) {
+	int ret = rte_eth_tx_queue_setup(port_id, tx_id, 256, socketid, &tx_conf);
 	if (ret < 0) {
 		rte_exit(EXIT_FAILURE, "rte_eth_tx_queue_setup(): error=%d, port=%d\n", ret, 0);
 	}
@@ -187,7 +181,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue(JNIEnv *, jclas
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1dev_1start(JNIEnv *env, jclass class, jint port_id) {
-	ret = rte_eth_dev_start(port_id);
+	int ret = rte_eth_dev_start(port_id);
 	if (ret < 0) {
 		printf("C: Cannot start ethernet device\n");
 		return ERROR;
@@ -202,9 +196,9 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status(JNIEnv *e
 
 	for (count = 0; count <= MAX_CHECK_TIME; count++) {
 		all_ports_up = 1;
-		for (portid = 0; portid < port_num; portid++) {
-			if ((port_mask & (1 << portid)) == 0)
-				continue;
+		for (portid = 0; portid < num_ports; portid++) {
+			//if ((port_mask & (1 << portid)) == 0)
+			//	continue;
 			memset(&link, 0, sizeof(link));
 			rte_eth_link_get_nowait(portid, &link);
 			/* print link status if flag set */
@@ -244,14 +238,8 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status(JNIEnv *e
 	}
 }
 
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1core_1mask(JNIEnv *env, jclass class, jstring value) {
-	core_mask = (*env)->GetStringUTFChars(env, value, 0);
-	//strcpy(core_mask, (*env)->GetStringUTFChars(env, value, JNI_TRUE));
-	//(*env)->ReleaseStringUTFChars(env, javaString, nativeString);
-}
-
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1port_1mask(JNIEnv *env, jclass class, jstring value) {
-	port_mask = (*env)->GetStringUTFChars(env, value, 0);
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1receive_1burst(JNIEnv *env, jclass class, jint value) {
+	get_burst = value;
 }
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1name(JNIEnv *env, jclass class, jstring value) {
@@ -286,7 +274,7 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass c
 
 	int offset = 0;
 
-	int nb_rx = rte_eth_rx_burst(0, 0, pkts_burst, MAX_PKT_BURST);
+	int nb_rx = rte_eth_rx_burst(0, 0, pkts_burst, get_burst);
 
 	uint16_t packet_count = (uint16_t)nb_rx;
 	uint8_t *point = (uint8_t*)mem_pointer;

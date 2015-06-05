@@ -11,17 +11,18 @@ import java.util.Properties;
 
 public class ApplicationStarter {
 	
-	private static final String PACKET_INSPECTOR = "packetinspector";
 	private static final String RX_BURST = "rxburst";
 	private static final String TX_BURST = "txburst";
 	private static final String FREE_BURST = "freeburst";
-	private static final String CORE_MASK = "coremask";
-	private static final String PORT_MASK = "portmask";
+	private static final String NUMCORES = "numcores";
+	private static final String NUMPORTS = "numports";
 	private static final String MEMORY_CHANNELS = "memorychannels";
 	private static final String PROGRAM_ID = "programid";
 	private static final String MEMORY = "memory";
 	private static final String BLACKLIST = "blacklist";
 	private static final String PROGRAM_NAME = "programname";
+	
+	private static final int ERROR = -1;
 	
 	Map<String, String> config_map;
 	List<AffinityThread> aff_threads = null;
@@ -140,12 +141,11 @@ public class ApplicationStarter {
 	}
 	
 	public void sendDPDKInformation() {
-		DpdkAccess.dpdk_set_core_mask(config_map.get(CORE_MASK));
-		DpdkAccess.dpdk_set_port_mask(config_map.get(PORT_MASK));
 		DpdkAccess.dpdk_set_program_name(config_map.get(PROGRAM_NAME));
 		DpdkAccess.dpdk_set_memory_channels(config_map.get(MEMORY_CHANNELS));
 		DpdkAccess.dpdk_set_memory(config_map.get(MEMORY));
 		DpdkAccess.dpdk_set_program_id(config_map.get(PROGRAM_ID));
+		DpdkAccess.dpdk_set_receive_burst(Integer.parseInt(config_map.get(RX_BURST)));
 		String[] bl = config_map.get(BLACKLIST).split(",");
 		System.out.println(bl.toString());
 		DpdkAccess.dpdk_set_blacklist(bl);
@@ -158,17 +158,17 @@ public class ApplicationStarter {
 
 			prop.load(input);
 	 
-			config_map.put(PACKET_INSPECTOR, prop.getProperty(PACKET_INSPECTOR));
 			config_map.put(RX_BURST, prop.getProperty(RX_BURST));
 			config_map.put(TX_BURST, prop.getProperty(TX_BURST));
 			config_map.put(FREE_BURST, prop.getProperty(FREE_BURST));
-			config_map.put(CORE_MASK, prop.getProperty(CORE_MASK));
+			config_map.put(NUMCORES, prop.getProperty(NUMCORES));
 			config_map.put(MEMORY_CHANNELS, prop.getProperty(MEMORY_CHANNELS));
 			config_map.put(PROGRAM_ID, prop.getProperty(PROGRAM_ID));
 			config_map.put(MEMORY, prop.getProperty(MEMORY));
 			config_map.put(BLACKLIST, prop.getProperty(BLACKLIST));
 			config_map.put(PROGRAM_NAME, prop.getProperty(PROGRAM_NAME));
-			config_map.put(PORT_MASK, prop.getProperty(PORT_MASK));
+			config_map.put(NUMPORTS, prop.getProperty(NUMPORTS));
+			
 	 
 		} catch (IOException ex) {
 			ex.printStackTrace();
@@ -182,11 +182,11 @@ public class ApplicationStarter {
 			}
 		}
 		
-		int num_cores_selected = Integer.bitCount(Integer.decode(config_map.get(CORE_MASK)));
+		int num_cores_selected = Integer.bitCount(Integer.decode(config_map.get(NUMCORES)));
 
 		if (num_available_cores < num_cores_selected) {
 			System.out.println("Coremask > num_of_cores on machine");
-			System.exit(-1);
+			System.exit(ERROR);
 		}
 		
 	}

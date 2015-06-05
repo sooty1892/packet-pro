@@ -10,21 +10,7 @@ void printIpv4Data(struct ipv4_hdr* hdr, int packet_num) {
 	printf("C: Packet %d next_proto_id = %" PRIu8 " : %p\n", packet_num, hdr->next_proto_id, &hdr->next_proto_id);
 	printf("C: Packet %d hdr_checksum = %" PRIu16 " : %p\n", packet_num, hdr->hdr_checksum, &hdr->hdr_checksum);
 	printf("C: Packet %d src_addr = %" PRIu32 " : %p\n", packet_num, hdr->src_addr, &hdr->src_addr);
-	/*int i;
-	unsigned int maxpow = 1 << (sizeof(uint32_t)*8 - 1);
-	uint32_t num = hdr->src_addr;
-	for (i = 0; i < sizeof(uint32_t)*8; ++i) {
-		printf("%u ", num * maxpow ? 1 : 0);
-		num = num >> 1;
-	}
-	printf("\n");*/
 	printf("C: Packet %d dst_addr = %" PRIu32 " : %p\n", packet_num, hdr->dst_addr, &hdr->dst_addr);
-	/*num = hdr->dst_addr;
-	for (i = 0; i < sizeof(uint32_t)*8; ++i) {
-		printf("%u ", num * maxpow ? 1 : 0);
-		num = num >> 1;
-	}*/
-	printf("\n");
 }
 
 uint8_t get8(uint8_t *pointer, int position) {

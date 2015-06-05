@@ -36,7 +36,7 @@ public abstract class Packet {
 	public int whichIP() {
 		ua.setCurrentPointer(packet_pointer);
 		int version = ua.getByte() >> 4;
-		if (version == 4 || version == 6) {
+		if (version == IPV4 || version == IPV6) {
 			return version;
 		} else {
 			//System.out.println("ERROR - VERSION NOT 6 or 4");
