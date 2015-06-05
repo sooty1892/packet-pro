@@ -1,3 +1,8 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <inttypes.h>
+#include <rte_ip.h>
 
 void printIpv4Data(struct ipv4_hdr *, int);
 

@@ -1,10 +1,9 @@
+#define _GNU_SOURCE
+
 #include "DpdkAccess.h"
 #include "Utils.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <inttypes.h>
+#include <sched.h>
 #include <sys/types.h>
 #include <string.h>
 #include <sys/queue.h>
@@ -12,6 +11,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <pthread.h>
+#include <syscall.h>
 
 
 #include <rte_common.h>
@@ -121,47 +121,49 @@ static struct rte_eth_rxconf rx_conf = {
     .rx_drop_en = 0,
 };
 
-char program_name[100];
-char core_mask[10];
-char port_mask[10];
-char memory_channels[2];
-char memory[4];
-char program_id[5];
-char blacklist[10][10];
+const char *program_name;
+const char *core_mask;
+const char *port_mask;
+const char *memory_channels;
+const char *memory;
+const char *program_id;
+const char **blacklist;
 int blacklist_count = 0;
 
 
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1core_1mask(JNIEnv *env, jclass class, jstring value)
-	core_mask = (*env)->GetStringUTFChars(env, value, JNI_TRUE);
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1core_1mask(JNIEnv *env, jclass class, jstring value) {
+	core_mask = (*env)->GetStringUTFChars(env, value, 0);
+	//strcpy(core_mask, (*env)->GetStringUTFChars(env, value, JNI_TRUE));
 	//(*env)->ReleaseStringUTFChars(env, javaString, nativeString);
 }
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1port_1mask(JNIEnv *env, jclass class, jstring value) {
-	port_mask = (*env)->GetStringUTFChars(env, value, JNI_TRUE);
+	port_mask = (*env)->GetStringUTFChars(env, value, 0);
 }
 
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1name(JJNIEnv *env, jclass class, jstring value) {
-	program_name = (*env)->GetStringUTFChars(env, value, JNI_TRUE);
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1name(JNIEnv *env, jclass class, jstring value) {
+	program_name = (*env)->GetStringUTFChars(env, value, 0);
 }
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1memory_1channels(JNIEnv *env, jclass class, jstring value) {
-	memory_channels = (*env)->GetStringUTFChars(env, value, JNI_TRUE);
+	memory_channels = (*env)->GetStringUTFChars(env, value, 0);
 }
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1memory(JNIEnv *env, jclass class, jstring value) {
-	memory = (*env)->GetStringUTFChars(env, value, JNI_TRUE);
+	memory = (*env)->GetStringUTFChars(env, value, 0);
 }
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1id(JNIEnv *env, jclass class, jstring value) {
-	program_id = (*env)->GetStringUTFChars(env, value, JNI_TRUE);
+	program_id = (*env)->GetStringUTFChars(env, value, 0);
 }
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1blacklist(JNIEnv *env, jclass class, jobjectArray values) {
 	blacklist_count = (*env)->GetArrayLength(env, values);
 
-	for (int i=0; i < blacklist_count; i++) {
+	int i;
+	for (i=0; i < blacklist_count; i++) {
 		jstring string = (jstring) (*env)->GetObjectArrayElement(env, values, i);
-		blacklist[i] = (*env)->GetStringUTFChars(env, string, 0);
+		//blacklist[i] = (*env)->GetStringUTFChars(env, string, 0);
 		// Don't forget to call `ReleaseStringUTFChars` when you're done.
 	}
 }
@@ -179,7 +181,8 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 	//malloc is ok at start of program
 
 	argv = malloc(argc * sizeof(char*));
-	for (int i = 0; i < argc; i++) {
+	int i;
+	for (i = 0; i < argc; i++) {
 		//overkill but works
 		argv[i] = malloc(120 * sizeof(char));
 	}
@@ -202,14 +205,15 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 	if (ret < 0) {
 		printf("C: EAL init error\n");
 		// free args
-		for (int i = 0; i < argc; i++) {
+		for (i = 0; i < argc; i++) {
 			dealloc(argv[i]);
 		}
 		dealloc(argv);
 		return ERROR;
 	} else {
 		// free args
-		for (int i = 0; i < argc; i++) {
+		int i;
+		for (i = 0; i < argc; i++) {
 			dealloc(argv[i]);
 		}
 		dealloc(argv);
@@ -233,7 +237,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 						NULL,
 						socketid,
 						0);
-	if (rx_pool == NULL) {
+	if (pktmbuf_pool == NULL) {
 		printf("C: Cannot init mbuf pool\n");
 		return ERROR;
 	}
@@ -248,7 +252,8 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 	}
 
 	//reset enabled ports
-	for (int portid = 0; portid < nb_ports; portid++) {
+	int portid;
+	for (portid = 0; portid < nb_ports; portid++) {
 		enabled_ports[portid] = 0;
 	}
 
@@ -272,7 +277,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 
 	ret = rte_eth_rx_queue_setup(port_to_conf, 0, 256,
 								socketid,
-								&rx_conf, rx_pool);
+								&rx_conf, pktmbuf_pool);
 	if (ret < 0) {
 		printf("C: Error setting up rx queue\n");
 		return ERROR;
@@ -379,33 +384,44 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv *env, jclass cl
 JNIEXPORT jboolean JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity(JNIEnv *env, jclass class, jlong tid, jint mask) {
 
 	cpu_set_t cpuset;
-	uint64_t thead_id = (uint64_t)tid;
+	//unsigned long thread_id = (unsigned long)tid;
 
+	//printf("C: %" PRIu64 "\n", thread_id);
+
+	pthread_t thread_id = pthread_self();
+
+	int j;
 	CPU_ZERO(&cpuset);
-	/*for (j = 0; j < 8; j++) {
+	for (j = 0; j < 2; j++) {
 		CPU_SET(j, &cpuset);
-	}*/
-	CPU_SET(1, &cpuset);
+	}
+	//CPU_SET(0, &cpuset);
 
-	int s = pthread_setaffinity_np(thead_id, sizeof(cpu_set_t), &cpuset);
+	int s = pthread_setaffinity_np(thread_id, sizeof(cpu_set_t), &cpuset);
 	if (s != 0) {
 		printf("AFFINITY ERROR 1");
-		return (bool) false;
+		return 0;
 	}
 
    /* Check the actual affinity mask assigned to the thread */
 
-   s = pthread_getaffinity_np(thead_id, sizeof(cpu_set_t), &cpuset);
+   s = pthread_getaffinity_np(thread_id, sizeof(cpu_set_t), &cpuset);
    if (s != 0) {
 	   printf("AFFINITY ERROR 2");
-	   return (bool) false;
+	   return 0;
    }
 
    printf("Set returned by pthread_getaffinity_np() contained:\n");
-   for (j = 0; j < CPU_SETSIZE; j++)
+   //int j;
+   for (j = 0; j < 2; j++)
 	   if (CPU_ISSET(j, &cpuset))
 		   printf("    CPU %d\n", j);
-   return (bool) true;
+	 printf("WORKED\n");
+   return 1;
 }
 
+
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1get_1thread_1id(JNIEnv *env, jclass class) {
+	return syscall(__NR_gettid);
+}
 

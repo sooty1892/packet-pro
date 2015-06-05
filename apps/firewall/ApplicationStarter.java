@@ -24,7 +24,7 @@ public class ApplicationStarter {
 	private static final String PROGRAM_NAME = "programname";
 	
 
-	public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public static void main(String[] args) throws InterruptedException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		//TODO: make all java output to gui
 		
 		Map<String, String> config_map = readConfig();
@@ -57,9 +57,17 @@ public class ApplicationStarter {
 		
 		Stats stats = new Stats(receivers, transmitters);
 		// everything should be started together - lastly
-		Thread t = new Thread(stats);
-		long i = t.getId();
-		boolean res = DpdkAccess.set_thread_affinity(i, 1);
+		CustomThread t = new CustomThread(stats);
+		/*int i = t.getThreadId();
+		System.out.println("ID: " + i);
+		//Thread.sleep(10000);
+		//boolean res = DpdkAccess.set_thread_affinity(i, 1);
+		if (res) {
+			System.out.println("YAY");
+		} else {
+			System.out.println("NOOOOO");
+		}*/
+		
 		
 		/*int ret = DpdkAccess.dpdk_setup();
 		if (ret < 0) {
