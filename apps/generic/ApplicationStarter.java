@@ -23,11 +23,16 @@ public class ApplicationStarter {
 	private static final String BLACKLIST = "blacklist";
 	private static final String PROGRAM_NAME = "programname";
 	
-
-	public static void main(String[] args) throws InterruptedException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private String config_file;
+	
+	public ApplicationStarter(String config_file) {
+		this.config_file = config_file;
+	}
+	
+	public void init() throws InterruptedException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		//TODO: make all java output to gui
 		
-		Map<String, String> config_map = readConfig();
+		Map<String, String> config_map = readConfig(config_file);
 		
 		int num_available_cores = Runtime.getRuntime().availableProcessors();
 		//System.out.println("CORES: " + num_of_cores);
@@ -86,7 +91,7 @@ public class ApplicationStarter {
 		rp.start();*/
 	}
 	
-	private static void sendDPDKInformation(Map<String, String> map) {
+	private void sendDPDKInformation(Map<String, String> map) {
 		DpdkAccess.dpdk_set_core_mask(map.get(CORE_MASK));
 		DpdkAccess.dpdk_set_port_mask(map.get(PORT_MASK));
 		DpdkAccess.dpdk_set_program_name(map.get(PROGRAM_NAME));
@@ -98,13 +103,13 @@ public class ApplicationStarter {
 		DpdkAccess.dpdk_set_blacklist(bl);
 	}
 	
-	private static Map<String, String> readConfig() {
+	private Map<String, String> readConfig(String config_file) {
 		Properties prop = new Properties();
 		InputStream input = null;
 		Map<String, String> map = new HashMap<String, String>();
 		try {
 			 
-			input = new FileInputStream("config.properties");
+			input = new FileInputStream(config_file);
 			
 			prop.load(input);
 	 
