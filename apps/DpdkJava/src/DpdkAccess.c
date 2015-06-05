@@ -176,27 +176,27 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 			   2 + // file prefix and flag
 			   2 + // memory and flag
 			   (2*blacklist_count); // flag and port for each blacklisted port
-	char **argv;
+	//char **argv;
 
 	//malloc is ok at start of program
 
 	// i think core mask should just be 1 as we don't want
 	// c threads creating
 
-	argv = malloc(argc * sizeof(char*));
+	/*argv = malloc(argc * sizeof(char*));
 	int i;
 	for (i = 0; i < argc; i++) {
 		//overkill but works
 		argv[i] = malloc(120 * sizeof(char));
-	}
+	}*/
 
-	/*char *argv[] = {"Pktcap",
-					"-c", "0x7",
+	char *argv[] = {"Pktcap",
+					"-c", "0x1",
 					"-n", "3",
 					"-m", "128",
 					"--file-prefix", "fw",
 					"-b", "00:08.0",
-					"-b", "00:03.0"};*/
+					"-b", "00:03.0"};
 
 	int port_to_conf = 0;
 
@@ -208,19 +208,20 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1setup(JNIEnv *env, jclass class) {
 	if (ret < 0) {
 		printf("C: EAL init error\n");
 		// free args
+		/*int i;
 		for (i = 0; i < argc; i++) {
 			dealloc(argv[i]);
 		}
-		dealloc(argv);
+		dealloc(argv);*/
 		return ERROR;
-	} else {
+	} /*else {
 		// free args
 		int i;
 		for (i = 0; i < argc; i++) {
 			dealloc(argv[i]);
 		}
 		dealloc(argv);
-	}
+	}*/
 
 	// ID of the execution unit we are running on
 	unsigned cpu = rte_lcore_id();

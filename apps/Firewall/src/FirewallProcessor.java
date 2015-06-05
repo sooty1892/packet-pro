@@ -77,6 +77,7 @@ public class FirewallProcessor extends PacketProcessor {
 
 	@Override
 	public void run() {
+		System.out.println("HERE");
 		while (true) {
 			List<Packet> packets = rp.getBurst();
 			for (Packet p : packets) {

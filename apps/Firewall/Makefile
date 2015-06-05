@@ -5,13 +5,15 @@ endif
 # Default target, can be overriden by command line or environment
 RTE_TARGET ?= x86_64-native-linuxapp-gcc
 
+DpdkJava = /home/dpdk64/packet-pro/apps/DpdkJava/src/
+
 include $(RTE_SDK)/mk/rte.vars.mk
 
 # binary name
 SHARED = libnat_dpdk.so
 
 # all source are stored in SRCS-y
-SRCS-y := DpdkAccess.c Utils.c
+SRCS-y := $(DpdkJava)DpdkAccess.c $(DpdkJava)Utils.c
 
 RTE_BUILD_SHARED_LIB=y
 

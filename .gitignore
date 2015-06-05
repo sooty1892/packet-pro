@@ -41,3 +41,6 @@
 
 **/x86_64-native-linuxapp-gcc/
 *.classpath
+*.o.cmd
+*.o.d
+/apps/Firewall/app/

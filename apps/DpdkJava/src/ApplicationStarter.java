@@ -24,7 +24,7 @@ public class ApplicationStarter {
 	private static final String PROGRAM_NAME = "programname";
 	
 	Map<String, String> config_map;
-	List<AffinityThread> aff_threads;
+	List<AffinityThread> aff_threads = null;
 	int num_available_cores;
 	Stats stats = null;
 	
@@ -84,8 +84,10 @@ public class ApplicationStarter {
         if (stats != null) {
         	new Thread(stats).start();
         }
-        for (AffinityThread af : aff_threads) {
-        	af.start();
+        if (aff_threads != null) {
+        	for (AffinityThread af : aff_threads) {
+	        	af.start();
+	        }
         }
         
 	}
