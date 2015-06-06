@@ -32,7 +32,7 @@ public class FirewallProcessor extends PacketProcessor {
 				pf.freePacket(currentPacket);
 				return false;
 			} else {
-				//ps.sendPacket(p);
+				ps.sendPacket(currentPacket);
 				pf.freePacket(currentPacket);
 				return true;
 			}
