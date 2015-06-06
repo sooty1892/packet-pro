@@ -39,7 +39,6 @@ public abstract class Packet {
 		if (version == IPV4 || version == IPV6) {
 			return version;
 		} else {
-			//System.out.println("ERROR - VERSION NOT 6 or 4");
 			return 0;
 		}
 	}

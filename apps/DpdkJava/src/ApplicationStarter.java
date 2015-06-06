@@ -31,20 +31,19 @@ public class ApplicationStarter {
 	
 	public ApplicationStarter() {
 		num_available_cores = Runtime.getRuntime().availableProcessors();
-		//System.out.println("CORES: " + num_of_cores);
 	}
 	
 	public void createAffinityThreads(List<CoreThread> threads) {
 		aff_threads = new ArrayList<AffinityThread>();
 		if (threads.size() > num_available_cores) {
-			System.out.println("NOPE");
+			System.out.println("-----Too many threads for number of cores");
 			return ;
 		}
 		int core = 0;
 		for (CoreThread ct : threads) {
 			AffinityThread af = new AffinityThread(ct, core, num_available_cores);
 			if (!af.ifWorked()) {
-				System.out.println("AFFINITY NOPE");
+				System.out.println("-----Affinity thread creation failed on core assignment");
 			}
 			aff_threads.add(af);
 			core++;
@@ -53,6 +52,9 @@ public class ApplicationStarter {
 	
 	public void setupGui(boolean gui) {
 		stats = new Stats(gui);
+		if (gui) {
+			System.out.println("Number of cores: " + num_available_cores);
+		}
 	}
 	
 	public void setupStats(List<ReceivePoller> receivers, List<PacketSender> transmitters, boolean gui) throws InterruptedException {
@@ -71,50 +73,50 @@ public class ApplicationStarter {
 	
 	public void dpdk_init_eal() {
 		if (DpdkAccess.dpdk_init_eal() < 0) {
-			exit_with_error("JAVA: Error in DPDK setup");
+			exit_with_error("-----dpdk_init_eal failed");
 		}
 	}
 	
 	//TODO: currently c code only handles 1 mempool
 	public void dpdk_create_mempool(String name, int num_el, int cache_size) {
 		if (DpdkAccess.dpdk_create_mempool(name, num_el, cache_size) < 0) {
-			exit_with_error("JAVA: Error in DPDK setup");
+			exit_with_error("-----dpdk_create_mempool failed");
 		}
 	}
 	
 	public void dpdk_check_ports() {
 		if (DpdkAccess.dpdk_check_ports() < 0) {
-			exit_with_error("JAVA: Error in DPDK setup");
+			exit_with_error("-----dpdk_check_ports failed");
 		}
 	}
 	
 	public void dpdk_configure_dev(int port_id, int rx_num, int tx_num) {
 		if (DpdkAccess.dpdk_configure_dev(port_id, rx_num, rx_num) < 0) {
-			exit_with_error("JAVA: Error in DPDK setup");
+			exit_with_error("-----dpdk_configure_dev failed");
 		}
 	}
 	
 	public void dpdk_configure_rx_queue(int port_id, int rx_id) {
 		if (DpdkAccess.dpdk_configure_rx_queue(port_id, rx_id) < 0) {
-			exit_with_error("JAVA: Error in DPDK setup");
+			exit_with_error("-----dpdk_configure_rx_queue failed");
 		}
 	}
 	
 	public void dpdk_configure_tx_queue(int port_id, int tx_id) {
 		if (DpdkAccess.dpdk_configure_tx_queue(port_id, tx_id) < 0) {
-			exit_with_error("JAVA: Error in DPDK setup");
+			exit_with_error("-----dpdk_configure_tx_queue failed");
 		}
 	}
 	
 	public void dpdk_dev_start(int port_id) {
 		if (DpdkAccess.dpdk_dev_start(port_id) < 0) {
-			exit_with_error("JAVA: Error in DPDK setup");
+			exit_with_error("-----dpdk_dev_start failed");
 		}
 	}
 	
 	public void dpdk_check_ports_link_status() {
 		if (DpdkAccess.dpdk_check_ports_link_status() < 0) {
-			exit_with_error("JAVA: Error in DPDK setup");
+			exit_with_error("-----dpdk_check_ports_link_status failed");
 		}
 	}
 	
@@ -124,14 +126,6 @@ public class ApplicationStarter {
 		//TODO: burst parametes everywhere
 		//TODO: get rid of thrown exceptions - catch them
 		//TODO: sort out error messages
-		
-		//System.out.println("JAVA: Starting application " + config_map.get(PROGRAM_NAME));
-		
-		/*
-		Class<?> cla = Class.forName("FirewallInspector");
-		Constructor<?> con = cla.getConstructor(PacketSender.class, PacketFreeer.class);
-		Object object = con.newInstance(new Object[] {null, null});
-		*/
         
         if (stats != null) {
         	new Thread(stats).start();
@@ -151,7 +145,6 @@ public class ApplicationStarter {
 		DpdkAccess.dpdk_set_program_id(config_map.get(PROGRAM_ID));
 		DpdkAccess.dpdk_set_receive_burst(Integer.parseInt(config_map.get(RX_BURST)));
 		String[] bl = config_map.get(BLACKLIST).split(",");
-		System.out.println(bl.toString());
 		DpdkAccess.dpdk_set_blacklist(bl);
 	}
 	
@@ -189,7 +182,7 @@ public class ApplicationStarter {
 		int num_cores_selected = Integer.bitCount(Integer.decode(config_map.get(NUMCORES)));
 
 		if (num_available_cores < num_cores_selected) {
-			System.out.println("Coremask > num_of_cores on machine");
+			System.out.println("-----Config selects more cores than are available");
 			System.exit(ERROR);
 		}
 		

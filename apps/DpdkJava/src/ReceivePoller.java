@@ -54,7 +54,6 @@ public class ReceivePoller {
 		mem_pointer += ua.getOffset();
 		
 		if (packet_count > 0) {
-			//System.out.println("JAVA: Parsing " + packet_count + " packets!");
 			
 			for (int i = 0; i < packet_count; i++) {
 				//Packet p = new Packet();

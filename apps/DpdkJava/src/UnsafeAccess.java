@@ -18,10 +18,8 @@ public class UnsafeAccess {
 		try {
 			f = Unsafe.class.getDeclaredField("theUnsafe");
 		} catch (NoSuchFieldException e) {
-			System.out.println("NO SUCH FIELD EXCEPTION");
 			e.printStackTrace();
 		} catch (SecurityException e) {
-			System.out.println("SECURITY EXCEPTION EXCEPTION");
 			e.printStackTrace();
 		}
 
@@ -29,10 +27,8 @@ public class UnsafeAccess {
         try {
 			this.unsafe = (Unsafe)f.get(null);
 		} catch (IllegalArgumentException e) {
-			System.out.println("ILLEGAL ARGUMENT EXCEPTION EXCEPTION");
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			System.out.println("ILLEGAL ACCESS EXCEPTION EXCEPTION");
 			e.printStackTrace();
 		}
         currentPointer = 0;

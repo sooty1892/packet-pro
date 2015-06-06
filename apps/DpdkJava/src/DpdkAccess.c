@@ -97,7 +97,6 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal(JNIEnv *env, jclass class)
 
 	int ret = rte_eal_init(argc, argv);
 	if (ret < 0) {
-		printf("C: EAL init error\n");
 		// free args
 		/*int i;
 		for (i = 0; i < argc; i++) {
@@ -137,17 +136,13 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1create_1mempool(JNIEnv *env, jclass 
 						socketid,
 						0);
 	if (pktmbuf_pool == NULL) {
-		printf("C: Cannot init mbuf pool\n");
 		return ERROR;
 	}
-	printf("C: Mempool created\n");
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports(JNIEnv *env, jclass class) {
 	num_ports = rte_eth_dev_count();
-	printf("C: %d ports enabled\n", num_ports);
 	if (num_ports == 0) {
-		printf("C: 0 ports error\n");
 		return ERROR;
 	}
 }
@@ -155,10 +150,8 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports(JNIEnv *env, jclass cla
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1dev(JNIEnv *env, jclass class, jint port_id, jint rx_num, jint tx_num) {
 	int ret = rte_eth_dev_configure(port_id, rx_num, tx_num, &port_conf);
 	if (ret < 0) {
-		printf("C: Cannot configure ethernet port\n");
 		return ERROR;
 	}
-	printf("C: Ethernet port configured\n");
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue(JNIEnv *env, jclass class, jint port_id, jint rx_id) {
@@ -166,31 +159,28 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue(JNIEnv *env, jc
 								socketid,
 								&rx_conf, pktmbuf_pool);
 	if (ret < 0) {
-		printf("C: Error setting up rx queue\n");
 		return ERROR;
 	}
-	printf("C: RX queue setup\n");
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue(JNIEnv *env, jclass class, jint port_id, jint tx_id) {
 	int ret = rte_eth_tx_queue_setup(port_id, tx_id, 256, socketid, &tx_conf);
 	if (ret < 0) {
-		rte_exit(EXIT_FAILURE, "rte_eth_tx_queue_setup(): error=%d, port=%d\n", ret, 0);
+		return ERROR;
 	}
-	printf("If %d rte_eth_tx_queue_setup() successful\n", 0);
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1dev_1start(JNIEnv *env, jclass class, jint port_id) {
 	int ret = rte_eth_dev_start(port_id);
 	if (ret < 0) {
-		printf("C: Cannot start ethernet device\n");
 		return ERROR;
 	}
-	printf("C: ethernet device started\n");
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status(JNIEnv *env, jclass class) {
 	struct rte_eth_link link;
+
+	// TODO: get this printing on java side
 
 	uint8_t portid, count, all_ports_up, print_flag = 0;
 
@@ -283,21 +273,14 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass c
 	offset += sizeof(uint16_t);
 
 	if (packet_count > 0) {
-		//printf("C: Parsing %d packets!\n", packet_count);
 
 		int i;
 		for (i = 0; i < packet_count; i++) {
-			//printf("NEED TO CHECK FOR IP VERSION IN C???");
 			struct ipv4_hdr* ip = (struct ipv4_hdr *)(rte_pktmbuf_mtod(pkts_burst[i], unsigned char *) + sizeof(struct ether_hdr));
-			//printf("C: %p\n", pkts_burst[i]);
 			insert64(point, offset, (uint64_t)pkts_burst[i]);
 			offset += sizeof(uint64_t);
 			insert64(point, offset, (uint64_t)ip);
-			//printf("C: Packet %d ip_hdr_add = %p\n", i, ip);
 			offset += sizeof(uint64_t);
-			//printf("C: Packet %d mbuf_add = %" PRIu64 "\n", i, pkts_burst[i]);
-			//printf("C: Packet %d ip_hdr_add = %" PRIu64 "\n", i, ip);
-			//printIpv4Data(ip, i);
 		}
 
 	}
@@ -310,13 +293,11 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packets(JNIEnv *env, jclass cl
 	int offset = 0;
 
 	uint16_t packet_count = get16(point, 0);
-	printf("C: free count = %d\n", packet_count);
 	offset += sizeof(uint16_t);
 
 	int i;
 	for (i = 0; i < packet_count; i++) {
 		struct rte_mbuf *freeing = (struct rte_mbuf*)get64(point, offset);
-		printf("C: freeing at %p\n", freeing);
 		rte_pktmbuf_free(freeing);
 		offset += sizeof(uint64_t);
 	}
@@ -327,7 +308,6 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv *env, jclass cl
 	int offset = 0;
 
 	uint16_t packet_count = get16(point, 0);
-	printf("C: send count = %d\n", packet_count);
 	offset += sizeof(uint16_t);
 
 	//TODO: DO THIS
@@ -355,18 +335,15 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity(JNIEnv *env, j
 
 	int s = pthread_setaffinity_np(thread_id, sizeof(cpu_set_t), &cpuset);
 	if (s != 0) {
-		printf("AFFINITY ERROR 1");
 		return 0;
 	}
 
    s = pthread_getaffinity_np(thread_id, sizeof(cpu_set_t), &cpuset);
    if (s != 0) {
-	   printf("AFFINITY ERROR 2");
 	   return 0;
    }
 
    if (!CPU_ISSET(core, &cpuset)) {
-	   printf("AFFINITY ERROR 3");
 	   return 0;
    }
 

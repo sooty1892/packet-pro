@@ -35,7 +35,6 @@ public class FirewallProcessor extends PacketProcessor {
 			}
 		} else {
 			//Ipv6Packet cp = (Ipv6Packet)p;
-			//System.out.println("NOT HANDLING IPv6 ATM");
 			pf.freePacket(currentPacket);
 			return false;
 		}
@@ -53,17 +52,14 @@ public class FirewallProcessor extends PacketProcessor {
 					blacklist.add(Utils.IpToInt(line));
 				}
 			} catch (IOException e1) {
-				System.out.println("IO EXCEPTION");
 				e1.printStackTrace();
 			}
 			try {
 				fileReader.close();
 			} catch (IOException e) {
-				System.out.println("IO EXCEPTION");
 				e.printStackTrace();
 			}
 		} catch (FileNotFoundException e) {
-			System.out.println("FILE NOT FOUND EXCEPTION");
 			e.printStackTrace();
 		}
 	}
@@ -77,7 +73,6 @@ public class FirewallProcessor extends PacketProcessor {
 
 	@Override
 	public void run() {
-		System.out.println("HERE");
 		while (true) {
 			List<Packet> packets = rp.getBurst();
 			for (Packet p : packets) {
