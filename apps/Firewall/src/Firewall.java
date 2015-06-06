@@ -16,6 +16,10 @@ public class Firewall {
 												  InvocationTargetException, InterruptedException, FileNotFoundException {
 		
 		ApplicationStarter as = new ApplicationStarter();
+		
+		List<ReceivePoller> rps = new ArrayList<ReceivePoller>();
+		List<PacketSender> pss = new ArrayList<PacketSender>();
+		
 		as.readConfig(new FileInputStream("config.properties"));
 		as.sendDPDKInformation();
 		
@@ -24,6 +28,9 @@ public class Firewall {
 		ReceivePoller rp = new ReceivePoller(0, 0);
 		PacketSender ps = new PacketSender(0, 0);
 		PacketFreeer pf = new PacketFreeer();
+		
+		rps.add(rp);
+		pss.add(ps);
 		
 		threads.add(new FirewallProcessor(ps, pf, rp));
 		
@@ -38,7 +45,7 @@ public class Firewall {
 		as.dpdk_dev_start(0);
 		as.dpdk_check_ports_link_status();
 		
-		//as.setupStats();
+		as.setupStats(rps, pss, true);
 		
 		as.startAll();
 	}
