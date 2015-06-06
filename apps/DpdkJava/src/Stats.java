@@ -3,6 +3,7 @@ import java.util.TimerTask;
 import java.util.Timer;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.OutputStream;
 import java.io.PrintStream;
 
 import javax.swing.*;
@@ -74,7 +75,8 @@ public class Stats implements Runnable {
 		send_all_size = frame.getSend_all_size();
 		send_gap_count = frame.getSend_gap_count();
 		send_gap_size = frame.getSend_gap_size();
-		PrintStream printStream = new PrintStream(new GuiOutputStream(frame.getConsole()));
+		OutputStream old = System.out;
+		PrintStream printStream = new PrintStream(new MultiStream(old, new GuiOutputStream(frame.getConsole())));
         System.setOut(printStream);
         System.setErr(printStream);
 	}
