@@ -34,7 +34,7 @@ public class GuiFrame extends JFrame {
 	public JTextField getSendGap() {
 		return send_gap;
 	}
-
+	
 	public GuiFrame() {
 		setTitle("DPDK Info");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -43,31 +43,36 @@ public class GuiFrame extends JFrame {
 		console = new JTextArea();
 		console.setEditable(false);
 		console.setBounds(6, 6, 206, 266);
-		getContentPane().add(console);
+		//getContentPane().add(console);
 		
 		receive_all = new JTextField();
 		receive_all.setEditable(false);
-		receive_all.setBounds(259, 26, 134, 28);
+		receive_all.setBounds(219, 328, 134, 28);
 		getContentPane().add(receive_all);
 		receive_all.setColumns(10);
 		
 		receive_gap = new JTextField();
 		receive_gap.setEditable(false);
-		receive_gap.setBounds(259, 86, 134, 28);
+		receive_gap.setBounds(10, 328, 134, 28);
 		getContentPane().add(receive_gap);
 		receive_gap.setColumns(10);
 		
 		send_all = new JTextField();
 		send_all.setEditable(false);
-		send_all.setBounds(259, 144, 134, 28);
+		send_all.setBounds(219, 250, 134, 28);
 		getContentPane().add(send_all);
 		send_all.setColumns(10);
 		
 		send_gap = new JTextField();
 		send_gap.setEditable(false);
-		send_gap.setBounds(259, 203, 134, 28);
+		send_gap.setBounds(10, 250, 134, 28);
 		getContentPane().add(send_gap);
 		send_gap.setColumns(10);
+		
+		JScrollPane scroll = new JScrollPane(console);
+		scroll.setSize(680, 200);
+		scroll.setLocation(10, 10);
+		getContentPane().add(scroll);
 		
 		setSize(700,700);
 		setVisible(true);
