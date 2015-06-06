@@ -24,12 +24,22 @@ public class Stats implements Runnable {
 	private JTextField send_all = null;
 	private JTextField send_gap = null;
 	
+	public void setReceivers(List<ReceivePoller> list) {
+		this.receivers = list;
+	}
+	
+	public void setTransmitters(List<PacketSender> list) {
+		this.transmitters = list;
+	}
 	
 	public Stats(List<ReceivePoller> receivers, List<PacketSender> transmitters, boolean gui) throws InterruptedException {
 		this.receivers = receivers;
 		this.transmitters = transmitters;
 		this.repeat_delay = SECOND;
 		this.gui = gui;
+		if (gui) {
+			initGui();
+		}
 	}
 	
 	public Stats(List<ReceivePoller> receivers, List<PacketSender> transmitters, long repeat_delay, boolean gui) {
@@ -37,6 +47,16 @@ public class Stats implements Runnable {
 		this.transmitters = transmitters;
 		this.repeat_delay = repeat_delay;
 		this.gui = gui;
+		if (gui) {
+			initGui();
+		}
+	}
+	
+	public Stats(boolean gui) {
+		this.gui = gui;
+		if (gui) {
+			initGui();
+		}
 	}
 	
 	public void initGui() {
@@ -52,9 +72,6 @@ public class Stats implements Runnable {
 
 	@Override
 	public void run() {
-		if (gui) {
-			initGui();
-		}
 		Timer timer = new Timer();
 		timer.schedule(new CollectStats(), repeat_delay, repeat_delay);  
 	}

@@ -27,7 +27,7 @@ public class ApplicationStarter {
 	Map<String, String> config_map;
 	List<AffinityThread> aff_threads = null;
 	int num_available_cores;
-	Thread stats_thread = null;
+	Stats stats = null;
 	
 	public ApplicationStarter() {
 		num_available_cores = Runtime.getRuntime().availableProcessors();
@@ -51,9 +51,17 @@ public class ApplicationStarter {
 		}
 	}
 	
+	public void setupGui(boolean gui) {
+		stats = new Stats(gui);
+	}
+	
 	public void setupStats(List<ReceivePoller> receivers, List<PacketSender> transmitters, boolean gui) throws InterruptedException {
-		Stats stats = new Stats(receivers, transmitters, gui);
-		stats_thread = new Thread(stats);
+		stats = new Stats(receivers, transmitters, gui);
+	}
+	
+	public void updateStatsInfo(List<ReceivePoller> receivers, List<PacketSender> transmitters) {
+		stats.setReceivers(receivers);
+		stats.setTransmitters(transmitters);
 	}
 	
 	private void exit_with_error(String error) {
@@ -125,8 +133,8 @@ public class ApplicationStarter {
 		Object object = con.newInstance(new Object[] {null, null});
 		*/
         
-        if (stats_thread != null) {
-        	stats_thread.start();
+        if (stats != null) {
+        	new Thread(stats).start();
         }
         if (aff_threads != null) {
         	for (AffinityThread af : aff_threads) {
