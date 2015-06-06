@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +67,7 @@ public class ApplicationStarter {
 	}
 	
 	// used to create stats with/out gui
-	public void setupStats(List<ReceivePoller> receivers, List<PacketSender> transmitters, boolean gui) throws InterruptedException {
+	public void setupStats(List<ReceivePoller> receivers, List<PacketSender> transmitters, boolean gui) {
 		stats = new Stats(receivers, transmitters, gui);
 	}
 	
@@ -153,9 +152,8 @@ public class ApplicationStarter {
 	}
 	
 	// starts all threads - affinity threads and stats thread
-	public void startAll() throws InterruptedException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public void startAll() {
 		//TODO: access to ethernet header?
-		//TODO: get rid of thrown exceptions - catch them
 		//TODO: check dpdkaccess.c for comments and sorting out some of the methods
         
         if (stats != null) {

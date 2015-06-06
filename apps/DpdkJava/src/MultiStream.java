@@ -17,9 +17,19 @@ public class MultiStream extends OutputStream {
 	}
 
 	@Override
-	public void write(int b) throws IOException {
-		ps1.write(b);
-		ps2.write(b);
+	public void write(int b) {
+		try {
+			ps1.write(b);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			ps2.write(b);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

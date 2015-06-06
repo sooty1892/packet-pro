@@ -39,7 +39,7 @@ public class Stats implements Runnable {
 		this.transmitters = list;
 	}
 	
-	public Stats(List<ReceivePoller> receivers, List<PacketSender> transmitters, boolean gui) throws InterruptedException {
+	public Stats(List<ReceivePoller> receivers, List<PacketSender> transmitters, boolean gui) {
 		this.receivers = receivers;
 		this.transmitters = transmitters;
 		this.repeat_delay = SECOND;

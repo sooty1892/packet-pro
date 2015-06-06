@@ -1,6 +1,5 @@
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,13 +9,7 @@ import java.util.List;
 
 public class Firewall {
 
-	public static void main(String[] args) throws ClassNotFoundException,
-												  NoSuchMethodException,
-												  SecurityException,
-												  InstantiationException,
-												  IllegalAccessException,
-												  IllegalArgumentException,
-												  InvocationTargetException, InterruptedException, FileNotFoundException {
+	public static void main(String[] args) {
 		
 		ApplicationStarter as = new ApplicationStarter();
 		
@@ -25,7 +18,12 @@ public class Firewall {
 		List<ReceivePoller> rps = new ArrayList<ReceivePoller>();
 		List<PacketSender> pss = new ArrayList<PacketSender>();
 		
-		as.readConfig(new FileInputStream("config.properties"));
+		try {
+			as.readConfig(new FileInputStream("config.properties"));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		as.sendDPDKInformation();
 		
 		List<CoreThread> threads = new ArrayList<CoreThread>();

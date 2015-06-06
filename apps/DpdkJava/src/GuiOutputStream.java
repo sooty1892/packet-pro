@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.io.OutputStream;
 import javax.swing.*;
 
@@ -14,7 +13,7 @@ public class GuiOutputStream extends OutputStream {
     }
      
     @Override
-    public void write(int b) throws IOException {
+    public void write(int b) {
         textArea.append(String.valueOf((char)b));
         textArea.setCaretPosition(textArea.getDocument().getLength());
     }
