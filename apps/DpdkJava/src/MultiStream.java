@@ -1,6 +1,10 @@
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintStream;
+
+/*
+ * Output stream to redirect printlns to 2 streams
+ * Generally used for streams to console and gui
+ */
 
 public class MultiStream extends OutputStream {
 	

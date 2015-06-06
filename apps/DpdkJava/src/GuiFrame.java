@@ -1,10 +1,8 @@
-import java.awt.Container;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
-import java.io.PrintStream;
-
 import javax.swing.*;
-import javax.swing.GroupLayout.Alignment;
+
+/*
+ * Gui class to show transmit and receive stats as well as console output
+ */
 
 public class GuiFrame extends JFrame {
 

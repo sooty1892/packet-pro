@@ -1,6 +1,9 @@
 import java.lang.reflect.Field;
-
 import sun.misc.Unsafe;
+
+/*
+ * Quicker access to java unsafe methods with pointer handling and data conversion
+ */
 
 public class UnsafeAccess {
 	

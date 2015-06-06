@@ -1,3 +1,10 @@
+/*
+ * Generic util methods which could be used anywhere
+ * 
+ * Swap methods - swaps byte order of memory - for endian conversion
+ * signToUnsign methods - converts signed values into unsigned values
+ */
+
 public class Utils {
 
 	public static short swap(short value) {
@@ -50,6 +57,7 @@ public class Utils {
 		return value & 0xFFFFFFFFL;
 	}
 
+	// prints IP value of int
 	public static String intToIp(long value) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(((value >> 24) & 0xFF));
@@ -62,6 +70,7 @@ public class Utils {
 		return sb.toString();
 	}
 
+	// gets int from IP string value
 	public static long IpToInt(String value) {
 		String[] parts = value.split("\\.");
 		long n = 0;

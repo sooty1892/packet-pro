@@ -1,3 +1,7 @@
+/*
+ * Generic packet class to store native pointers to the data
+ */
+
 public abstract class Packet {
 	
 	protected long mbuf_pointer;

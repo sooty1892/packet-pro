@@ -1,3 +1,8 @@
+/*
+ * See DpdkAccess.java for explanation of methods in this class
+ * Commenting on certain features may still be used
+ */
+
 #define _GNU_SOURCE
 
 #include "DpdkAccess.h"
@@ -63,7 +68,7 @@ const char **blacklist;
 int blacklist_count = 0;
 int get_burst = 32;
 
-
+//TODO: THIS
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal(JNIEnv *env, jclass class) {
 	int argc = 1 + // program name
 			   2 + // core mask and flag

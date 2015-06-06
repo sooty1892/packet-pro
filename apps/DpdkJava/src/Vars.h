@@ -1,3 +1,7 @@
+/*
+ * Variables used in DpdkAccess.c
+ */
+
 #include <rte_ether.h>
 #include <rte_ethdev.h>
 

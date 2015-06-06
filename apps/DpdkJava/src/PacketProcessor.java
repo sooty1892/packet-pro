@@ -1,11 +1,6 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
+/*
+ * Abstract class to for packet processors to be created off
+ */
 
 public abstract class PacketProcessor extends CoreThread {
 	

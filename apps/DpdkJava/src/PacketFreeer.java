@@ -1,6 +1,9 @@
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * Frees given packets from native memory via DPDK library
+ */
 
 // How to spell free-er is the real question here
 public class PacketFreeer {
@@ -30,19 +33,23 @@ public class PacketFreeer {
 		this.free_burst = free_burst;
 	}
 	
+	// checks if the given time period has occurred since last packet freeing
+	// used so packets are held in memory for too long for no reason
 	private boolean isTimedOut() {
 		return (System.nanoTime() - past_freed) >= NANO_SECOND;
 	}
 	
+	// packet added to free list and checks made for
+	// timeout period and list size
 	public void freePacket(Packet p) {
 		list.add(p);
-		//TODO time delay on this as well - also in packet sender
 		if (list.size() >= free_burst || isTimedOut()) {
 			freeBurst();
 			past_freed = System.nanoTime();
 		}
 	}
 	
+	// frees burst of packets via dpdk library
 	private void freeBurst() {
 		int num = 0;
 		if (list.size() > free_burst) {

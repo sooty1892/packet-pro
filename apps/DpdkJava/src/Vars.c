@@ -1,3 +1,7 @@
+/*
+ * Variables used in DpdkAccess.c
+ */
+
 #include "Vars.h"
 
 // ethernet port config - more options available

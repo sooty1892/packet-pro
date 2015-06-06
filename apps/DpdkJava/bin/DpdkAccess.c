@@ -1,3 +1,8 @@
+/*
+ * See DpdkAccess.java for explanation of methods in this class
+ * Commenting on certain features may still be used
+ */
+
 #define _GNU_SOURCE
 
 #include "DpdkAccess.h"
@@ -63,7 +68,7 @@ const char **blacklist;
 int blacklist_count = 0;
 int get_burst = 32;
 
-
+//TODO: THIS
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal(JNIEnv *env, jclass class) {
 	int argc = 1 + // program name
 			   2 + // core mask and flag
@@ -148,7 +153,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports(JNIEnv *env, jclass cla
 	if (num_ports == 0) {
 		return ERROR;
 	}
-	return SUCCESS;
+	return num_ports;
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1dev(JNIEnv *env, jclass class, jint port_id, jint rx_num, jint tx_num) {
@@ -182,7 +187,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1dev_1start(JNIEnv *env, jclass class
 	if (ret < 0) {
 		return ERROR;
 	}
-	return SUCCESS
+	return SUCCESS;
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status(JNIEnv *env, jclass class) {

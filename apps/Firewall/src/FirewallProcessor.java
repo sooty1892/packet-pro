@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/*
+ * firewall processor to be put into affinity threads
+ */
 
 public class FirewallProcessor extends PacketProcessor {
 	

@@ -1,12 +1,14 @@
 import java.util.List;
 import java.util.TimerTask;
 import java.util.Timer;
-import java.awt.*;
-import java.awt.event.*;
 import java.io.OutputStream;
 import java.io.PrintStream;
-
 import javax.swing.*;
+
+/*
+ * Class to collect all stats together and updates data in console or gui
+ * at given time period
+ */
 
 public class Stats implements Runnable {
 	

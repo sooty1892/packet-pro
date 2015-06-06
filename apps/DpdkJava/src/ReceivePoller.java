@@ -1,6 +1,9 @@
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+/*
+ * Class to receive packets from given port and queue
+ */
 
 public class ReceivePoller {
 	
@@ -35,6 +38,8 @@ public class ReceivePoller {
 		this.get_size = get_size;
 	}
 	
+	// gets burst of packets and create packet objects via dpdk library
+	// also contains stats data collection
 	public List<Packet> getBurst() {
 		List<Packet> packets = new ArrayList<Packet>();
 		

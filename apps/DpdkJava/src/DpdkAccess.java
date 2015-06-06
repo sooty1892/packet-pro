@@ -1,4 +1,4 @@
-// Contains native methods to connect to C DPDK libraries
+// Contains native methods to connect to C native DPDK libraries
 
 public class DpdkAccess {
 	

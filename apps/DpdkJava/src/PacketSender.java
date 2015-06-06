@@ -1,6 +1,9 @@
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * Class to aid in sending packets via certain port and queue
+ */
 
 public class PacketSender {
 	
@@ -41,10 +44,14 @@ public class PacketSender {
 		this.send_burst = send_burst;
 	}
 	
+	// checks if the given time period has occurred since last packet sending
+	// used so packets are held in memory for too long for no reason
 	private boolean isTimedOut() {
 		return (System.nanoTime() - past_sent) >= NANO_SECOND;
 	}
 	
+	// packet added to sends list and checks made for
+	// timeout period and list size
 	public void sendPacket(Packet p) {
 		list.add(p);
 		if (list.size() >= send_burst || isTimedOut()) {
@@ -53,6 +60,8 @@ public class PacketSender {
 		}
 	}
 	
+	// send burst of packets and also frees them via dpdk library
+	// also contains stats data collection
 	private void sendBurst() {
 		int num = 0;
 		if (list.size() > send_burst) {
@@ -68,9 +77,14 @@ public class PacketSender {
 		
 		for (int i = 0; i < num; i++) {
 			ua.putLong(list.get(i).getMbuf_pointer());
+			packet_all_size += ((Ipv4Packet)list.get(i)).getTotalLength(); // plus ethernet header?
+			packet_interval_size += ((Ipv4Packet)list.get(i)).getTotalLength();
 		}
 		
 		list.subList(0, num).clear();
+		
+		packet_all += num;
+		packet_interval += num;
 		
 		DpdkAccess.dpdk_send_packets(pointer, port_id, queue_id);
 		

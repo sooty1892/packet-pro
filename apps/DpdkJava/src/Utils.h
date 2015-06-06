@@ -1,3 +1,8 @@
+/*
+ * methods for getting and inserting different data types
+ * into and out of continuous memory
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>

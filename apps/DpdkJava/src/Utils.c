@@ -1,3 +1,8 @@
+/*
+ * methods for getting and inserting different data types
+ * into and out of continuous memory
+ */
+
 #include "Utils.h"
 
 void printIpv4Data(struct ipv4_hdr* hdr, int packet_num) {

@@ -4,6 +4,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * Starter class for Firewall application
+ */
 
 public class Firewall {
 

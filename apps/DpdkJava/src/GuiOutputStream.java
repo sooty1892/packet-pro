@@ -1,7 +1,10 @@
 import java.io.IOException;
 import java.io.OutputStream;
- 
 import javax.swing.*;
+
+/*
+ * Output stream to redirect printlns to gui console
+ */
 
 public class GuiOutputStream extends OutputStream {
     private JTextArea textArea;

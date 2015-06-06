@@ -1,3 +1,6 @@
+/*
+ * IPv6 packet to access all fields of packet headers
+ */
 
 public class Ipv6Packet extends Packet {
 	
@@ -14,7 +17,7 @@ public class Ipv6Packet extends Packet {
 		super(mbuf, packet);
 	}
 	
-	//check struct is packed
+	//TODO: check struct is packed
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

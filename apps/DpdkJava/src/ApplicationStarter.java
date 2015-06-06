@@ -1,13 +1,16 @@
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+/*
+ * Contains main methods to start dpdk and assign
+ * ports, queues, cores etc
+ */
 
 public class ApplicationStarter {
 	
@@ -24,15 +27,20 @@ public class ApplicationStarter {
 	
 	private static final int ERROR = -1;
 	
+	// results from config.properties files
 	Map<String, String> config_map;
+	// threads to run on start
 	List<AffinityThread> aff_threads = null;
+	// number of cores available to use
 	int num_available_cores;
+	// stats thread - must be loaded first to use gui
 	Stats stats = null;
 	
 	public ApplicationStarter() {
 		num_available_cores = Runtime.getRuntime().availableProcessors();
 	}
 	
+	// Puts all runnables into affinity thread and assigns them a core
 	public void createAffinityThreads(List<CoreThread> threads) {
 		aff_threads = new ArrayList<AffinityThread>();
 		if (threads.size() > num_available_cores) {
@@ -50,6 +58,8 @@ public class ApplicationStarter {
 		}
 	}
 	
+	// sets up gui if value set to true
+	// this must be called first as application class first call if qui is wanted
 	public void setupGui(boolean gui) {
 		stats = new Stats(gui);
 		if (gui) {
@@ -57,15 +67,18 @@ public class ApplicationStarter {
 		}
 	}
 	
+	// used to create stats with/out gui
 	public void setupStats(List<ReceivePoller> receivers, List<PacketSender> transmitters, boolean gui) throws InterruptedException {
 		stats = new Stats(receivers, transmitters, gui);
 	}
 	
+	// updates which pollers and senders to get stats from
 	public void updateStatsInfo(List<ReceivePoller> receivers, List<PacketSender> transmitters) {
 		stats.setReceivers(receivers);
 		stats.setTransmitters(transmitters);
 	}
 	
+	// initialise dpdk environment abstraction layer (EAL)
 	public void dpdk_init_eal() {
 		if (DpdkAccess.dpdk_init_eal() < 0) {
 			System.out.println("-----dpdk_init_eal failed");
@@ -74,6 +87,7 @@ public class ApplicationStarter {
 		}
 	}
 	
+	// creates mempool
 	//TODO: currently c code only handles 1 mempool
 	public void dpdk_create_mempool(String name, int num_el, int cache_size) {
 		if (DpdkAccess.dpdk_create_mempool(name, num_el, cache_size) < 0) {
@@ -83,6 +97,7 @@ public class ApplicationStarter {
 		}
 	}
 	
+	// checks available ports
 	public void dpdk_check_ports() {
 		int ports = DpdkAccess.dpdk_check_ports();
 		if (ports < 0) {
@@ -92,6 +107,7 @@ public class ApplicationStarter {
 		}
 	}
 	
+	// configures devices for the number of rx and tx queues required
 	public void dpdk_configure_dev(int port_id, int rx_num, int tx_num) {
 		if (DpdkAccess.dpdk_configure_dev(port_id, rx_num, rx_num) < 0) {
 			System.out.println("-----dpdk_configure_dev failed");
@@ -100,6 +116,7 @@ public class ApplicationStarter {
 		}
 	}
 	
+	// configure rx queue for device
 	public void dpdk_configure_rx_queue(int port_id, int rx_id) {
 		if (DpdkAccess.dpdk_configure_rx_queue(port_id, rx_id) < 0) {
 			System.out.println("-----dpdk_configure_rx_queue failed");
@@ -108,6 +125,7 @@ public class ApplicationStarter {
 		}
 	}
 	
+	// configure tx queue for device
 	public void dpdk_configure_tx_queue(int port_id, int tx_id) {
 		if (DpdkAccess.dpdk_configure_tx_queue(port_id, tx_id) < 0) {
 			System.out.println("-----dpdk_configure_tx_queue failed");
@@ -116,6 +134,7 @@ public class ApplicationStarter {
 		}
 	}
 	
+	// starts given device
 	public void dpdk_dev_start(int port_id) {
 		if (DpdkAccess.dpdk_dev_start(port_id) < 0) {
 			System.out.println("-----dpdk_dev_start failed");
@@ -124,6 +143,7 @@ public class ApplicationStarter {
 		}
 	}
 	
+	// checks link status of all ports
 	public void dpdk_check_ports_link_status() {
 		if (DpdkAccess.dpdk_check_ports_link_status() < 0) {
 			System.out.println("-----dpdk_check_ports_link_status failed");
@@ -132,12 +152,11 @@ public class ApplicationStarter {
 		}
 	}
 	
+	// starts all threads - affinity threads and stats thread
 	public void startAll() throws InterruptedException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		//TODO: make all java output to gui
 		//TODO: access to ethernet header?
-		//TODO: burst parametes everywhere
 		//TODO: get rid of thrown exceptions - catch them
-		//TODO: sort out error messages
+		//TODO: check dpdkaccess.c for comments and sorting out some of the methods
         
         if (stats != null) {
         	new Thread(stats).start();
@@ -150,6 +169,7 @@ public class ApplicationStarter {
         
 	}
 	
+	// sends parameters in config file to dpdk library
 	public void sendDPDKInformation() {
 		DpdkAccess.dpdk_set_program_name(config_map.get(PROGRAM_NAME));
 		DpdkAccess.dpdk_set_memory_channels(config_map.get(MEMORY_CHANNELS));
@@ -160,6 +180,7 @@ public class ApplicationStarter {
 		DpdkAccess.dpdk_set_blacklist(bl);
 	}
 	
+	// reads the given config file
 	public void readConfig(InputStream input) {
 		Properties prop = new Properties();
 		config_map = new HashMap<String, String>();
