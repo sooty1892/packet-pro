@@ -43,6 +43,7 @@
 #include <rte_ip.h>
 
 #define ERROR -1
+#define SUCCESS 1
 #define MBUF_SIZE (2048 + sizeof(struct rte_mbuf) + RTE_PKTMBUF_HEADROOM)
 
 
@@ -112,6 +113,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal(JNIEnv *env, jclass class)
 		}
 		dealloc(argv);
 	}*/
+	return SUCCESS;
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1create_1mempool(JNIEnv *env, jclass class, jstring name, jint num_el, jint cache_size) {
@@ -138,6 +140,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1create_1mempool(JNIEnv *env, jclass 
 	if (pktmbuf_pool == NULL) {
 		return ERROR;
 	}
+	return SUCCESS;
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports(JNIEnv *env, jclass class) {
@@ -145,6 +148,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports(JNIEnv *env, jclass cla
 	if (num_ports == 0) {
 		return ERROR;
 	}
+	return SUCCESS;
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1dev(JNIEnv *env, jclass class, jint port_id, jint rx_num, jint tx_num) {
@@ -152,6 +156,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1dev(JNIEnv *env, jclass c
 	if (ret < 0) {
 		return ERROR;
 	}
+	return SUCCESS;
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue(JNIEnv *env, jclass class, jint port_id, jint rx_id) {
@@ -161,6 +166,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue(JNIEnv *env, jc
 	if (ret < 0) {
 		return ERROR;
 	}
+	return SUCCESS;
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue(JNIEnv *env, jclass class, jint port_id, jint tx_id) {
@@ -168,6 +174,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue(JNIEnv *env, jc
 	if (ret < 0) {
 		return ERROR;
 	}
+	return SUCCESS;
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1dev_1start(JNIEnv *env, jclass class, jint port_id) {
@@ -175,6 +182,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1dev_1start(JNIEnv *env, jclass class
 	if (ret < 0) {
 		return ERROR;
 	}
+	return SUCCESS
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status(JNIEnv *env, jclass class) {
@@ -226,6 +234,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status(JNIEnv *e
 			printf("done\n");
 		}
 	}
+	return SUCCESS;
 }
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1receive_1burst(JNIEnv *env, jclass class, jint value) {
