@@ -66,57 +66,69 @@ public class ApplicationStarter {
 		stats.setTransmitters(transmitters);
 	}
 	
-	private void exit_with_error(String error) {
-		System.out.println(error);
-		System.exit(-1);
-	}
-	
 	public void dpdk_init_eal() {
 		if (DpdkAccess.dpdk_init_eal() < 0) {
-			exit_with_error("-----dpdk_init_eal failed");
+			System.out.println("-----dpdk_init_eal failed");
+		} else {
+			System.out.println("EAL initialised");
 		}
 	}
 	
 	//TODO: currently c code only handles 1 mempool
 	public void dpdk_create_mempool(String name, int num_el, int cache_size) {
 		if (DpdkAccess.dpdk_create_mempool(name, num_el, cache_size) < 0) {
-			exit_with_error("-----dpdk_create_mempool failed");
+			System.out.println("-----dpdk_create_mempool failed");
+		} else {
+			System.out.println("Created mempool " + name);
 		}
 	}
 	
 	public void dpdk_check_ports() {
-		if (DpdkAccess.dpdk_check_ports() < 0) {
-			exit_with_error("-----dpdk_check_ports failed");
+		int ports = DpdkAccess.dpdk_check_ports();
+		if (ports < 0) {
+			System.out.println("-----dpdk_check_ports failed");
+		} else {
+			System.out.println("Ports available: " + ports);
 		}
 	}
 	
 	public void dpdk_configure_dev(int port_id, int rx_num, int tx_num) {
 		if (DpdkAccess.dpdk_configure_dev(port_id, rx_num, rx_num) < 0) {
-			exit_with_error("-----dpdk_configure_dev failed");
+			System.out.println("-----dpdk_configure_dev failed");
+		} else {
+			System.out.println("Configured port " + port_id);
 		}
 	}
 	
 	public void dpdk_configure_rx_queue(int port_id, int rx_id) {
 		if (DpdkAccess.dpdk_configure_rx_queue(port_id, rx_id) < 0) {
-			exit_with_error("-----dpdk_configure_rx_queue failed");
+			System.out.println("-----dpdk_configure_rx_queue failed");
+		} else {
+			System.out.println("Configured rx queue " + rx_id + " on port " + port_id);
 		}
 	}
 	
 	public void dpdk_configure_tx_queue(int port_id, int tx_id) {
 		if (DpdkAccess.dpdk_configure_tx_queue(port_id, tx_id) < 0) {
-			exit_with_error("-----dpdk_configure_tx_queue failed");
+			System.out.println("-----dpdk_configure_tx_queue failed");
+		} else {
+			System.out.println("Configured tx queue " + tx_id + " on port " + port_id);
 		}
 	}
 	
 	public void dpdk_dev_start(int port_id) {
 		if (DpdkAccess.dpdk_dev_start(port_id) < 0) {
-			exit_with_error("-----dpdk_dev_start failed");
+			System.out.println("-----dpdk_dev_start failed");
+		} else {
+			System.out.println("Started port " + port_id);
 		}
 	}
 	
 	public void dpdk_check_ports_link_status() {
 		if (DpdkAccess.dpdk_check_ports_link_status() < 0) {
-			exit_with_error("-----dpdk_check_ports_link_status failed");
+			System.out.println("-----dpdk_check_ports_link_status failed");
+		} else {
+			System.out.println("Link status checking complete");
 		}
 	}
 	
