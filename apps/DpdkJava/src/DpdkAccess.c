@@ -319,7 +319,7 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv *env, jclass cl
 	uint16_t packet_count = get16(point, 0);
 	offset += sizeof(uint16_t);
 
-	rte_eth_tx_burst(port_id, tx_id, (struct rte_mbuf**)get64(point, offset), packet_count);
+	rte_eth_tx_burst(port_id, tx_id, (struct rte_mbuf**)(point+offset), packet_count);
 
 
 	offset = sizeof(uint16_t);
