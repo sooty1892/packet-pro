@@ -42,7 +42,7 @@ public class GuiFrame extends JFrame {
 		
 		console = new JTextArea();
 		console.setEditable(false);
-		console.setBounds(6, 6, 206, 266);
+		console.setBounds(6, 6, 600, 266);
 		getContentPane().add(console);
 		
 		receive_all = new JTextField();
