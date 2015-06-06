@@ -19,10 +19,14 @@ public class Stats implements Runnable {
 	private long transmitted_packet_total_size = 0;
 	boolean gui = false;
 	
-	private JTextField receive_all = null;
-	private JTextField receive_gap = null;
-	private JTextField send_all = null;
-	private JTextField send_gap = null;
+	private JTextField receive_all_count = null;
+	private JTextField receive_all_size = null;
+	private JTextField receive_gap_count = null;
+	private JTextField receive_gap_size = null;
+	private JTextField send_all_count = null;
+	private JTextField send_all_size = null;
+	private JTextField send_gap_count = null;
+	private JTextField send_gap_size = null;
 	
 	public void setReceivers(List<ReceivePoller> list) {
 		this.receivers = list;
@@ -62,10 +66,14 @@ public class Stats implements Runnable {
 	
 	public void initGui() {
 		GuiFrame frame = new GuiFrame();
-		receive_all = frame.getReceiveAll();
-		receive_gap = frame.getReceiveGap();
-		send_all = frame.getSendAll();
-		send_gap = frame.getSendGap();
+		receive_all_count = frame.getReceive_all_count();
+		receive_all_size = frame.getReceive_all_size();
+		receive_gap_count = frame.getReceive_gap_count();
+		receive_gap_size = frame.getReceive_gap_size();
+		send_all_count = frame.getSend_all_count();
+		send_all_size = frame.getSend_all_size();
+		send_gap_count = frame.getSend_gap_count();
+		send_gap_size = frame.getSend_gap_size();
 		PrintStream printStream = new PrintStream(new GuiOutputStream(frame.getConsole()));
         System.setOut(printStream);
         System.setErr(printStream);
@@ -104,10 +112,14 @@ public class Stats implements Runnable {
 			transmitted_packet_total_size += transmitted_Packet_interval_size;
 			
 			if (gui) {
-				receive_all.setText(received_packet_total + " / " + received_packet_total_size);
-				receive_gap.setText(received_packet_interval + " / " + received_packet_interval_size);
-				send_all.setText(transmitted_packet_total + " / " + transmitted_packet_total_size);
-				send_gap.setText(transmitted_packet_interval + " / " + transmitted_Packet_interval_size);
+				receive_all_count.setText(String.valueOf(received_packet_total));
+				receive_all_size.setText(String.valueOf(received_packet_total_size));
+				receive_gap_count.setText(String.valueOf(received_packet_interval));
+				receive_gap_size.setText(String.valueOf(received_packet_interval_size));
+				send_all_count.setText(String.valueOf(transmitted_packet_total));
+				send_all_size.setText(String.valueOf(transmitted_packet_total_size));
+				send_gap_count.setText(String.valueOf(transmitted_packet_interval));
+				send_gap_size.setText(String.valueOf(transmitted_Packet_interval_size));
 			} else {
 				System.out.println();
 				System.out.println("TRANSMITTED INTERVAL COUNT/SIZE: " + transmitted_packet_interval + " / " + transmitted_Packet_interval_size);
