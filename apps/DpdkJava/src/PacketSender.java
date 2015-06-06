@@ -72,7 +72,7 @@ public class PacketSender {
 		
 		list.subList(0, num).clear();
 		
-		DpdkAccess.dpdk_send_packets(pointer);
+		DpdkAccess.dpdk_send_packets(pointer, port_id, queue_id);
 		
 		ua.freeMemory(pointer);
 	}

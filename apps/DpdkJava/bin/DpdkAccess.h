@@ -74,10 +74,10 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status
 /*
  * Class:     DpdkAccess
  * Method:    nat_receive_burst
- * Signature: (J)V
+ * Signature: (JII)V
  */
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst
-  (JNIEnv *, jclass, jlong);
+  (JNIEnv *, jclass, jlong, jint, jint);
 
 /*
  * Class:     DpdkAccess
@@ -90,10 +90,10 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packets
 /*
  * Class:     DpdkAccess
  * Method:    nat_send_packets
- * Signature: (J)V
+ * Signature: (JII)V
  */
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets
-  (JNIEnv *, jclass, jlong);
+  (JNIEnv *, jclass, jlong, jint, jint);
 
 /*
  * Class:     DpdkAccess

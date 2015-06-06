@@ -43,7 +43,7 @@ public class ReceivePoller {
 		long mem_pointer = ua.allocateMemory(memory_size);
 		long orig = mem_pointer;
 
-		DpdkAccess.dpdk_receive_burst(mem_pointer);
+		DpdkAccess.dpdk_receive_burst(mem_pointer, port_id, queue_id);
 		
 		ua.setCurrentPointer(mem_pointer);
 		

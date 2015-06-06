@@ -16,7 +16,7 @@ public class FirewallProcessor extends PacketProcessor {
 		super(ps, pf, rp);
 		blacklist = new HashSet<Long>();
 		readBlacklist();
-		printBlacklist();
+		//printBlacklist();
 	}
 
 	private boolean inspect(Packet currentPacket) {

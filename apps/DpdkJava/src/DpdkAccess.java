@@ -11,9 +11,9 @@ public class DpdkAccess {
 	private static native int nat_dev_start(int port_id);
 	private static native int nat_check_ports_link_status();
 
-	private static native void nat_receive_burst(long pointer);
+	private static native void nat_receive_burst(long pointer, int port_id, int rx_id);
 	private static native void nat_free_packets(long pointer);
-	private static native void nat_send_packets(long pointer);
+	private static native void nat_send_packets(long pointer, int port_id, int tx_id);
 	
 	private static native void nat_set_receive_burst(int value);
 	private static native void nat_set_program_name(String value);
@@ -59,16 +59,16 @@ public class DpdkAccess {
 		return nat_check_ports_link_status();
 	}
 	
-	public static void dpdk_receive_burst(long pointer) {
-		nat_receive_burst(pointer);
+	public static void dpdk_receive_burst(long pointer, int port_id, int rx_id) {
+		nat_receive_burst(pointer, port_id, rx_id);
 	}
 	
 	public static void dpdk_free_packets(long pointer) {
 		nat_free_packets(pointer);
 	}
 	
-	public static void dpdk_send_packets(long pointer) {
-		nat_send_packets(pointer);
+	public static void dpdk_send_packets(long pointer, int port_id, int tx_id) {
+		nat_send_packets(pointer, port_id, tx_id);
 	}
 	
 	public static void dpdk_set_receive_burst(int value) {
