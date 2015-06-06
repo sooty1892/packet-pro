@@ -53,6 +53,7 @@ public class Stats implements Runnable {
 	}
 	
 	public Stats(boolean gui) {
+		this.repeat_delay = SECOND;
 		this.gui = gui;
 		if (gui) {
 			initGui();
