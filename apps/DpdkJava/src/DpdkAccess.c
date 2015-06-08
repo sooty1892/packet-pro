@@ -76,19 +76,30 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal(JNIEnv __attribute__ ((unu
 			   2 + // file prefix and flag
 			   2 + // memory and flag
 			   (2*blacklist_count); // flag and port for each blacklisted port
-	//char **argv;
 
 	//malloc is ok at start of program
 
-	// i think core mask should just be 1 as we don't want
-	// c threads creating
-
-	/*argv = malloc(argc * sizeof(char*));
+	char **argv = malloc(argc * sizeof(char*));
 	int i;
 	for (i = 0; i < argc; i++) {
 		//overkill but works
 		argv[i] = malloc(120 * sizeof(char));
 	}*/
+
+	memcpy(argv[0], program_name, strlen(program_name));
+	memcpy(argv[1], "-c", 2);
+	memcpy(argv[2], "0x1", 3);
+	memcpy(argv[3], "-n", 2);
+	memcpy(argv[4], memory_channels, strlen(memory_channels));
+	memcpy(argv[5], "--file-prefix", 13);
+	memcpy(argv[6], program_id, strlen(program_id));
+	memcpy(argv[7], "-m", 2);
+	memcpy(argv[8], memory, strlen(memory));
+
+	for (i = 0; i < blacklist_count; i++) {
+		memcpy(argv[9+(i*2)], "-b", 2);
+		memcpy(argv[9+((i*2)+1)], blacklist[i], strlen(blacklist[i]));
+	}
 
 	/*char *argv[] = {"Pktcap",
 					"-c", "0x1",
@@ -269,10 +280,12 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1id(JNIEnv *env, jclass
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1blacklist(JNIEnv *env, jclass __attribute__ ((unused)) class, jobjectArray values) {
 	blacklist_count = (*env)->GetArrayLength(env, values);
 
+	blacklist = malloc(blacklist_count * sizeof(char *));
+
 	int i;
 	for (i=0; i < blacklist_count; i++) {
 		jstring string = (jstring) (*env)->GetObjectArrayElement(env, values, i);
-		//blacklist[i] = (*env)->GetStringUTFChars(env, string, 0);
+		blacklist[i] = (*env)->GetStringUTFChars(env, string, 0);
 		// Don't forget to call `ReleaseStringUTFChars` when you're done.
 	}
 }
