@@ -69,7 +69,7 @@ int blacklist_count = 0;
 int get_burst = 32;
 
 //TODO: THIS
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal(JNIEnv *env, jclass class) {
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal(JNIEnv __attribute__ ((unused))*env, jclass __attribute__ ((unused))class) {
 	int argc = 1 + // program name
 			   2 + // core mask and flag
 			   2 + // memory channels and flag
@@ -125,7 +125,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal(JNIEnv *env, jclass class)
 	return SUCCESS;
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1create_1mempool(JNIEnv *env, jclass class, jstring name, jint num_el, jint cache_size) {
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1create_1mempool(JNIEnv *env, jclass __attribute__ ((unused)) class, jstring name, jint num_el, jint cache_size) {
 	const char *n = (*env)->GetStringUTFChars(env, name, 0);
 
 	// ID of the execution unit we are running on
@@ -152,7 +152,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1create_1mempool(JNIEnv *env, jclass 
 	return SUCCESS;
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports(JNIEnv *env, jclass class) {
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class) {
 	num_ports = rte_eth_dev_count();
 	if (num_ports == 0) {
 		return ERROR;
@@ -160,7 +160,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports(JNIEnv *env, jclass cla
 	return num_ports;
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1dev(JNIEnv *env, jclass class, jint port_id, jint rx_num, jint tx_num) {
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1dev(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jint port_id, jint rx_num, jint tx_num) {
 	int ret = rte_eth_dev_configure(port_id, rx_num, tx_num, &port_conf);
 	if (ret < 0) {
 		return ERROR;
@@ -168,7 +168,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1dev(JNIEnv *env, jclass c
 	return SUCCESS;
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue(JNIEnv *env, jclass class, jint port_id, jint rx_id) {
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jint port_id, jint rx_id) {
 	int ret = rte_eth_rx_queue_setup(port_id, rx_id, 256,
 								socketid,
 								&rx_conf, pktmbuf_pool);
@@ -178,7 +178,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue(JNIEnv *env, jc
 	return SUCCESS;
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue(JNIEnv *env, jclass class, jint port_id, jint tx_id) {
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jint port_id, jint tx_id) {
 	int ret = rte_eth_tx_queue_setup(port_id, tx_id, 256, socketid, &tx_conf);
 	if (ret < 0) {
 		return ERROR;
@@ -186,7 +186,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue(JNIEnv *env, jc
 	return SUCCESS;
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1dev_1start(JNIEnv *env, jclass class, jint port_id) {
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1dev_1start(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jint port_id) {
 	int ret = rte_eth_dev_start(port_id);
 	if (ret < 0) {
 		return ERROR;
@@ -194,7 +194,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1dev_1start(JNIEnv *env, jclass class
 	return SUCCESS;
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status(JNIEnv *env, jclass class) {
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class) {
 	struct rte_eth_link link;
 
 	// TODO: get this printing on java side
@@ -246,27 +246,27 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status(JNIEnv *e
 	return SUCCESS;
 }
 
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1receive_1burst(JNIEnv *env, jclass class, jint value) {
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1receive_1burst(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jint value) {
 	get_burst = value;
 }
 
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1name(JNIEnv *env, jclass class, jstring value) {
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1name(JNIEnv *env, jclass __attribute__ ((unused)) class, jstring value) {
 	program_name = (*env)->GetStringUTFChars(env, value, 0);
 }
 
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1memory_1channels(JNIEnv *env, jclass class, jstring value) {
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1memory_1channels(JNIEnv *env, jclass __attribute__ ((unused)) class, jstring value) {
 	memory_channels = (*env)->GetStringUTFChars(env, value, 0);
 }
 
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1memory(JNIEnv *env, jclass class, jstring value) {
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1memory(JNIEnv *env, jclass __attribute__ ((unused)) class, jstring value) {
 	memory = (*env)->GetStringUTFChars(env, value, 0);
 }
 
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1id(JNIEnv *env, jclass class, jstring value) {
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1id(JNIEnv *env, jclass __attribute__ ((unused)) class, jstring value) {
 	program_id = (*env)->GetStringUTFChars(env, value, 0);
 }
 
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1blacklist(JNIEnv *env, jclass class, jobjectArray values) {
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1blacklist(JNIEnv *env, jclass __attribute__ ((unused)) class, jobjectArray values) {
 	blacklist_count = (*env)->GetArrayLength(env, values);
 
 	int i;
@@ -277,7 +277,7 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1blacklist(JNIEnv *env, jclass c
 	}
 }
 
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass class, jlong mem_pointer, jint port_id, jint rx_id) {
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jlong mem_pointer, jint port_id, jint rx_id) {
 	struct rte_mbuf *pkts_burst[128];
 
 	int offset = 0;
@@ -306,7 +306,7 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv *env, jclass c
 }
 
 
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packets(JNIEnv *env, jclass class, jlong mem_pointer) {
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packets(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jlong mem_pointer) {
 	uint8_t *point = (uint8_t*)mem_pointer;
 	int offset = 0;
 
@@ -321,7 +321,7 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packets(JNIEnv *env, jclass cl
 	}
 }
 
-JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv *env, jclass class, jlong mem_pointer, jint port_id, jint tx_id) {
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jlong mem_pointer, jint port_id, jint tx_id) {
 	uint8_t *point = (uint8_t*)mem_pointer;
 	int offset = 0;
 
@@ -340,7 +340,7 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv *env, jclass cl
 	}
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity(JNIEnv *env, jclass class, jint core, jint avail) {
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jint core, jint __attribute__ ((unused)) avail) {
 
 	cpu_set_t cpuset;
 
