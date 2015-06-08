@@ -46,3 +46,4 @@
 *.o.cmd
 *.o.d
 /apps/Firewall/app/
+*.gz*

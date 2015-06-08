@@ -20,7 +20,8 @@ RTE_BUILD_SHARED_LIB=y
 CFLAGS += -fPIC
 LDLIBS += -lrte_eal -lrte_mempool -lrte_mbuf -lrte_cmdline -lrte_timer -lrte_ring -lrte_pmd_ring -lrte_malloc -lethdev -lrte_pmd_e1000 -lrte_pmd_null
 CFLAGS += -O3
-#CFLAGS += $(WERROR_FLAGS)
+CFLAGS += $(WERROR_FLAGS)
+CFLAGS += -Wall
 CFLAGS += -I/usr/lib/jvm/java-7-openjdk-amd64/include
 
 include $(RTE_SDK)/mk/rte.extshared.mk

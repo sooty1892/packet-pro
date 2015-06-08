@@ -135,7 +135,7 @@ On modern processors all commercially available C compilers will arrange basic C
 \todo[inline]{C struct field always in given order}
 \todo[inline]{Inconsistencies with datatype length so using uint32t etc}
 
-Code \ref{lst:c_padded_struct} shows a struct which has compiler inserted padding. Any user wouldn't know the padding was there and wouldn't be able to access the data in the bits of the padding through conventional C dereferencing paradigm. This example does assume use on a 64-bit machine with 8 byte alignment, but 32-bit machines or a different compiler may have different alignment rules.
+Code \ref{lst:c_padded_struct} shows a struct which has compiler inserted padding. Any user wouldn't know the padding was there and wouldn't be able to access the data in the bits of the padding through conventional C dereferencing paradigm (only via pointer arithmetic). This example does assume use on a 64-bit machine with 8 byte alignment, but 32-bit machines or a different compiler may have different alignment rules.
 
 \begin{lstlisting}[language=C, caption={Example C Struct with compiler inserted padding}, label=lst:c_padded_struct]
 struct example {
@@ -148,13 +148,83 @@ struct example {
     int z;         // 4 bytes
 };
 \end{lstlisting}
-\todo[inline]{Mention this is on 64-bit machine and obviously you don't notice padding}
+\todo[inline]{Mention this is on 64-bit machine and obviously you don't notice padding and order of elements can pay an important part in this}
 
 \todo[inline]{Example making sure compiler doesn't pad}
-Since the proposed application in this report requires high throughput of data, the initial thought would be that this optimisation is a benefit to the program. Generally this is the case, but for data which is likely to be shared between the C side and Java side a large amount, data accessing is far quicker \todo{Proof on speed} on the Java side if the struct is padded. This results in certain structs been forced to be padded when compiled, more noticeably, those used for packet headers.
+Since the proposed application in this report requires high throughput of data, the initial thought would be that this optimisation is a benefit to the program. Generally this is the case, but for data which is likely to be shared between the C side and Java side a large amount, data accessing is far quicker \todo{Proof on speed} on the Java side if the struct is packed (no padding). This results in certain structs been forced to be packed when compiled, more noticeably, those used for packet headers. \\
+\newline
+Packed structures mean there are no gaps between elements, required alignment is set to 1 byte. Also \_\_attribute\_\_((packed)) definition means that compiler will deal with accessing members which may get misaligned due to 1 byte alignment and packing so reading and writing is correct. However, compilers will only deal with this misalignment if structs are accessed via direct access. Using a pointer to a packed struct member (and therefore pointer arithmetic) can result in the wrong value for the dereferenced pointer. This is since certain members may not be aligned to 1 byte. In the below example, unint32 is 4 byte aligned and therefore it is possible for a pointer to it to expect 4 byte alignment therefore resulting in the wrong results.
+
+\begin{lstlisting}[language=C, caption={Example C Struct with compiler inserted padding}, label=lst:c_padded_struct]
+#include <stdio.h>
+#include <inttypes.h>
+#include <arpa/inet.h>
+
+struct packet {
+    uint8_t x;
+    uint32_t y;
+} __attribute__((packed));
+
+int main ()
+{
+    uint8_t bytes[5] = {1, 0, 0, 0, 2};
+    struct packet *p = (struct packet *)bytes;
+
+    // compiler handles misalignment because it knows that
+    // "struct packet" is packed
+    printf("y=%"PRIX32", ", ntohl(p->y));
+
+    // compiler does not handle misalignment - py does not inherit
+    // the packed attribute
+    uint32_t *py = &p->y;
+    printf("*py=%"PRIX32"\n", ntohl(*py));
+    return 0;
+}
+\end{lstlisting}
+
+On an x86 system (which does not enforce memory access alignment), this will produce
+
+y=2, *py=2
+
+as expected. On the other hand on my ARM Linux board, for example, it produced the seemingly wrong result
+
+y=2, *py=1
+
+However, since a packed struct is much easier to traverse from Java than a padded struct, the decision was made to make certain structs packed within the DPDK framework and then recompile the libraries. This decision could be made since other structs within the DPDK framework were also packed and therefore consideration of this was already made. \\
+\newline
+Note that if a struct contains another struct, that struct should be packed recursively as-well to ensure the first struct has no padding at all. \\
+\newline
+Char doesn't have alignment and can start on any address. But 2-byte shorts must start on an even address, 4-byte ints or floats must start on an address divisible by 4, and 8-byte longs or doubles must start on an address divisible by 8. Signed or unsigned makes no difference. \\
+\newline
+Self-alignment makes access faster because it facilitates generating single-instruction fetches and puts of the typed data. Without alignment constraints, on the other hand, the code might end up having to do two or more accesses spanning machine-word boundaries. Characters are a special case; they’re equally expensive from anywhere they live inside a single machine word. That’s why they don’t have a preferred alignment. \\
+\newline
+casting to an odd pointer will slow down code and could work. Other architectures will take the word which the pointer points to and therefore the problem occurs above.
 
 \subsubsection{Javolution}
 \subsubsection{Performance testing}
+
+\subsubsection{Thread affinity}
+Thread.currentThread().getId(); just gets id of thread relative to jvm. \\
+\newline
+It keeps a process limited to certain a certain core or cores. Process will still be taken out of use and switched back in but without the problem of moving cache between cores. \\
+\newline
+Normally as a thread gets a time slice (a period in which to use the core), it is granted whichever core [CPU] is determined to be most free by the operating system's scheduler. Yes, this is in contrast to the popular fallacy that the single thread would stay on a single core. This means that the actual thread(s) of an application might get swapped around to non-overclocked cores, and even underclocked cores in some cases. As you can see, changing the affinity and forcing a single-threaded CPU to stay on a single CPU makes a big difference in such scenarios. The scaling up of a core does not happen instantly, not by a long shot in CPU time.
+
+Therefore, for primarily single (or limited) thread applications, it is sometimes best to set the CPU affinity to a specific core, or subset of cores. This will allow the 'Turbo' processor frequency scaling to kick in and be sustained (instead of skipping around to various cores that may not be scaled up, and could even be scaled down). \\
+\newline
+core thrashing - ust by the name, you know this is a bad thing. You lose performance when a thread is swapped to a different core, due to the CPU cache being 'lost' each time. In general, the *least* switching of cores the better. One would hope the OS would try to avoid this, but it doesn't seem to at all in quick tests under Windows 7. Therefore, it is recommended you manually adjust the CPU affinity of certain applications to achieve better performance. \\
+\newline
+Another important issue is avoiding placing a load on a HyperThreaded (non-physical) core. These cores offer a small fraction of the performance of a real core. The Windows scheduler is aware of this and will swap to them only if needed. As of mid Jan 2012 the Windows 7 and Windows 2008 R2 schedulers have a hotfix for AMD Bulldozer CPUs that see them as HyperThreaded, cutting them down from 8 physical cores to 4 physical cores, 8 logical cores. This is for two reasons: The AMD Bulldozer platform uses pairs of cores called Bulldozer Modules. Each pair shares some computation units, such as an L2 cache and FPU. To spread out the load and prevent too much load being placed on two cores that have shared computational units, the Windows patch was released, boosting performance in lightly threaded scenarios. \\
+\newline
+Processor affinity takes advantage of the fact that some remnants of a process that was run on a given processor may remain in that processor's memory state (for example, data in the CPU cache) after another process is run on that CPU. Scheduling that process to execute on the same processor could result in an efficient use of process by reducing performance-degrading situations such as cache misses. A practical example of processor affinity is executing multiple instances of a non-threaded application, such as some graphics-rendering software. \\
+\todo[inline]{put code showing cpu affinity assignment}
+
+In Linux, Java thread uses the native thread(i.e, thread provided by Linux).
+This means the JVM creates a new native thread when the Java code creates a new java thread. So, the Java threads can be organised in any way the native threads can be organised.\\
+
+A native thread can be bound to a core through the sched_setaffinity() function. So, a Java thread can be bound to a core. If Java standard library does not provide a function to do so, then this function need to be provided through JNI. \\
+
+In Linux, multi-threading is same as parallel threading. Linux kernel distribute threads among processors to balance the cpu load. However the individual threads can be bound with any core as wished. So, in Linux Java multi-threading is same as parallel threading.
 
 \section{General Implementation}
 \subsection{Shared Libraries}
