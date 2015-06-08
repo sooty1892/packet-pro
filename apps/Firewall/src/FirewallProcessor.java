@@ -29,16 +29,16 @@ public class FirewallProcessor extends PacketProcessor {
 		if (version == 4) {
 			Ipv4Packet cp = (Ipv4Packet)currentPacket;
 			if (blacklist.contains(cp.getSrcAddr())) {
-				pf.freePacket(currentPacket);
+				pf.get(0).freePacket(currentPacket);
 				return false;
 			} else {
-				ps.sendPacket(currentPacket);
-				pf.freePacket(currentPacket);
+				ps.get(0).sendPacket(currentPacket);
+				pf.get(0).freePacket(currentPacket);
 				return true;
 			}
 		} else {
 			//Ipv6Packet cp = (Ipv6Packet)p;
-			pf.freePacket(currentPacket);
+			pf.get(0).freePacket(currentPacket);
 			return false;
 		}
 	}
@@ -77,7 +77,7 @@ public class FirewallProcessor extends PacketProcessor {
 	@Override
 	public void run() {
 		while (true) {
-			List<Packet> packets = rp.getBurst();
+			List<Packet> packets = rp.get(0).getBurst();
 			for (Packet p : packets) {
 				inspect(p);
 			}

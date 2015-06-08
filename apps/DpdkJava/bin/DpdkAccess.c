@@ -90,16 +90,20 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal(JNIEnv *env, jclass class)
 		argv[i] = malloc(120 * sizeof(char));
 	}*/
 
-	char *argv[] = {"Pktcap",
+	/*char *argv[] = {"Pktcap",
 					"-c", "0x1",
 					"-n", "3",
 					"-m", "128",
 					"--file-prefix", "fw",
 					"-b", "00:08.0",
-					"-b", "00:03.0"};
+					"-b", "00:03.0"};*/
 
-	int port_to_conf = 0;
-
+	/*char *argv[] = {program_name,
+					"-c", "0x1",
+					"-n", memory_channels,
+					"-m", memory,
+					"--file-prefix", program_id,
+					""};*/
 
 	int ret = rte_eal_init(argc, argv);
 	if (ret < 0) {
