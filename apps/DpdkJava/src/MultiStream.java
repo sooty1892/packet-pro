@@ -21,13 +21,11 @@ public class MultiStream extends OutputStream {
 		try {
 			ps1.write(b);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
 			ps2.write(b);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

@@ -142,7 +142,6 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1create_1mempool(JNIEnv *env, jclass 
 	// Get the ID of the physical socket of the specified lcore
 	socketid = rte_lcore_to_socket_id(cpu);
 
-	//TODO: Change cache size?
 	pktmbuf_pool = rte_mempool_create(
 						n, //name of mempool
 						num_el, //number of elements in mempool
