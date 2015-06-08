@@ -17,15 +17,16 @@ Generally there are 2 well known network models. The Open System Interconnection
 \end{figure}
 \todo{cite this}
 
-The TCP/IP application layer doesn't represent an actual application but instead its a set of protocols which provides services to applications. These services include HTTP, FTP, SMTP, POP3 and more. It acts as an interface for software to communicate between systems (e.g. client retrieving data from server via SMTP). \\
-\newline
-The transport layer is responsible for fragmenting the data into transmission control protocol (TCP) or user datagram protocol (UDP) packets, although other protocols can be used. This layer will attach its own TCP or UDP header to the data which contains information such as source and destination ports, sequence number and acknowledgement data. \\
-\newline
-The network/internet layer attaches a protocol header for packet addressing and routing. Most commonly this will be an IPv4 or IPv6 header \todo{ref this}. This layer only provides datagram networking functionality and it's up to the transport layer to handle the packets correctly. \\
-\newline
-The network interface or link layer will firstly attach its own ethernet header (or suitable protocol header) to the packets, along with an ethernet trailer. This header will specify the destination and source of the media access control (MAC) address which are specific to network interfaces. The next step is to put the packet onto the physical layer, which may be fibre optic, wireless or standard cables. \\
-\newline
-This will eventually build a packet of data which include the original raw data along with multiple headers for each layer of the model. \todo{ref image and source} \\
+The TCP/IP application layer doesn't represent an actual application but instead its a set of protocols which provides services to applications. These services include HTTP, FTP, SMTP, POP3 and more. It acts as an interface for software to communicate between systems (e.g. client retrieving data from server via SMTP).
+
+The transport layer is responsible for fragmenting the data into transmission control protocol (TCP) or user datagram protocol (UDP) packets, although other protocols can be used. This layer will attach its own TCP or UDP header to the data which contains information such as source and destination ports, sequence number and acknowledgement data.
+
+The network/internet layer attaches a protocol header for packet addressing and routing. Most commonly this will be an IPv4 or IPv6 header \todo{ref this}. This layer only provides datagram networking functionality and it's up to the transport layer to handle the packets correctly.
+
+The network interface or link layer will firstly attach its own ethernet header (or suitable protocol header) to the packets, along with an ethernet trailer. This header will specify the destination and source of the media access control (MAC) address which are specific to network interfaces. The next step is to put the packet onto the physical layer, which may be fibre optic, wireless or standard cables.
+
+This will eventually build a packet of data which include the original raw data along with multiple headers for each layer of the model. \todo{ref image and source}
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{img/headers.png}
@@ -111,8 +112,8 @@ The Java Virtual Machine is an abstract computer that allows Java programs to ru
 Typically, any network communication from a Java application occurs via the JVM and through the operating system. This is because the JVM is still technically an application running on top of the OS and therefore doesn't have any superuser access rights. Any network operation results in a kernel system call, which is then put into a priority queue in order to be executed. This is one of the main reasons why network calls through the JVM and kernel can be seen as 'slow', in relative speeds compared to network line rate speeds.
 
 \subsubsection{Java Native Interface (JNI)}
-Provided by the Java Software Development Kit (SDK), the JNI is a native programming interface that lets Java applications use libraries written in other languages. The JNI also includes the invocation API which allows a JVM to be embedded into native applications. This project and therefore this overview will only focus on Java code using C libraries via the JNI on a linux based system.\\
-\newline
+Provided by the Java Software Development Kit (SDK), the JNI is a native programming interface that lets Java applications use libraries written in other languages. The JNI also includes the invocation API which allows a JVM to be embedded into native applications. This project and therefore this overview will only focus on Java code using C libraries via the JNI on a linux based system.
+
 In order to call native libraries from Java applications a number of steps have to be undertaken as shown below, which are described in more detail later:
 
 \begin{enumerate}
@@ -196,8 +197,8 @@ JNIEXPORT void JNICALL Java_Jni_objectPrint(JNIEnv *env, jclass class, jobject o
 }
 \end{lstlisting}
 
-The C source file implementation is in Code~\ref{lst:source}. The method signature on line 3 isn't as first declared in the Java source file. The 'env' variable is used to access functions to interact with objects, classes and other Java features. It points to a structure containing all JNI function pointers. Furthermore, the method invocation receives the class from which it was called since it was a static method. If the method had been per instance, this variable would be of type 'jobject'. \\
-\newline
+The C source file implementation is in Code~\ref{lst:source}. The method signature on line 3 isn't as first declared in the Java source file. The 'env' variable is used to access functions to interact with objects, classes and other Java features. It points to a structure containing all JNI function pointers. Furthermore, the method invocation receives the class from which it was called since it was a static method. If the method had been per instance, this variable would be of type 'jobject'.
+
 Line 4 shows how to find a class identifier by using the class name. In this example, the variables 'class' and 'cls' would actually be equal. In order to call an objects' method, a method id is required as a pointer to this method. Line 5 shows the retrieval of this method id, whose parameters are the jclass variable, the method name and the return type, in this case an integer (represented by an I). Then the method can be called on the object via one of the numerous helper methods (line 6) which differ depending on the return type and static or non-static context.
 
 \begin{lstlisting}[language=sh, caption={Terminal commands to generate shared library file (.so)}, label=lst:shared]
@@ -211,8 +212,8 @@ $ java -Djava.library.path="." Jni
 Object x value is 5
 \end{lstlisting}
 
-Running the Java application, pointing to the location where Java can find the shared library (if not in a standard location) will output the above in Code~\ref{lst:output}. \\
-\newline
+Running the Java application, pointing to the location where Java can find the shared library (if not in a standard location) will output the above in Code~\ref{lst:output}.
+
 Although the JNI provides a very useful interface to interact with native library code, there are a number of issues that users should be wary of before progressing:
 \begin{itemize}
 	\item The Java application that relies on the JNI loses its portability with the JVM as it relies on natively compiled code.
@@ -232,15 +233,15 @@ Java sockets are the standard low level communication for applications as most n
 Remote Method Invocation (RMI) is a protocol developed by Java which allows an object running in a JVM to invoke methods on another object running on a different JVM. Although this method provides a relatively easy interface for which JVM's can communicate, its major drawback relates to the speed. Since RMI uses Java sockets as its basic level communication method, it faces the same performance issues as mentioned in section~\ref{subsec:sockets}.
 
 \paragraph{Shared Memory Programming}\mbox{}\\ %subsubsubsection
-Shared memory programming provides high performance JVM interaction due to Java's multithread and parallel programming support. This allows different JVM's to communicate via objects within memory which is shared between the JVM's. However, this technique requires the JVM's to be on the same shared memory system, which is a major drawback for distributed systems as scalability options decrease. \\
+Shared memory programming provides high performance JVM interaction due to Java's multithread and parallel programming support. This allows different JVM's to communicate via objects within memory which is shared between the JVM's. However, this technique requires the JVM's to be on the same shared memory system, which is a major drawback for distributed systems as scalability options decrease.
 
 Even though these 3 techniques allow for communication between JVM's and other applications, the major issue is that incoming packets are still handled by the kernel and then passed onto the corresponding JVM. This means that packets are destined for certain applications, meaning that generic packets can't be intercepted and checked, which is a requirement for common middlebox software.
 
 \subsection{jVerbs}
-Ultra-low latency for Java applications has been partially solved by the jVerbs \cite{jverbs} framework. Using remote direct memory access (RDMA), jVerbs provides an interface for which Java applications can communicate, mainly useful within large scale data centre applications. \\
-\newline
-RDMA is a technology that allows computers within a network to transfer data between each other via direct memory operations, without involving the processor, cache or operating system of either communicating computer. RDMA implements a transport protocol directly within the network interface card (NIC), allowing for zero copy networking, which allows a computer to read from another computer and write to its own direct main memory without intermediate copies. High throughput and performance is a feature of RDMA due to the lack of kernel involvement, but the major downside is that it requires specific hardware which supports the RDMA protocol, while also requiring the need for specific computer connections set up by sockets. \\
-\newline
+Ultra-low latency for Java applications has been partially solved by the jVerbs \cite{jverbs} framework. Using remote direct memory access (RDMA), jVerbs provides an interface for which Java applications can communicate, mainly useful within large scale data centre applications.
+
+RDMA is a technology that allows computers within a network to transfer data between each other via direct memory operations, without involving the processor, cache or operating system of either communicating computer. RDMA implements a transport protocol directly within the network interface card (NIC), allowing for zero copy networking, which allows a computer to read from another computer and write to its own direct main memory without intermediate copies. High throughput and performance is a feature of RDMA due to the lack of kernel involvement, but the major downside is that it requires specific hardware which supports the RDMA protocol, while also requiring the need for specific computer connections set up by sockets.
+
 As jVerbs takes advantage of mapping the network device directly into the JVM, bypassing both the JVM and operating system (Figure~\ref{fig:jverb}), it can significantly reduce the latency. In order to have low level interaction with the NIC, jVerbs has a very thin layer of JNI calls which can increase the overhead slightly. However, jVerbs is flawed, mainly because it requires specific hardware to run on, firstly limited by the RDMA protocol reliant hardware and further by the required RDMA wrappers which are implemented by the creators. Also, it can only be used for specific computer to computer connection and not generally packet inspection. 
 
 \begin{figure}[H]
@@ -258,22 +259,22 @@ Currently available native networking API's are capable of reading and writing p
 \subsubsection{Data Plane Development Kit (DPDK)}
 \label{subsec:dpdk}
 \todo{refer to in-depth section - also is this right?}
-Data Plane Development Kit (DPDK) \cite{dpdk} is a set of libraries and drivers which enabled fast packet processing with certain system set ups. Since DPDK is developed by Intel, it only supports Intel x86 CPU's and certain network interface controllers (NIC). DPDK overwrites the NIC's drivers meaning that the operating system doesn't recognise the network cards and can't interact with them. It installs its own drivers allowing it to interact with certain memory locations without permission from the kernel or even involving it in any way. \\
-\newline
-DPDK makes use of an environment abstraction layer (EAL) which hides the environmental specifics and provides a standard interface which any application can interact with. Due to this, if the system changes in any way, the DPDK library needs to be re-compiled with other features been re-enabled in order to allow applications to run correctly again. \\
-\newline
-In order to use the DPDK libraries for the intended purpose, data packets have to be written into the correct buffer location so they are inserted onto the network. I similar approach is used when receiving packets on the incoming buffer ring, but instead of the system using interrupts to acknowledge the arrival of a new packet, which is performance costly, it constantly polls the buffer space to check for new packets. DPDK also allows for multiple queues per NIC and can handle multiple NIC's per system, therefore scalability is a major bonus of the libraries. \\
-\newline
+Data Plane Development Kit (DPDK) \cite{dpdk} is a set of libraries and drivers which enabled fast packet processing with certain system set ups. Since DPDK is developed by Intel, it only supports Intel x86 CPU's and certain network interface controllers (NIC). DPDK overwrites the NIC's drivers meaning that the operating system doesn't recognise the network cards and can't interact with them. It installs its own drivers allowing it to interact with certain memory locations without permission from the kernel or even involving it in any way.
+
+DPDK makes use of an environment abstraction layer (EAL) which hides the environmental specifics and provides a standard interface which any application can interact with. Due to this, if the system changes in any way, the DPDK library needs to be re-compiled with other features been re-enabled in order to allow applications to run correctly again.
+
+In order to use the DPDK libraries for the intended purpose, data packets have to be written into the correct buffer location so they are inserted onto the network. I similar approach is used when receiving packets on the incoming buffer ring, but instead of the system using interrupts to acknowledge the arrival of a new packet, which is performance costly, it constantly polls the buffer space to check for new packets. DPDK also allows for multiple queues per NIC and can handle multiple NIC's per system, therefore scalability is a major bonus of the libraries.
+
 DPDK is very well documented on a number of levels. Firstly there is a online API which gives in depth details about what the methods, constants and structs do. There are a number of well written guides which give step-by-step details of how to install, set-up and use DPDK on various platforms and finally, there are many sample programs included with the build which give understanding of how the overall library works.
 
 \subsection{Benchmarking}
-Benchmarking is a process of testing hardware, individual components or full end to end systems to determine the performance of the application or hardware \todo{Examples of hardware comparisons}. Generally, benchmarking should be repeatable under numerous iterations without only minor variations in performance results. This is firstly to allow minor changes to be made to the application/component with re-runs of the benchmark showing the performance changes. Secondly, it allows accurate comparisons to be drawn between similar software or hardware with different implementations in order to derive \todo{better word for derive} a better product.\\
-\newline
+Benchmarking is a process of testing hardware, individual components or full end to end systems to determine the performance of the application or hardware \todo{Examples of hardware comparisons}. Generally, benchmarking should be repeatable under numerous iterations without only minor variations in performance results. This is firstly to allow minor changes to be made to the application/component with re-runs of the benchmark showing the performance changes. Secondly, it allows accurate comparisons to be drawn between similar software or hardware with different implementations in order to derive \todo{better word for derive} a better product.
+
 \todo{why I need benchmarking}
 
 \subsubsection{Programming Languages}
-It is well known that different programming languages can provide a radical change in execution for a given program. However, direct comparisons can't truly be trusted as certain languages are suited for for specific tasks and finding a benchmarking program to incorporate this is problematic. Other factors can be introduced when deciding on the optimisation level \todo{show example of optimising java and how different it looks, also different depending on architecture} and the compiler of JIT used. \todo{better phrasing off that sentence needed} \\
-\newline
+It is well known that different programming languages can provide a radical change in execution for a given program. However, direct comparisons can't truly be trusted as certain languages are suited for for specific tasks and finding a benchmarking program to incorporate this is problematic. Other factors can be introduced when deciding on the optimisation level \todo{show example of optimising java and how different it looks, also different depending on architecture} and the compiler of JIT used. \todo{better phrasing off that sentence needed}
+
 Numerous attempts have been made to compare languages, most noticeably the 'Benchmark Game' and Google. \todo{More here}
 \paragraph{Loop Recognition}\mbox{}\\
 Google inducted their own experiment on this problem, testing only C++, Java, Scala and Go on the loop recognition algorithm \todo{get paper}. Implementations made use of standard looping constructs and memory allocation schemes without the use of non-orthodox optimisation techniques. Selected results of this are shown below: \todo{explain difference with GC etc}
@@ -305,6 +306,8 @@ Google inducted their own experiment on this problem, testing only C++, Java, Sc
 The Benchmark Game is an online community which aims to find the best programming language by using multiple benchmarking algorithms running on different architecture configurations to determine the outcome. Again, even this community regard the best benchmark application to be your application. A few selected results are shown below between Java and C (those used in this report) for a few different benchmarks. \todo{get data}
 
 \paragraph{Using Economics}\mbox{}\\
+About economics paper
+
 \paragraph{Which is better?}
 
 \subsubsection{Intra-Language Techniques}

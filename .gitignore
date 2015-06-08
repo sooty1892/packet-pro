@@ -41,6 +41,7 @@
 *.blg
 *.gz*
 *.nfs*
+*.dvi
 
 # course docs folder
 /course_docs
