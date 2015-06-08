@@ -47,3 +47,4 @@
 *.o.d
 /apps/Firewall/app/
 *.gz*
+*.nfs*
