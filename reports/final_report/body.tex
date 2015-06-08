@@ -222,7 +222,7 @@ Processor affinity takes advantage of the fact that some remnants of a process t
 In Linux, Java thread uses the native thread(i.e, thread provided by Linux).
 This means the JVM creates a new native thread when the Java code creates a new java thread. So, the Java threads can be organised in any way the native threads can be organised.\\
 
-A native thread can be bound to a core through the sched_setaffinity() function. So, a Java thread can be bound to a core. If Java standard library does not provide a function to do so, then this function need to be provided through JNI. \\
+A native thread can be bound to a core through the sched\_setaffinity() function. So, a Java thread can be bound to a core. If Java standard library does not provide a function to do so, then this function need to be provided through JNI. \\
 
 In Linux, multi-threading is same as parallel threading. Linux kernel distribute threads among processors to balance the cpu load. However the individual threads can be bound with any core as wished. So, in Linux Java multi-threading is same as parallel threading.
 
