@@ -68,7 +68,30 @@ const char **blacklist;
 int blacklist_count = 0;
 int get_burst = 32;
 
-//TODO: THIS
+void freeArgs(char **, int);
+char *concat(char *, const char*);
+
+void freeArgs(char **argv, int argc) {
+	int i;
+	for (i = 0; i < argc; i++) {
+		free(argv[i]);
+	}
+	free(argv);
+}
+
+char *concat(char *old, const char *add) {
+	size_t len1 = strlen(old);
+	size_t len2 = strlen(add);
+
+	char *s = malloc(len1 + len2 + 1);
+	memcpy(s, old, len1);
+	memcpy(s + len1, add, len2 + 1);
+
+	free(old);
+
+	return s;
+}
+
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal(JNIEnv __attribute__ ((unused))*env, jclass __attribute__ ((unused))class) {
 	int argc = 1 + // program name
 			   2 + // core mask and flag
@@ -84,56 +107,31 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal(JNIEnv __attribute__ ((unu
 	for (i = 0; i < argc; i++) {
 		//overkill but works
 		argv[i] = malloc(120 * sizeof(char));
-	}*/
-
-	memcpy(argv[0], program_name, strlen(program_name));
-	memcpy(argv[1], "-c", 2);
-	memcpy(argv[2], "0x1", 3);
-	memcpy(argv[3], "-n", 2);
-	memcpy(argv[4], memory_channels, strlen(memory_channels));
-	memcpy(argv[5], "--file-prefix", 13);
-	memcpy(argv[6], program_id, strlen(program_id));
-	memcpy(argv[7], "-m", 2);
-	memcpy(argv[8], memory, strlen(memory));
-
-	for (i = 0; i < blacklist_count; i++) {
-		memcpy(argv[9+(i*2)], "-b", 2);
-		memcpy(argv[9+((i*2)+1)], blacklist[i], strlen(blacklist[i]));
 	}
 
-	/*char *argv[] = {"Pktcap",
-					"-c", "0x1",
-					"-n", "3",
-					"-m", "128",
-					"--file-prefix", "fw",
-					"-b", "00:08.0",
-					"-b", "00:03.0"};*/
+	strcpy(argv[0], program_name);
+	strcpy(argv[1], "-c\0");
+	strcpy(argv[2], "0x1\0");
+	strcpy(argv[3], "-n\0");
+	strcpy(argv[4], memory_channels);
+	strcpy(argv[5], "--file-prefix\0");
+	strcpy(argv[6], program_id);
+	strcpy(argv[7], "-m\0");
+	strcpy(argv[8], memory);
 
-	/*char *argv[] = {program_name,
-					"-c", "0x1",
-					"-n", memory_channels,
-					"-m", memory,
-					"--file-prefix", program_id,
-					""};*/
+	for (i = 0; i < blacklist_count; i++) {
+		strcpy(argv[9+(i*2)], "-b");
+		strcpy(argv[9+((i*2)+1)], blacklist[i]);
+	}
+
+	// can't free args since they are a constant and used throughout - at least in setup;
 
 	int ret = rte_eal_init(argc, argv);
 	if (ret < 0) {
-		// free args
-		/*int i;
-		for (i = 0; i < argc; i++) {
-			dealloc(argv[i]);
-		}
-		dealloc(argv);*/
 		return ERROR;
-	} /*else {
-		// free args
-		int i;
-		for (i = 0; i < argc; i++) {
-			dealloc(argv[i]);
-		}
-		dealloc(argv);
-	}*/
-	return SUCCESS;
+	} else {
+		return SUCCESS;
+	}
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1create_1mempool(JNIEnv *env, jclass __attribute__ ((unused)) class, jstring name, jint num_el, jint cache_size) {
@@ -205,12 +203,14 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1dev_1start(JNIEnv __attribute__ ((un
 	return SUCCESS;
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class) {
+JNIEXPORT jstring JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class) {
 	struct rte_eth_link link;
-
-	// TODO: get this printing on java side
-
+	
 	uint8_t portid, count, all_ports_up, print_flag = 0;
+
+	char *output;
+	output = (char *)malloc(1);
+	strcpy(output, "\0");
 
 	for (count = 0; count <= MAX_CHECK_TIME; count++) {
 		all_ports_up = 1;
@@ -221,15 +221,21 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status(JNIEnv __
 			rte_eth_link_get_nowait(portid, &link);
 			/* print link status if flag set */
 			if (print_flag == 1) {
-				if (link.link_status)
-					printf("Port %d Link Up - speed %u "
-						"Mbps - %s\n", (uint8_t)portid,
-						(unsigned)link.link_speed,
-				(link.link_duplex == ETH_LINK_FULL_DUPLEX) ?
-					("full-duplex") : ("half-duplex\n"));
-				else
-					printf("Port %d Link Down\n",
-						(uint8_t)portid);
+				if (link.link_status) {
+					char *temp = malloc(snprintf(NULL, 0, "Port %d Link Up - speed %u Mbps - %s\n",
+													(uint8_t)portid,
+													(unsigned)link.link_speed,
+													(link.link_duplex == ETH_LINK_FULL_DUPLEX) ? ("full-duplex") : ("half-duplex\n")) + 1);
+					sprintf(temp, "Port %d Link Up - speed %u Mbps - %s\n",
+													(uint8_t)portid,
+													(unsigned)link.link_speed,
+													(link.link_duplex == ETH_LINK_FULL_DUPLEX) ? ("full-duplex") : ("half-duplex\n"));
+					output = concat(output, temp);
+				} else {
+					char *temp = malloc(snprintf(NULL, 0, "Port %d Link Down\n", (uint8_t)portid));
+					sprintf(temp, "Port %d Link Down\n", (uint8_t)portid);
+					output = concat(output, temp);
+				}
 				continue;
 			}
 			/* clear all_ports_up flag if any link down */
@@ -243,18 +249,17 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status(JNIEnv __
 			break;
 
 		if (all_ports_up == 0) {
-			printf(".");
-			fflush(stdout);
+			output = concat(output, ".");
+			//fflush(stdout);
 			rte_delay_ms(CHECK_INTERVAL);
 		}
 
 		/* set the print_flag if all ports up or timeout */
 		if (all_ports_up == 1 || count == (MAX_CHECK_TIME - 1)) {
 			print_flag = 1;
-			printf("done\n");
 		}
 	}
-	return SUCCESS;
+	return (*env)->NewStringUTF(env, output);
 }
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1receive_1burst(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jint value) {

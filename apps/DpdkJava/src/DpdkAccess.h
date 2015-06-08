@@ -66,9 +66,9 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1dev_1start
 /*
  * Class:     DpdkAccess
  * Method:    nat_check_ports_link_status
- * Signature: ()I
+ * Signature: ()Ljava/lang/String;
  */
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status
+JNIEXPORT jstring JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status
   (JNIEnv *, jclass);
 
 /*

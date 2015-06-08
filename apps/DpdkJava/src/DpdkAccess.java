@@ -9,7 +9,7 @@ public class DpdkAccess {
 	private static native int nat_configure_rx_queue(int port_id, int rx_id);
 	private static native int nat_configure_tx_queue(int port_id, int tx_id);
 	private static native int nat_dev_start(int port_id);
-	private static native int nat_check_ports_link_status();
+	private static native String nat_check_ports_link_status();
 
 	private static native void nat_receive_burst(long pointer, int port_id, int rx_id);
 	private static native void nat_free_packets(long pointer);
@@ -55,7 +55,7 @@ public class DpdkAccess {
 		return nat_dev_start(port_id);
 	}
 	
-	public static int dpdk_check_ports_link_status() {
+	public static String dpdk_check_ports_link_status() {
 		return nat_check_ports_link_status();
 	}
 	

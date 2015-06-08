@@ -148,11 +148,7 @@ public class ApplicationStarter {
 	
 	// checks link status of all ports
 	public void dpdk_check_ports_link_status() {
-		if (DpdkAccess.dpdk_check_ports_link_status() < 0) {
-			System.out.println("-----dpdk_check_ports_link_status failed");
-		} else {
-			System.out.println("Link status checking complete");
-		}
+		System.out.println(DpdkAccess.dpdk_check_ports_link_status());
 	}
 	
 	// starts all threads - affinity threads and stats thread
