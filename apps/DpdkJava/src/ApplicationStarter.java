@@ -73,8 +73,12 @@ public class ApplicationStarter {
 	
 	// updates which pollers and senders to get stats from
 	public void updateStatsInfo(List<ReceivePoller> receivers, List<PacketSender> transmitters) {
-		stats.setReceivers(receivers);
-		stats.setTransmitters(transmitters);
+		stats.addReceivers(receivers);
+		stats.addTransmitters(transmitters);
+	}
+	
+	public Stats getStats() {
+		return stats;
 	}
 	
 	// initialise dpdk environment abstraction layer (EAL)

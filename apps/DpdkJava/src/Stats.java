@@ -1,8 +1,10 @@
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.Timer;
 import java.io.OutputStream;
 import java.io.PrintStream;
+
 import javax.swing.*;
 
 /*
@@ -31,12 +33,32 @@ public class Stats implements Runnable {
 	private JTextField send_gap_count = null;
 	private JTextField send_gap_size = null;
 	
-	public void setReceivers(List<ReceivePoller> list) {
-		this.receivers = list;
+	public void addReceivers(List<ReceivePoller> list) {
+		for (ReceivePoller rp : list) {
+			if (!receivers.contains(rp)) {
+				receivers.add(rp);
+			}
+		}
+	}
+
+	public void addTransmitters(List<PacketSender> list) {
+		for (PacketSender ps : list) {
+			if (!transmitters.contains(ps)) {
+				transmitters.add(ps);
+			}
+		}
 	}
 	
-	public void setTransmitters(List<PacketSender> list) {
-		this.transmitters = list;
+	public void addReceivers(ReceivePoller rp) {
+		if (!receivers.contains(rp)) {
+			receivers.add(rp);
+		}
+	}
+	
+	public void addTransmitters(PacketSender ps) {
+		if (!transmitters.contains(ps)) {
+			transmitters.add(ps);
+		}
 	}
 	
 	public Stats(List<ReceivePoller> receivers, List<PacketSender> transmitters, boolean gui) {
@@ -65,6 +87,8 @@ public class Stats implements Runnable {
 		if (gui) {
 			initGui();
 		}
+		this.receivers = new ArrayList<ReceivePoller>();
+		this.transmitters = new ArrayList<PacketSender>();
 	}
 	
 	public void initGui() {
