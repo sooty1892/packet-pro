@@ -25,6 +25,8 @@ public class ApplicationStarter {
 	private static final String PROGRAM_NAME = "programname";
 	
 	private static final int ERROR = -1;
+
+	private boolean working;
 	
 	// results from config.properties files
 	Map<String, String> config_map;
@@ -37,6 +39,7 @@ public class ApplicationStarter {
 	
 	public ApplicationStarter() {
 		num_available_cores = Runtime.getRuntime().availableProcessors();
+		working = true;
 	}
 	
 	// Puts all runnables into affinity thread and assigns them a core
@@ -44,6 +47,7 @@ public class ApplicationStarter {
 		aff_threads = new ArrayList<AffinityThread>();
 		if (threads.size() > num_available_cores) {
 			System.out.println("-----Too many threads for number of cores");
+			working = false;
 			return ;
 		}
 		int core = 0;
@@ -51,6 +55,7 @@ public class ApplicationStarter {
 			AffinityThread af = new AffinityThread(ct, core, num_available_cores);
 			if (!af.ifWorked()) {
 				System.out.println("-----Affinity thread creation failed on core assignment");
+				working = false;
 			}
 			aff_threads.add(af);
 			core++;
@@ -85,6 +90,7 @@ public class ApplicationStarter {
 	public void dpdk_init_eal() {
 		if (DpdkAccess.dpdk_init_eal() < 0) {
 			System.out.println("-----dpdk_init_eal failed");
+			working = false;
 		} else {
 			System.out.println("EAL initialised");
 		}
@@ -95,6 +101,7 @@ public class ApplicationStarter {
 	public void dpdk_create_mempool(String name, int num_el, int cache_size) {
 		if (DpdkAccess.dpdk_create_mempool(name, num_el, cache_size) < 0) {
 			System.out.println("-----dpdk_create_mempool failed");
+			working = false;
 		} else {
 			System.out.println("Created mempool " + name);
 		}
@@ -105,6 +112,7 @@ public class ApplicationStarter {
 		int ports = DpdkAccess.dpdk_check_ports();
 		if (ports < 0) {
 			System.out.println("-----dpdk_check_ports failed");
+			working = false;
 		} else {
 			System.out.println("Ports available: " + ports);
 		}
@@ -114,6 +122,7 @@ public class ApplicationStarter {
 	public void dpdk_configure_dev(int port_id, int rx_num, int tx_num) {
 		if (DpdkAccess.dpdk_configure_dev(port_id, rx_num, rx_num) < 0) {
 			System.out.println("-----dpdk_configure_dev failed");
+			working = false;
 		} else {
 			System.out.println("Configured port " + port_id);
 		}
@@ -123,6 +132,7 @@ public class ApplicationStarter {
 	public void dpdk_configure_rx_queue(int port_id, int rx_id) {
 		if (DpdkAccess.dpdk_configure_rx_queue(port_id, rx_id) < 0) {
 			System.out.println("-----dpdk_configure_rx_queue failed");
+			working = false;
 		} else {
 			System.out.println("Configured rx queue " + rx_id + " on port " + port_id);
 		}
@@ -132,6 +142,7 @@ public class ApplicationStarter {
 	public void dpdk_configure_tx_queue(int port_id, int tx_id) {
 		if (DpdkAccess.dpdk_configure_tx_queue(port_id, tx_id) < 0) {
 			System.out.println("-----dpdk_configure_tx_queue failed");
+			working = false;
 		} else {
 			System.out.println("Configured tx queue " + tx_id + " on port " + port_id);
 		}
@@ -141,6 +152,7 @@ public class ApplicationStarter {
 	public void dpdk_dev_start(int port_id) {
 		if (DpdkAccess.dpdk_dev_start(port_id) < 0) {
 			System.out.println("-----dpdk_dev_start failed");
+			working = false;
 		} else {
 			System.out.println("Started port " + port_id);
 		}
@@ -154,7 +166,10 @@ public class ApplicationStarter {
 	// starts all threads - affinity threads and stats thread
 	public void startAll() {
 		//TODO: access to ethernet header?
-        
+        if (!working) {
+		System.out.println("-----Not starting threads - start up failed");
+		System.exit(-1);
+	}
         if (stats != null) {
         	new Thread(stats).start();
         }

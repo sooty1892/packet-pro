@@ -13,7 +13,7 @@ public class Firewall {
 		
 		ApplicationStarter as = new ApplicationStarter();
 		
-		as.setupGui(true);
+		as.setupGui(false);
 		
 		List<ReceivePoller> rps = new ArrayList<ReceivePoller>();
 		List<PacketSender> pss = new ArrayList<PacketSender>();
