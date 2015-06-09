@@ -154,7 +154,6 @@ public class ApplicationStarter {
 	// starts all threads - affinity threads and stats thread
 	public void startAll() {
 		//TODO: access to ethernet header?
-		//TODO: check dpdkaccess.c for comments and sorting out some of the methods
         
         if (stats != null) {
         	new Thread(stats).start();

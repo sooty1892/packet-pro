@@ -23,7 +23,7 @@ public class Ipv4Packet extends Packet {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Version_ihl: " + getVersionIhl() + "\n");
 		sb.append("Type Of Service: " + getTypeOfService() + "\n");
-		sb.append("Total Length: " + getTotalLength() + "\n");
+		sb.append("Total Length: " + getLength() + "\n");
 		sb.append("Packet Id: " + getPacketId() + "\n");
 		sb.append("Fragment Offset: " + getFragmentOffset() + "\n");
 		sb.append("Time To Live: " + getTimeToLive() + "\n");
@@ -89,12 +89,16 @@ public class Ipv4Packet extends Packet {
 		return ua.getByte();
 	}
 	
+	public int getVersion() {
+		return getVersionIhl() >> 4;
+	}
+	
 	public int getTypeOfService() {
 		ua.setCurrentPointer(packet_pointer + TYPE_OF_SERVICE_OFFSET);
 		return ua.getByte();
 	}
 	
-	public int getTotalLength() {
+	public int getLength() {
 		ua.setCurrentPointer(packet_pointer + TOTAL_LENGTH_OFFSET);
 		return ua.getShort();
 	}

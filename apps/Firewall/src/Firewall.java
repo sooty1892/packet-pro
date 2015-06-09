@@ -23,6 +23,7 @@ public class Firewall {
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.exit(-1);
 		}
 		as.sendDPDKInformation();
 		

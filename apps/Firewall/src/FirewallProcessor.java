@@ -24,23 +24,22 @@ public class FirewallProcessor extends PacketProcessor {
 
 	private boolean inspect(Packet currentPacket) {
 		int version = currentPacket.whichIP();
-		assert(version == 4 || version == 6);
-		
+
 		if (version == 4) {
 			Ipv4Packet cp = (Ipv4Packet)currentPacket;
 			if (blacklist.contains(cp.getSrcAddr())) {
 				pf.get(0).freePacket(currentPacket);
-				return false;
 			} else {
 				ps.get(0).sendPacket(currentPacket);
-				pf.get(0).freePacket(currentPacket);
 				return true;
 			}
-		} else {
-			//Ipv6Packet cp = (Ipv6Packet)p;
+		} else if (version == 6) {
+			System.out.println("Not handling IPv6 - skipping and freeing");
 			pf.get(0).freePacket(currentPacket);
-			return false;
+		} else {
+			System.out.println("Packet received where version isn't 4 or 6 - skipping and freeing");
 		}
+		return false;
 	}
 	
 	private void readBlacklist() {
@@ -67,6 +66,7 @@ public class FirewallProcessor extends PacketProcessor {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private void printBlacklist() {
 		System.out.println("Blacklist contains:");
 		for (Long l : blacklist) {

@@ -61,17 +61,19 @@ public class ReceivePoller {
 		if (packet_count > 0) {
 			
 			for (int i = 0; i < packet_count; i++) {
-				//Packet p = new Packet();
-				
+
 				long new_pointer = mem_pointer + (2*i*ua.longSize());
 				ua.setCurrentPointer(new_pointer);
 				long mbuf = ua.getLong();
 				long packet = ua.getLong();
 				
-				Ipv4Packet p = new Ipv4Packet(mbuf, packet);
+				Packet p = new Ipv4Packet(mbuf, packet);
+				if (p.getVersion() == 6) {
+					p = new Ipv6Packet(mbuf, packet);
+				}
 				
-				packet_all_size += p.getTotalLength(); // plus ethernet header?
-				packet_interval_size += p.getTotalLength();
+				packet_all_size += p.getLength(); // plus ethernet header?
+				packet_interval_size += p.getLength();
 				
 				packets.add(p);
 			}

@@ -15,13 +15,13 @@ public class PacketFreeer {
 	int free_burst;
 	
 	private static final int DEFAULT_FREE_BURST = 32;
-	private static final long NANO_SECOND = 1000000000;
+	private static final long MILLI_SECOND = 1000;
 	private static final int SHORT_SIZE = 2;
 	
 	public PacketFreeer() {
 		list = new ArrayList<Packet>();
 		ua = new UnsafeAccess();
-		past_freed = System.nanoTime();
+		past_freed = System.currentTimeMillis();
 		free_burst = DEFAULT_FREE_BURST;
 	}
 	
@@ -36,7 +36,7 @@ public class PacketFreeer {
 	// checks if the given time period has occurred since last packet freeing
 	// used so packets are held in memory for too long for no reason
 	private boolean isTimedOut() {
-		return (System.nanoTime() - past_freed) >= NANO_SECOND;
+		return (System.currentTimeMillis() - past_freed) >= MILLI_SECOND;
 	}
 	
 	// packet added to free list and checks made for
@@ -45,7 +45,7 @@ public class PacketFreeer {
 		list.add(p);
 		if (list.size() >= free_burst || isTimedOut()) {
 			freeBurst();
-			past_freed = System.nanoTime();
+			past_freed = System.currentTimeMillis();
 		}
 	}
 	

@@ -48,5 +48,7 @@ public abstract class Packet {
 	}
 	
 	public abstract String toString();
+	public abstract int getLength();
+	public abstract int getVersion();
 	
 }

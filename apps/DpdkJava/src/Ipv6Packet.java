@@ -17,12 +17,10 @@ public class Ipv6Packet extends Packet {
 		super(mbuf, packet);
 	}
 	
-	//TODO: check struct is packed
-	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Vtc Flow: " + getVtcFlow() + "\n");
-		sb.append("Payload Length: " + getPayloadLength() + "\n");
+		sb.append("Payload Length: " + getLength() + "\n");
 		sb.append("Proto: " + getProto() + "\n");
 		sb.append("Hop Limits: " + getHopLimits() + "\n");
 		sb.append("Src Addr: " + getSrcAddr().toString() + "\n");
@@ -64,12 +62,16 @@ public class Ipv6Packet extends Packet {
 		}
 	}
 	
+	public int getVersion() {
+		return (int)(getVtcFlow() >> 28);
+	}
+	
 	public long getVtcFlow() {
 		ua.setCurrentPointer(packet_pointer + VTC_FLOW_OFFSET);
 		return ua.getInt();
 	}
 	
-	public int getPayloadLength() {
+	public int getLength() {
 		ua.setCurrentPointer(packet_pointer + PAYLOAD_LENGTH_OFFSET);
 		return ua.getShort();
 	}
