@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /*
- * Starter class for Firewall application
+ * Starter class for Packet capture application
  */
 
-public class Firewall {
-
+public class PacketCap {
+	
 	public static void main(String[] args) {
 		
 		ApplicationStarter as = new ApplicationStarter();
@@ -36,7 +36,7 @@ public class Firewall {
 		rps.add(rp);
 		pss.add(ps);
 		
-		threads.add(new FirewallProcessor(ps, pf, rp));
+		threads.add(new CaptureProcessor(ps, pf, rp));
 		
 		as.createAffinityThreads(threads);
 		
@@ -52,6 +52,7 @@ public class Firewall {
 		as.updateStatsInfo(rps, pss);
 		
 		as.startAll();
+		
 	}
 	
 }
