@@ -384,3 +384,20 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity(JNIEnv __attri
    return 1;
 }
 
+JNIEXPORT jstring JNICALL Java_DpdkAccess_nat_1get_1mac_1info(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class) {
+	char *output;
+	output = (char *)malloc(1);
+	strcpy(output, "\0");
+
+	int i;
+	for (i = 0; i < num_ports; i++) {
+		struct ether_addr eth;
+		rte_eth_macaddr_get(i, &eth);
+		char *temp = malloc(20);
+		ether_format_addr(temp, 20, eth);
+		output = concat(output, temp);
+	}
+
+	return (*env)->NewStringUTF(env, output);
+}
+

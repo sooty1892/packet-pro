@@ -23,6 +23,8 @@ public class DpdkAccess {
 	private static native void nat_set_blacklist(String[] value);
 	private static native int nat_set_thread_affinity(int core, int avail);
 	
+	private static native String nat_get_mac_info();
+	
 	static {
 		System.loadLibrary("nat_dpdk");
 	}
@@ -97,6 +99,10 @@ public class DpdkAccess {
 	
 	public static int set_thread_affinity(int core, int avail) {
 		return nat_set_thread_affinity(core, avail);
+	}
+	
+	public static String dpdk_get_mac_info() {
+		return nat_get_mac_info();
 	}
 	
 }

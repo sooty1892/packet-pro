@@ -51,6 +51,8 @@ public class Firewall {
 		
 		as.updateStatsInfo(rps, pss);
 		
+		as.dpdk_get_mac_info();
+		
 		as.startAll();
 	}
 	

@@ -163,6 +163,10 @@ public class ApplicationStarter {
 		System.out.println(DpdkAccess.dpdk_check_ports_link_status());
 	}
 	
+	public void dpdk_get_mac_info() {
+		System.out.println(DpdkAccess.dpdk_get_mac_info());
+	}
+	
 	// starts all threads - affinity threads and stats thread
 	public void startAll() {
 		//TODO: access to ethernet header?

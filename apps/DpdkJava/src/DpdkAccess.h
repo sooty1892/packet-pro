@@ -151,6 +151,14 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1blacklist
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity
   (JNIEnv *, jclass, jint, jint);
 
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_get_mac_info
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_DpdkAccess_nat_1get_1mac_1info
+  (JNIEnv *, jclass);
+
 #ifdef __cplusplus
 }
 #endif
