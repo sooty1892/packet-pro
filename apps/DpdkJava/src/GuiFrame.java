@@ -54,7 +54,7 @@ public class GuiFrame extends JFrame {
 	}
 
 	public GuiFrame() {
-		setTitle("DPDK Info");
+		setTitle("DPDK Java Packet Rx/Tx Info");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		getContentPane().setLayout(null);
 		
