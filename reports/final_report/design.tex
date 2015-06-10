@@ -87,7 +87,7 @@ Using Unsafe then allows direct native memory access to retrieve data in any of 
 
 \subsubsection{JNA?}
 
-\subsubsection{Packing C Structs}
+\subsubsection{Packing C Structs - in its own section?}
 Structs are a way of defining complex data into a grouped set in order to make this data easier to access and reference as shown in Code \ref{lst:c_struct}.
 
 \begin{lstlisting}[language=C, caption={Example C Struct}, label=lst:c_struct]
@@ -175,7 +175,7 @@ casting to an odd pointer will slow down code and could work. Other architecture
 \subsubsection{Javolution}
 \subsubsection{Performance testing}
 
-\subsubsection{Thread affinity}
+\subsection{Thread affinity}
 Thread.currentThread().getId(); just gets id of thread relative to jvm.
 
 It keeps a process limited to certain a certain core or cores. Process will still be taken out of use and switched back in but without the problem of moving cache between cores.
@@ -197,5 +197,12 @@ This means the JVM creates a new native thread when the Java code creates a new 
 A native thread can be bound to a core through the sched\_setaffinity() function. So, a Java thread can be bound to a core. If Java standard library does not provide a function to do so, then this function need to be provided through JNI.
 
 In Linux, multi-threading is same as parallel threading. Linux kernel distribute threads among processors to balance the cpu load. However the individual threads can be bound with any core as wished. So, in Linux Java multi-threading is same as parallel threading.
+
+\subsection{Endian-ness}
+
+\subsection{Data type conversion}
+
+\subsection{Protocol undertaking}
+just IP (4 and ) supporting udp and tcp (i think), no ARP etc
 
 \end{document}

@@ -30,9 +30,10 @@ This will eventually build a packet of data which include the original raw data 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{img/headers.png}
-	\caption{Network model headers \cite{headers}}
+	\caption{Network model headers}
 	\label{fig:headers}
 \end{figure}
+\todo{cite headers}
 
 \subsubsection{Network Packets}
 A network packet is responsible for carrying data from a source to a destination. Packets are routed, fragmented and dropped via information stored within the packet's header. Note: in this report packets and datagrams are interchangeable. Data within the packets are generally input from the application layer, and headers are appended to the front of this data depending on the network level described in \todo{ref this}. Packets are routed to their destination based on a combination of an IP address and MAC address which corresponds to a specific computer located within the network, whether that is a public or private network. In this project we will only be concerned with the Internet Protocol (IP) and therefore IPv4 and IPv6 packet headers. \todo{update software for ipv6} \todo{ref packet headers below}
@@ -40,9 +41,10 @@ A network packet is responsible for carrying data from a source to a destination
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{img/ipv4header.png}
-	\caption{IPv4 Packet Header \cite{ipv4}}
+	\caption{IPv4 Packet Header}
 	\label{fig:ipv4}
 \end{figure}
+\todo{cite{ipv4}}
 
 \begin{itemize}
 	\item Version - IP version number (set to 4 for IPv4)
