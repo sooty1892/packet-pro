@@ -2,34 +2,6 @@
 
 \begin{document}
 
-\section{DPDK}
-This section will go into much more detail about the Data Plane Development Kit (DPDK), focussing on the basic concepts used by the fast packet processing framework for use within custom applications.
-
-\subsection{Environment Abstraction Layer (EAL)}
-The EAL abstracts the specific environment from the user and provides a constant interface in order for applications to be ported to other environments without problems. The EAL may change depending on the architecture (32-bit or 64-bit), operating system, compilers in use or network interface cards. This is done via the creation of a set of libraries that are environment specific and are responsible for the low-level operations gaining access to hardware and memory resources.
-
-On the start-up of an application, the EAL is responsible for finding PCI information about devices and addresses via the igb\_uio kernel module, performing physical memory allocation using huge pages \todo{reference this} and starting user-level threads for the logical cores (lcores) of the application. 
-
-\subsection{huge pages}
-Huge pages are a way of increasing performance when dealing with large amounts of memory. Normally, memory is managed in 4096 byte blocks known as pages, which are listed within the CPU memory management unit (MMU). However, if a system uses a large amount of memory, increasing the number of standard pages is expensive on the CPU as the MMU can only handle thousands of pages and not millions.
-
-The solution is to increase the page size from 4KB to 2MB or 1GB (if supported) which keeps the number of pages references small in the MMU but increases the overall memory for the system. Huge pages should be assigned at boot time for better overall management, but can be manual assigned on initial boot up if required.
-
-DPDK makes uses of huge pages simply for increased performance due to the large amount of packets in memory. This is even the case if the system memory size is relatively small and the application isn't processing an extreme number of packets.
-
-\subsection{Ring Buffer}
-A ring buffer is used by DPDK to manage transmit and receive queues for each network port on the system. This fixed sized first-in-first-out system allows multiple objects to be enqueued and dequeued from the ring at the same time from any number of consumers or producers. A major disadvantage of this is that once the ring is full (more of a concern in receive queues), it no more objects can be added to the ring, resulting in dropped packets. It is therefore imperative that applications can processes packets at the required rate.
-
-\subsection{Memory usage - malloc, mempool, mbuf}
-DPDK can make use of non-uniform memory access (NUMA) if the system supports it. NUMA is a method for speeding up memory access when multiple processors are trying to access the same memory and therefore reduces the processors waiting time. Each processor will receive its own bank of memory which is faster to access as it doesn't have to wait. As applications become more extensive, processors may need to share memory, which is possible via moving the data between memory banks. This somewhat negates the need for NUMA, but NUMA can be very effective depending on the application. DPDK can make extensive use of NUMA as each logical core is generally responsible for its own queues, and since queues can't be shared between logical cores, data sharing is rare.
-
-As discussed previously \todo{ref}, DPDK uses hugepages in memory and therefore it provides its own malloc library, which as expected, allocates hugepage memory to the user. However, as DPDK focusses on raw speed, the use of the DPDK malloc isn't suggested as pool-bases allocation is faster. DPDK also provides ways to malloc memory on specific sockets depending on the NUMA configuration of the application.
-
-\todo{finish this section}
-
-\subsection{Poll Mode Driver (PMD)}
-A Poll Mode Driver (PMD) is responsible 
-
 \section{Initial language comparison}
 Before any implementation or specific design considerations were undertaken, an evaluation of the performance of C, Java and Java using the Java Native Interface (JNI) was carried out. Although data from existing articles and websites could be used for Java and C, there was no existing direct comparisons between them and the JNI, therefore custom tests were carried out.
 
@@ -196,7 +168,7 @@ Note that if a struct contains another struct, that struct should be packed recu
 
 Char doesn't have alignment and can start on any address. But 2-byte shorts must start on an even address, 4-byte ints or floats must start on an address divisible by 4, and 8-byte longs or doubles must start on an address divisible by 8. Signed or unsigned makes no difference.
 
-Self-alignment makes access faster because it facilitates generating single-instruction fetches and puts of the typed data. Without alignment constraints, on the other hand, the code might end up having to do two or more accesses spanning machine-word boundaries. Characters are a special case; they’re equally expensive from anywhere they live inside a single machine word. That’s why they don’t have a preferred alignment.
+Self-alignment makes access faster because it facilitates generating single-instruction fetches and puts of the typed data. Without alignment constraints, on the other hand, the code might end up having to do two or more accesses spanning machine-word boundaries. Characters are a special case; they√ïre equally expensive from anywhere they live inside a single machine word. That√ïs why they don√ït have a preferred alignment.
 
 casting to an odd pointer will slow down code and could work. Other architectures will take the word which the pointer points to and therefore the problem occurs above.
 
@@ -225,9 +197,5 @@ This means the JVM creates a new native thread when the Java code creates a new 
 A native thread can be bound to a core through the sched\_setaffinity() function. So, a Java thread can be bound to a core. If Java standard library does not provide a function to do so, then this function need to be provided through JNI.
 
 In Linux, multi-threading is same as parallel threading. Linux kernel distribute threads among processors to balance the cpu load. However the individual threads can be bound with any core as wished. So, in Linux Java multi-threading is same as parallel threading.
-
-\section{General Implementation}
-\subsection{Shared Libraries}
-\subsection{Handling Errors}
 
 \end{document}
