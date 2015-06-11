@@ -261,7 +261,7 @@ Currently available native networking API's are capable of reading and writing p
 \subsubsection{Data Plane Development Kit (DPDK)}
 \label{subsec:dpdk}
 \todo{refer to in-depth section - also is this right?}
-Data Plane Development Kit (DPDK) \cite{dpdk} is a set of libraries and drivers which enabled fast packet processing with certain system set ups. Since DPDK is developed by Intel, it only supports Intel x86 CPU's and certain network interface controllers (NIC). DPDK overwrites the NIC's drivers meaning that the operating system doesn't recognise the network cards and can't interact with them. It installs its own drivers allowing it to interact with certain memory locations without permission from the kernel or even involving it in any way.
+Data Plane Development Kit (DPDK) \cite{dpdk} is a set of libraries and drivers which enabled fast packet processing with certain system set ups. Since DPDK is developed by Intel, it only supports Intel x86 CPU's and certain network interface controllers (NIC). DPDK overwrites the NIC's drivers meaning that the operating system doesn't recognise the network cards and can't interact with them. It make use of drivers run in user space allowing it to interact with certain memory locations without permission from the kernel or even involving it in any way.
 
 DPDK makes use of an environment abstraction layer (EAL) which hides the environmental specifics and provides a standard interface which any application can interact with. Due to this, if the system changes in any way, the DPDK library needs to be re-compiled with other features been re-enabled in order to allow applications to run correctly again.
 
