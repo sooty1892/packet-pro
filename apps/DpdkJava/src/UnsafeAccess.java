@@ -19,7 +19,8 @@ public class UnsafeAccess {
 	private static final long MIN_SHORT = 0;
 	private static final long MAX_INT = Long.parseLong("4294967295");
 	private static final long MIN_INT = 0;
-	private static final long MAX_LONG = Long.parseLong("18446744073709551615");
+	//private static final long MAX_LONG = Long.parseLong("18446744073709551615");
+	private static final long MAX_LONG = 0;
 	private static final long MIN_LONG = 0;
 	
 	Unsafe unsafe;
@@ -94,7 +95,7 @@ public class UnsafeAccess {
 	}
 	
 	public void putLong(long value) {
-		checkBounds(value, LONG_SIZE);
+		//checkBounds(value, LONG_SIZE);
 		unsafe.putLong(currentPointer + offset, value);
 		offset += LONG_SIZE;
 	}

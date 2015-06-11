@@ -162,6 +162,10 @@ public class ApplicationStarter {
 	public void dpdk_check_ports_link_status() {
 		System.out.println(DpdkAccess.dpdk_check_ports_link_status());
 	}
+
+	public void dpdk_enable_pro() {
+		DpdkAccess.dpdk_enable_pro();
+	}
 	
 	public void dpdk_get_mac_info() {
 		System.out.println(DpdkAccess.dpdk_get_mac_info());

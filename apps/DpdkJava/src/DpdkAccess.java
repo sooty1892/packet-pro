@@ -22,11 +22,17 @@ public class DpdkAccess {
 	private static native void nat_set_program_id(String value);
 	private static native void nat_set_blacklist(String[] value);
 	private static native int nat_set_thread_affinity(int core, int avail);
+
+	private static native void nat_enable_pro();
 	
 	private static native String nat_get_mac_info();
 	
 	static {
 		System.loadLibrary("nat_dpdk");
+	}
+
+	public static void dpdk_enable_pro() {
+		nat_enable_pro();
 	}
 	
 	public static int dpdk_init_eal() {

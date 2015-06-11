@@ -267,7 +267,7 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1receive_1burst(JNIEnv __attribu
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1name(JNIEnv *env, jclass __attribute__ ((unused)) class, jstring value) {
 	program_name = (*env)->GetStringUTFChars(env, value, 0);
-	printf("INT SIZE: %zu\n", sizeof(int));
+	//printf("INT SIZE: %zu\n", sizeof(int));
 }
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1memory_1channels(JNIEnv *env, jclass __attribute__ ((unused)) class, jstring value) {
@@ -406,3 +406,9 @@ JNIEXPORT jstring JNICALL Java_DpdkAccess_nat_1get_1mac_1info(JNIEnv __attribute
 	return (*env)->NewStringUTF(env, output);
 }
 
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1enable_1pro(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class) {
+	int i;
+	for (i = 0; i < num_ports; i++) {
+		 rte_eth_promiscuous_enable(i);
+	}
+}

@@ -13,7 +13,7 @@ public class PacketCap {
 		
 		ApplicationStarter as = new ApplicationStarter();
 		
-		as.setupGui(true);
+		as.setupGui(false);
 		
 		List<ReceivePoller> rps = new ArrayList<ReceivePoller>();
 		List<PacketSender> pss = new ArrayList<PacketSender>();
@@ -48,6 +48,8 @@ public class PacketCap {
 		as.dpdk_configure_tx_queue(0, 0);
 		as.dpdk_dev_start(0);
 		as.dpdk_check_ports_link_status();
+
+		as.dpdk_enable_pro();
 		
 		as.updateStatsInfo(rps, pss);
 		

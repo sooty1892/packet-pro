@@ -153,6 +153,14 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity
 
 /*
  * Class:     DpdkAccess
+ * Method:    nat_enable_pro
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1enable_1pro
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     DpdkAccess
  * Method:    nat_get_mac_info
  * Signature: ()Ljava/lang/String;
  */
