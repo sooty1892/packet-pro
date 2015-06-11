@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 n_groups = 4
 
-DATA = [23, 24, 63, 6918]
+DATA = [22, 23, 73, 14254]
 DATA2 = np.log10(DATA)
 RATIO = [x/float(DATA[0]) for x in DATA]
 RoundedRatio = [ '%.2f' % elem for elem in RATIO]
@@ -49,7 +49,3 @@ autolabel(chart1)
 
 plt.tight_layout()
 plt.show()
-
-x = 5
-y = "FUN"
-print str(x)+y

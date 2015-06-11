@@ -244,27 +244,37 @@ The graphs show the time in nanoseconds which it tool to process an individual p
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{img/figure_1.png}
-	\caption{OSI vc TCP/IP Model}
+	\includegraphics[width=0.8\textwidth]{img/server.png}
+	\caption{Server}
 	\label{fig:layers}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{img/figure_1.png}
-	\caption{OSI vc TCP/IP Model}
+	\includegraphics[width=0.8\textwidth]{img/mac.png}
+	\caption{Mac}
 	\label{fig:layers}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{img/figure_1.png}
-	\caption{OSI vc TCP/IP Model}
+	\includegraphics[width=0.8\textwidth]{img/vm.png}
+	\caption{VM}
 	\label{fig:layers}
 \end{figure}
+
+\todo[inline]{should these graphs all be together because they look the same}
 
 \subsubsection{Evaluation}
+As the graphs show, the exceptions declared earlier have been met. The object technique should be completely disregard, even though it offers the easiest solution. Due to its abysmal performance, been 300 - 650 times slower than the faster technique, its not going to help with packet throughput.
 
+For similar reasons Byte buffer should be disregarded as well simply because its too slow compared to the other methods. The amount of data copying with this technique is the downfall, although this could have potentially worked if structs could be directly written into the buffers. \todo{cant be done and reference earlier}
+
+The difference between the direct and unsafe methods is minimal on all 3 machines. The direct technique is slightly faster since it doesn't copy the data into the object although Java is surprisingly fast at this as proven by the unsafe results. Furthermore, in general middleware software, there isn't the requirement to access all data fields of the packets generally, therefore storing them all in objects can be seen as needless copying. This is where the direct access technique excels since it only accesses data which it needs to been zero-copy. Direct access was therefore chosen as the technique to use for the implementation which goes into further details about how this was done.
+
+\todo[inline]{extension to remove packet pointer passing and do it directly from struct array - would have to dynamically pack array though - how????}
+
+\todo[inline]{do hardware testing - ie hardware faster than programs (i think) so should aim for throughput and not efficiency}
 
 \subsection{Thread affinity}
 Thread.currentThread().getId(); just gets id of thread relative to jvm.
