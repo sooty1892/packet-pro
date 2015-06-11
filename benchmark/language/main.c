@@ -4,8 +4,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#define NUM_ITER 1000
-#define NUM_PACKS 100000
+#define NUM_ITER 10
+#define NUM_PACKS 1000000
 
 struct packet {
 	int a,b,c,d,e,result;
@@ -40,10 +40,10 @@ void proPacket(struct packet *p) {
 }
 
 void process_data(struct timespec *t) {
-	//uint64_t start, end;
-	//start = mach_absolute_time();
+	uint64_t start, end;
+	////start = mach_absolute_time();
 	int i;
-	for (i = 0; i < 10000; i++) {
+	for (i = 0; i < NUM_PACKS; i++) {
 		struct packet p;
 		p.result = -1;
 		popPacket(&p);
@@ -58,14 +58,12 @@ void process_data(struct timespec *t) {
 
 
 int main(int argc, char **argv) {
-	//struct timespec total;
 	int i;
 	for (i=0; i < NUM_ITER; i++) {
 		struct timespec t;
 		process_data(&t);
-		//total.tv_sec += t.tv_sec;
-		//total.tv_nsec += t.tv_nsec;
+		//printf("%f seconds, %lu nanoseconds\n", (double)t.tv_sec, t.tv_nsec);
+		//printf("%lu\n", t.tv_nsec / NUM_PACKS);
 	}
-	//printf("%f seconds, %lu nanoseconds\n", (double)total.tv_nsec / 1000000000.0, total.tv_nsec);
 	return 0;
 }

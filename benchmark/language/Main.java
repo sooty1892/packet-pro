@@ -2,16 +2,14 @@ import java.util.Random;
 
 public class Main {
 	
-	private static final int NUM_ITER = 1000;
-	private static final int NUM_PACKS = 100000;
+	private static final int NUM_ITER = 10;
+	private static final int NUM_PACKS = 1000000;
 
 	public static void main(String[] args) {
-		long total_time = 0;
 		for (int i = 0; i < NUM_ITER; i++) {
-			total_time += process_data();
+			System.out.println(process_data());
+			System.out.println(process_data() / NUM_PACKS);
 		}
-		double seconds = ((double)(total_time) / 1000000000.0);
-		System.out.printf("Average was " + seconds);
 	}
 	
 	private static void popPacket(Packet p) {
