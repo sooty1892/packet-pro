@@ -267,6 +267,7 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1receive_1burst(JNIEnv __attribu
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1name(JNIEnv *env, jclass __attribute__ ((unused)) class, jstring value) {
 	program_name = (*env)->GetStringUTFChars(env, value, 0);
+	printf("INT SIZE: %zu\n", sizeof(int));
 }
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1memory_1channels(JNIEnv *env, jclass __attribute__ ((unused)) class, jstring value) {
@@ -394,7 +395,11 @@ JNIEXPORT jstring JNICALL Java_DpdkAccess_nat_1get_1mac_1info(JNIEnv __attribute
 		struct ether_addr eth;
 		rte_eth_macaddr_get(i, &eth);
 		char *temp = malloc(20);
-		ether_format_addr(temp, 20, eth);
+		ether_format_addr(temp, 20, &eth);
+		output = concat(output, temp);
+
+		temp = realloc(temp, 1);
+		strcpy(temp, "\n");
 		output = concat(output, temp);
 	}
 

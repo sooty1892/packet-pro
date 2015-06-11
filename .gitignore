@@ -51,3 +51,4 @@
 
 # Java DPDK app build folder
 /apps/Firewall/app/
+apps/PacketCap/app
