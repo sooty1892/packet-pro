@@ -13,15 +13,6 @@ public class UnsafeAccess {
 	private static final int SHORT_SIZE = Short.SIZE / Byte.SIZE;
 	private static final int BYTE_SIZE = Byte.SIZE / Byte.SIZE;
 	
-	private static final long MAX_BYTE = 255;
-	private static final long MIN_BYTE = 0;
-	private static final long MAX_SHORT = 65535;
-	private static final long MIN_SHORT = 0;
-	private static final long MAX_INT = Long.parseLong("4294967295");
-	private static final long MIN_INT = 0;
-	private static final long MAX_LONG = Long.parseLong("18446744073709551615");
-	private static final long MIN_LONG = 0;
-	
 	Unsafe unsafe;
 	long currentPointer;
 	int offset;
@@ -48,53 +39,22 @@ public class UnsafeAccess {
         offset = 0;
 	}
 	
-	public void checkBounds(long value, int byte_size) {
-		boolean error = false;
-		switch (byte_size) {
-			case BYTE_SIZE:
-				error = value < MIN_BYTE || value > MAX_BYTE;
-				break;
-			case SHORT_SIZE:
-				error = value < MIN_SHORT || value > MAX_SHORT;
-				break;
-			case INT_SIZE:
-				error = value < MIN_INT || value > MAX_INT;
-				break;
-			case LONG_SIZE:
-				error = value < MIN_LONG || value > MAX_LONG;
-				break;
-			default:
-				break;
-		}
-		if (error) {
-			try {
-				throw new SignedToUnsignedOutOfRangeException();
-			} catch (SignedToUnsignedOutOfRangeException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
 	public void putByte(int value) {
-		checkBounds(value, BYTE_SIZE);
 		unsafe.putByte(currentPointer + offset, (byte)value);
 		offset += BYTE_SIZE;
 	}
 	
 	public void putShort(int value) {
-		checkBounds(value, SHORT_SIZE);
 		unsafe.putShort(currentPointer + offset, (short)value);
 		offset += SHORT_SIZE;
 	}
 	
 	public void putInt(long value) {
-		checkBounds(value, INT_SIZE);
 		unsafe.putInt(currentPointer + offset, (int)value);
 		offset += INT_SIZE;
 	}
 	
 	public void putLong(long value) {
-		checkBounds(value, LONG_SIZE);
 		unsafe.putLong(currentPointer + offset, value);
 		offset += LONG_SIZE;
 	}

@@ -4,4 +4,48 @@
 
 \section{Evaluation}
 
+\subsection{Packet Generating}
+Packet generating is the act of creating packets with random payloads to be sent to certain MAC addresses on the network. This can either be done via the use of specialised hardware or using software. They are used for load testing of packet processing applications to test the amount of data which applications can process per second. This can reveal whether limitations on a system is software or hardware based.
+
+\todo[inline]{Talk about pktgen module in kernel - does dpdk version use this}
+
+Pktgen is open source software tool, maintained by Intel, which aims to generate packets using the DPDK framework. It can generate up to 10Gbits of data per second and send the data in the form of packets across a compatible network interface card/controller. It has a number of benefits which include:
+
+\begin{itemize}
+	\item Real time packet configuration and port control
+	\item Real time metrics on packets sent and received
+	\item Handles UDP, TCP, ARP and more packet headers
+	\item Can be commanded via a Lua \ref{ref this} script
+\end{itemize}
+
+\todo[inline]{how does pktgen work and why we used it}
+
+\subsection{Initial Testing}
+The initial testing of applications \todo{which ones?} was carried out an a local Mac OS X machine running Ubuntu 14.04 LTS 64-bit on a VirtualBox \todo{ref this and ubuntu} virtual machine. Although this set-up didn't provide the ability to load test on very high speeds (anything above 1Gbit/s), it allowed for basic testing to check that the application was running as expected. Load testing of speeds up to roughly 700Mbit/s were also possible which have a basic testing platform without the need to move code to servers.
+
+\subsubsection{Set-up}
+Testing could be carried out using the 2 available 1Gbit NICs of the machine via a bridged network from the host to guest machine which severely reduced transmission speed. This allowed an ethernet cable to be looped back and connected between the ports, meaning anything transmitted via 1 port was guaranteed to be received by the other port.
+
+Pktgen and the custom application were booted up simultaneously running in parallel. Careful memory allocation, port addressing and processor core assignment had to be carried out to stop shared resourced impacting the overall performance of either application. This allowed Pktgen to send packets and the application to receive and process them.
+
+\subsubsection{Methods}
+
+\subsubsection{Results}
+
+\subsection{Further Testing}
+On servers
+
+\subsubsection{Set-up}
+
+\subsubsection{Methods}
+
+\subsubsection{Results}
+
+\subsection{Software Design}
+Mention somewhere about the limitations of pktgen
+
+\subsubsection{Portability}
+
+\subsection{Possible Improvement}
+
 \end{document}

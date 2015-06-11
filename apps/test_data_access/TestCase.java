@@ -2,52 +2,48 @@ abstract class TestCase {
 	
 	private final String name;
 	protected final int repetitions;
-	private long writeTimeNanos;
-	private long readTimeNanos;
-	
-	protected final ObjectPacket op = new ObjectPacket();
+	//private long getTimeNanos;
+	//private long setTimeNanos;
+	private long avgTime;
 
 	public TestCase(String name, int repetitions) {
 		this.name = name;
 		this.repetitions = repetitions;
-		op.setVersion(13);
-		op.setIhl(14);
-		op.setDscp(15);
-		op.setEcn(16);
-		op.setTotal_length(17);
-		op.setPacket_id(18);
-		op.setFragment_offset(19);
-		op.setTime_to_live(20);
-		op.setNext_proto_id(21);
-		op.setHdr_checksum(22);
-		op.setSrc_addr(23);
-		op.setDst_addr(24);
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public long getWriteTimeNanos() {
-		return writeTimeNanos;
+	/*public long getGetTimeNanos() {
+		return getTimeNanos;
 	}
 
-	public long getReadTimeNanos() {
-		return readTimeNanos;
+	public long getSetTimeNanos() {
+		return setTimeNanos;
+	}*/
+	
+	public long getAvgTime() {
+		return avgTime;
 	}
 
 	public void performTest() {
-		final long startWriteNanos = System.nanoTime();
-		testGetData();
-        writeTimeNanos = (System.nanoTime() - startWriteNanos) / repetitions;
+		//final long startGetNanos = System.nanoTime();
+		//testGetData();
+		//getTimeNanos = (System.nanoTime() - startGetNanos) / repetitions;
  
-        final long startReadNanos = System.nanoTime();
-        testSetData();
-        readTimeNanos = (System.nanoTime() - startReadNanos) / repetitions;
+        //final long startSetNanos = System.nanoTime();
+        //testSetData();
+        //setTimeNanos = (System.nanoTime() - startSetNanos) / repetitions;
 		
+		final long start = System.nanoTime();
+		testGetSetData();
+		avgTime = ((System.nanoTime() - start) / (long)repetitions);
 	}
 
-	public abstract void testGetData();
-	public abstract void testSetData();
+	//public abstract void testGetData();
+	//public abstract void testSetData();
+	
+	public abstract void testGetSetData();
 
 }

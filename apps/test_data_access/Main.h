@@ -26,16 +26,8 @@ JNIEXPORT void JNICALL Java_Main_getData__LObjectPacket_2
  * Method:    setData
  * Signature: (LObjectPacket;)V
  */
-JNIEXPORT void JNICALL Java_Main_setData
+JNIEXPORT void JNICALL Java_Main_setData__LObjectPacket_2
   (JNIEnv *, jclass, jobject);
-
-/*
- * Class:     Main
- * Method:    getPointer
- * Signature: ()J
- */
-JNIEXPORT jlong JNICALL Java_Main_getPointer
-  (JNIEnv *, jclass);
 
 /*
  * Class:     Main
@@ -44,6 +36,22 @@ JNIEXPORT jlong JNICALL Java_Main_getPointer
  */
 JNIEXPORT void JNICALL Java_Main_getData__Ljava_nio_ByteBuffer_2
   (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     Main
+ * Method:    setData
+ * Signature: (Ljava/nio/ByteBuffer;)V
+ */
+JNIEXPORT void JNICALL Java_Main_setData__Ljava_nio_ByteBuffer_2
+  (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     Main
+ * Method:    getPointer
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_Main_getPointer
+  (JNIEnv *, jclass, jlong);
 
 #ifdef __cplusplus
 }
