@@ -1,4 +1,5 @@
 #include "Main.h"
+#include "Utils.h"
 
 struct packet {
 	int version;
@@ -19,16 +20,16 @@ JNIEXPORT void JNICALL Java_Main_setData(JNIEnv *env, jclass class, jobject pack
 	struct packet p;
 
 	jclass cls = (*env)->FindClass(env, "ObjectPacket");
-	jmethodID method1 = (*env)->GetMethodID(env, cls, "getVersion", "()I");
-	jmethodID method2 = (*env)->GetMethodID(env, cls, "getIhl", "()I");
-	jmethodID method3 = (*env)->GetMethodID(env, cls, "getDscp", "()I");
-	jmethodID method4 = (*env)->GetMethodID(env, cls, "getEcn", "()I");
-	jmethodID method5 = (*env)->GetMethodID(env, cls, "getTotal_length", "()I");
-	jmethodID method6 = (*env)->GetMethodID(env, cls, "getPacket_id", "()I");
-	jmethodID method7 = (*env)->GetMethodID(env, cls, "getFragment_offset", "()I");
-	jmethodID method8 = (*env)->GetMethodID(env, cls, "getTime_to_live", "()I");
-	jmethodID method9 = (*env)->GetMethodID(env, cls, "getNext_proto_id", "()I");
-	jmethodID method10 = (*env)->GetMethodID(env, cls, "getHdr_checksum", "()I");
+	jmethodID method1 = (*env)->GetMethodID(env, cls, "getVersion", "()J");
+	jmethodID method2 = (*env)->GetMethodID(env, cls, "getIhl", "()J");
+	jmethodID method3 = (*env)->GetMethodID(env, cls, "getDscp", "()J");
+	jmethodID method4 = (*env)->GetMethodID(env, cls, "getEcn", "()J");
+	jmethodID method5 = (*env)->GetMethodID(env, cls, "getTotal_length", "()J");
+	jmethodID method6 = (*env)->GetMethodID(env, cls, "getPacket_id", "()J");
+	jmethodID method7 = (*env)->GetMethodID(env, cls, "getFragment_offset", "()J");
+	jmethodID method8 = (*env)->GetMethodID(env, cls, "getTime_to_live", "()J");
+	jmethodID method9 = (*env)->GetMethodID(env, cls, "getNext_proto_id", "()J");
+	jmethodID method10 = (*env)->GetMethodID(env, cls, "getHdr_checksum", "()J");
 	jmethodID method11 = (*env)->GetMethodID(env, cls, "getSrc_addr", "()J");
 	jmethodID method12 = (*env)->GetMethodID(env, cls, "getDst_addr", "()J");
 
@@ -50,16 +51,16 @@ JNIEXPORT void JNICALL Java_Main_getData__LObjectPacket_2(JNIEnv *env, jclass cl
 	struct packet p = packet_default;
 
 	jclass cls = (*env)->FindClass(env, "ObjectPacket");
-	jmethodID method1 = (*env)->GetMethodID(env, cls, "setVersion", "(I)V");
-	jmethodID method2 = (*env)->GetMethodID(env, cls, "setIhl", "(I)V");
-	jmethodID method3 = (*env)->GetMethodID(env, cls, "setDscp", "(I)V");
-	jmethodID method4 = (*env)->GetMethodID(env, cls, "setEcn", "(I)V");
-	jmethodID method5 = (*env)->GetMethodID(env, cls, "setTotal_length", "(I)V");
-	jmethodID method6 = (*env)->GetMethodID(env, cls, "setPacket_id", "(I)V");
-	jmethodID method7 = (*env)->GetMethodID(env, cls, "setFragment_offset", "(I)V");
-	jmethodID method8 = (*env)->GetMethodID(env, cls, "setTime_to_live", "(I)V");
-	jmethodID method9 = (*env)->GetMethodID(env, cls, "setNext_proto_id", "(I)V");
-	jmethodID method10 = (*env)->GetMethodID(env, cls, "setHdr_checksum", "(I)V");
+	jmethodID method1 = (*env)->GetMethodID(env, cls, "setVersion", "(J)V");
+	jmethodID method2 = (*env)->GetMethodID(env, cls, "setIhl", "(J)V");
+	jmethodID method3 = (*env)->GetMethodID(env, cls, "setDscp", "(J)V");
+	jmethodID method4 = (*env)->GetMethodID(env, cls, "setEcn", "(J)V");
+	jmethodID method5 = (*env)->GetMethodID(env, cls, "setTotal_length", "(J)V");
+	jmethodID method6 = (*env)->GetMethodID(env, cls, "setPacket_id", "(J)V");
+	jmethodID method7 = (*env)->GetMethodID(env, cls, "setFragment_offset", "(J)V");
+	jmethodID method8 = (*env)->GetMethodID(env, cls, "setTime_to_live", "(J)V");
+	jmethodID method9 = (*env)->GetMethodID(env, cls, "setNext_proto_id", "(J)V");
+	jmethodID method10 = (*env)->GetMethodID(env, cls, "setHdr_checksum", "(J)V");
 	jmethodID method11 = (*env)->GetMethodID(env, cls, "setSrc_addr", "(J)V");
 	jmethodID method12 = (*env)->GetMethodID(env, cls, "setDst_addr", "(J)V");
 
@@ -80,6 +81,7 @@ JNIEXPORT void JNICALL Java_Main_getData__LObjectPacket_2(JNIEnv *env, jclass cl
 JNIEXPORT void JNICALL Java_Main_getData__Ljava_nio_ByteBuffer_2(JNIEnv *env, jclass class, jobject buffer) {
 	char *buf = (char*)(*env)->GetDirectBufferAddress(env, buffer);
 	struct packet p = packet_default;
+
 	buf[0] = p.version;
 	buf[4] = p.ihl;
 	buf[8] = p.dscp;
@@ -94,9 +96,31 @@ JNIEXPORT void JNICALL Java_Main_getData__Ljava_nio_ByteBuffer_2(JNIEnv *env, jc
 	buf[48] = p.dst_addr;
 }
 
-JNIEXPORT jlong JNICALL Java_Main_getPointer(JNIEnv *env, jclass class) {
+JNIEXPORT void JNICALL Java_Main_setData__Ljava_nio_ByteBuffer_2(JNIEnv *env, jclass class, jobject buffer) {
+	uint8_t *buf = (uint8_t*)(*env)->GetDirectBufferAddress(env, buffer);
 	struct packet p = packet_default;
-	return (long)&p;
+
+	p.version = get32(buf, 0);
+	p.ihl = get32(buf, 4);
+	p.dscp = get32(buf, 8);
+	p.ecn = get32(buf, 12);
+	p.total_length = get32(buf, 16);
+	p.packet_id = get32(buf, 20);
+	p.fragment_offset = get32(buf, 24);
+	p.time_to_live = get32(buf, 28);
+	p.next_proto_id = get32(buf, 32);
+	p.hdr_checksum = get32(buf, 36);
+	p.src_addr = get64(buf, 40);
+	p.dst_addr = get64(buf, 48);
 }
+
+struct packet p = {1,2,3,4,5,6,7,8,9,10,11,12};
+
+JNIEXPORT void JNICALL Java_Main_getPointer(JNIEnv *env, jclass class, jlong pointer) {
+	//struct packet p = packet_default;
+	insert64(pointer, 0, (long)&p);
+	//printf("C: %p\n", &p);
+}
+
 
 
