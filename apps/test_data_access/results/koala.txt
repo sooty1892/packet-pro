@@ -1,5 +1,5 @@
-bjects	avg = 7432
-1 Objects	avg = 7242
+0 Objects	avg = 7432???
+1 Objects	avg = 7242???
 2 Objects	avg = 6976
 3 Objects	avg = 6909
 4 Objects	avg = 6909
@@ -9,7 +9,7 @@ bjects	avg = 7432
 8 Objects	avg = 6916
 9 Objects	avg = 6906
 Objects: Avg = 7001
-0 ByteBuffer	avg = 173
+0 ByteBuffer	avg = 173???
 1 ByteBuffer	avg = 68
 2 ByteBuffer	avg = 62
 3 ByteBuffer	avg = 62
@@ -43,3 +43,7 @@ Unsafe: Avg = 27
 9 Direct Access	avg = 23
 Direct Access: Avg = 24
 
+Object: 6918
+ByteByffer: 63
+Unsafe: 24
+Direct Access: 23

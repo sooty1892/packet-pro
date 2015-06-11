@@ -49,8 +49,8 @@ public class UnsafeTestCase extends TestCase {
 			op.setTime_to_live(unsafe.getInt(packetPointer + 28));
 			op.setNext_proto_id(unsafe.getInt(packetPointer + 32));
 			op.setHdr_checksum(unsafe.getInt(packetPointer + 36));
-			op.setSrc_addr(unsafe.getInt(packetPointer + 40));
-			op.setDst_addr(unsafe.getInt(packetPointer + 48));
+			op.setSrc_addr(unsafe.getLong(packetPointer + 40));
+			op.setDst_addr(unsafe.getLong(packetPointer + 48));
 			
 			op.setVersion(13);
 			op.setIhl(14);

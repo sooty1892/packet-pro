@@ -1,4 +1,4 @@
-bjects	avg = 14871
+0 Objects	avg = 14871
 1 Objects	avg = 13893
 2 Objects	avg = 14857
 3 Objects	avg = 13691
@@ -9,7 +9,7 @@ bjects	avg = 14871
 8 Objects	avg = 14908
 9 Objects	avg = 14726
 Objects: Avg = 14254
-0 ByteBuffer	avg = 160
+0 ByteBuffer	avg = 160???
 1 ByteBuffer	avg = 78
 2 ByteBuffer	avg = 74
 3 ByteBuffer	avg = 73
@@ -20,7 +20,7 @@ Objects: Avg = 14254
 8 ByteBuffer	avg = 70
 9 ByteBuffer	avg = 71
 ByteBuffer: Avg = 81
-0 Unsafe	avg = 68
+0 Unsafe	avg = 68???
 1 Unsafe	avg = 24
 2 Unsafe	avg = 23
 3 Unsafe	avg = 24
@@ -31,15 +31,19 @@ ByteBuffer: Avg = 81
 8 Unsafe	avg = 23
 9 Unsafe	avg = 23
 Unsafe: Avg = 27
-0 Direct Access	avg = 46
-1 Direct Access	avg = 25
+0 Direct Access	avg = 46???
+1 Direct Access	avg = 25??
 2 Direct Access	avg = 23
 3 Direct Access	avg = 22
 4 Direct Access	avg = 22
-5 Direct Access	avg = 26
+5 Direct Access	avg = 26??
 6 Direct Access	avg = 22
 7 Direct Access	avg = 22
 8 Direct Access	avg = 22
 9 Direct Access	avg = 22
 Direct Access: Avg = 25
 
+Object: 14254
+ByteByffer: 73
+Unsafe: 23
+Direct Access: 22

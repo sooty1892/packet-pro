@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 n_groups = 4
 
-DATA = [20, 35, 11000, 14000]
+DATA = [23, 24, 63, 6918]
 DATA2 = np.log10(DATA)
 RATIO = [x/float(DATA[0]) for x in DATA]
 RoundedRatio = [ '%.2f' % elem for elem in RATIO]
@@ -24,8 +24,8 @@ chart1 = plt.bar(index,
 
 # plt.xlabel('xLABEL')
 plt.ylabel('nanoseconds (logarithmic scale)')
-plt.title('TITLE')
-plt.xticks(index + (bar_width/2), ('A', 'B', 'C', 'D', 'E'))
+plt.title('Server')
+plt.xticks(index + (bar_width/2), ('Direct', 'Unsafe', 'ByteBuffer', 'Object'))
 ax.set_yticks([0,1,2,3,4, 5])
 ax.set_yticklabels(('0', '10', '100', '1000', '10000', '100000'))
 plt.xlim(-(bar_width), index[-1]+2*bar_width)
