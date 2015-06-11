@@ -1,5 +1,7 @@
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Output stream to redirect printlns to 2 streams
@@ -8,25 +10,35 @@ import java.io.OutputStream;
 
 public class MultiStream extends OutputStream {
 	
-	private OutputStream ps1;
-	private OutputStream ps2;
+	private List<OutputStream> streams;
 	
-	public MultiStream(OutputStream ps1, OutputStream ps2) {
-		this.ps1 = ps1;
-		this.ps2 = ps2;
+	public MultiStream() {
+		streams = new ArrayList<OutputStream>();
+	}
+	
+	public MultiStream(OutputStream os) {
+		streams = new ArrayList<OutputStream>();
+		streams.add(os);
+	}
+	
+	public MultiStream(OutputStream os1, OutputStream os2) {
+		streams = new ArrayList<OutputStream>();
+		streams.add(os1);
+		streams.add(os2);
+	}
+	
+	public void addStream(OutputStream os) {
+		streams.add(os);
 	}
 
 	@Override
 	public void write(int b) {
-		try {
-			ps1.write(b);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		try {
-			ps2.write(b);
-		} catch (IOException e) {
-			e.printStackTrace();
+		for (OutputStream os : streams) {
+			try {
+				os.write(b);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
