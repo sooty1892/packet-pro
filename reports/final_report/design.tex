@@ -3,7 +3,7 @@
 \begin{document}
 
 \section{Initial language comparison}
-Before any implementation or specific design considerations were undertaken, an evaluation of the performance of C, Java and the Java Native Interface (JNI) was carried out. Although data from existing articles and websites could be used for Java and C, there was no existing direct comparisons between them and the JNI, therefore custom tests were carried out.
+Before any implementation or specific design considerations were undertaken, an evaluation of the performance of C, Java and Java using the Java Native Interface (JNI) was carried out. Although data from existing articles and websites could be used for Java and C, there was no existing direct comparisons between them and the JNI, therefore custom tests were carried out.
 
 The JNI is inherently \todo{article on this} seen as a bottleneck of an application (even after its vast update in Java 7). \todo{reasons why JNI is slow}
 
@@ -38,12 +38,10 @@ As discussed previously \todo{ref this}, there are always advantages and disadva
 	\end{algorithmic}
 \end{algorithm}
 
-For the JNI version, the same algorithm was used, however, the \textit{PopPacket} method was carried out on the native side to simulate retrieving raw packet data. The \textit{ProPacket} method was executed on the Java side with the result been passed back to the native side to be entered back into the packet structure.
-
-Timing within the algorithm for all variations was carried out between each iteration. This firstly eliminated any initial start-up time associated with the application which is common with the JVM. Secondly, any calls for time stamps to the system would be miminised as 100,000 iterations would occur in-between them.
+For the JNI version, the same algorithm was used, however, the PopPacket method was carried out on the native side to simulate retrieving raw packet data. The ProPacket method was executed on the Java side with the result been passed back to the native side.
 
 \subsection{Results}
-Each language had the algorithm run 1,000 times in order to minimise any variations due to external factors. Figures \todo{ref this} show that C was considerably quicker than Java, while Java using the JNI was extremely slow. \todo{expand on this}
+Each language had the algorithm run 1000 times in order to minimise any variations due to external factors. Figures \todo{ref this} show that C was considerably quicker than Java, while Java using the JNI was extremely slow. \todo{expand on this}
 
 \subsection{Further Investigation}
 Due to the very poor performance of the JNI compared to other languages, further investigations were carried out to find more specific results surrounding the JNI.
@@ -51,7 +49,7 @@ Due to the very poor performance of the JNI compared to other languages, further
 
 \section{Design Considerations}
 \subsection{Data Sharing}
-The proposed application will be sharing data between the DPDK code written in C (low level) and the Java (medium level) side used for the highly abstracted part of the application. This requires a large amount of data, most noticeably packets, to be transferred between 'sides' in a small amount of time.
+The proposed application will be sharing data between the DPDK code written in C and the Java side used for the high functionality part of the application. This requires a large amount of data, most noticeably packets, to be transferred between 'sides' in a small amount of time.
 \todo[inline]{Diagram of packets from NIC using c through 'technique' and then processing packets in java and then back}
 A few techniques for this are available with Java and C, all with different performances and ease-of-use.
 
@@ -59,7 +57,6 @@ A few techniques for this are available with Java and C, all with different perf
 By far the simplest technique available is using the Java Native Interface (JNI) in order to interact with native code and then retrieve the required via this. This can be done 2 ways, either by creating the object and passing it as a parameter to the native methods or creating an object on the native side via the Java environment parameter. Both ways require the population of the fields to be done on the native side. From then on, any data manipulation and processing could be done on the Java side. Unfortunately, this does require all data to be taken from the object and placed back into the structs before packets can be forwarded. Obviously this results in a lot of unneeded data copying, while the actual JNI calls can significantly reduce the speed of the application as shown in \todo{ref this}.
 
 \subsubsection{ByteBuffers - Non-heap and heap memory}
-\todo{cant use bytebuffers directly with DPDK as dont use hugepages}
 ByteBuffers are a Java class which allow for memory to be allocated on the Java heap (non direct) or outside of the JVM (direct). Non direct ByteBuffer's are simply a wrapper for a byte array on the heap and are generally used as they allow easier access to bytes, as well as other primitive data types.
 
 Direct ByteBuffers allocate memory outside of the JVM in native memory. This firstly means that the only limit on the size of ByteBuffers is memory itself. Furthermore, the Java garbage collector doesn't have access to this memory. Direct ByteBuffers have increased performance since the JVM isn't slowed down by the garbage collector and intrinsic native methods can be called on the memory for faster data access.
@@ -67,20 +64,14 @@ Direct ByteBuffers allocate memory outside of the JVM in native memory. This fir
 \subsubsection{Java Unsafe - non-heap}
 The Java Unsafe class is actually only used internally by Java for its memory management. It generally shouldn't be used within Java since it makes a safe programming language like Java an unsafe language (hence the name) since memory access exceptions can be thrown. It can be used for a number of things such as:
 
-\paragraph*{Object initialisation skipping}
-This is where any instance of an object can be created from the class, but no constructors are used meaning that the object created without any of the fields set. This has a number of uses including security check bypassing, creating instances of objects which don't have a public constructor and allowing multiple objects of a singleton class.
-
-\paragraph*{Intentional memory corruption}
-This allows the setting of private fields of any object. It is a common way of bypassing security features as private fields to allow access to certain situation can be overwritten to gain access.
-
-\paragraph*{Nullifying unwanted objects}
-This has a common use of nullifying passwords after they have been stored as strings. If a password is stored as a string in Java, even setting the field to \textit(null) will only dereference it. The original string will still be in memory after the dereferencing up until it is garbage collected. Even rewriting the field with a new field won't work as strings are immutable in Java. This makes it susceptible to a timing attack to retrieve the password. Using unsafe allows for the actual memory location to be overwritten with random values to prevent this.
-
-\paragraph*{Multiple inheritance}
-Java doesn't allow multiple inheritance within its class declaration of casting. However, using Unsafe any object can be cast to any other object without a compiler of run-time error. This obviously only works if data fields are compliant with each other and any method invocations are referenced. 
-
-\paragraph*{Very fast serialization}
-The Java \textit{Serializable} abstraction is well known to be slow, which can be a major bottleneck in fast processing applications over a network. Even the \textit{Externalizable} functionality isn't much factor and that requires an class schema to be defined. However, custom serializing can be extremely fast using the Unsafe Class. Basically allocating memory and then putting/getting data from the memory requires little JVM usage and can be done with machine instructions.
+\begin{itemize}
+	\item Object initialisation skipping
+	\item Intentional memory corruption
+	\item Nullifying unwanted objects
+	\item Multiple inheritance
+	\item Dynamic classes
+	\item Very fast serialization
+\end{itemize}
 
 Obviously without proper precautions any of these actions can be dangerous and can result in crashing the full JVM. This is why the Unsafe class has a private constructor and calling the static Unsage.getUnsafe() will throw a security exception for untrusted code which is hard to bypass. Fortunately, Unsafe has its own instance called 'theUnsafe' which can be accessed by using Java reflection \todo{ref this}:
 
@@ -90,7 +81,7 @@ f.setAccessible(true);
 Unsafe unsafe = (Unsafe) f.get(null);
 \end{lstlisting}
 
-Using Unsafe then allows direct native memory access (off heap) to retrieve data in any of the primitive data formats. Custom objects with a set structure can then be created, accessed and altered using Unsafe which provides a vast increase in performance over traditional objects stored on the heap. This is mainly thanks to the JIT compiler which can use machine code more efficiently. This also removes the need for copying of data between memory locations, structs and objects, therefore meaning it is zero-copy.
+Using Unsafe then allows direct native memory access to retrieve data in any of the primitive data formats. Custom objects with a set structure can then be created, accessed and altered using Unsafe which provides a vast increase in performance over traditional objects stored on the heap. This is mainly thanks to the JIT compiler which can use machine code more efficiently.
 
 \subsubsection{Evaluation}
 
@@ -183,6 +174,8 @@ casting to an odd pointer will slow down code and could work. Other architecture
 
 \subsubsection{Javolution}
 \subsubsection{Performance testing}
+In order to evaluate the most suitable data sharing technique, performance testing on 4 different implementation options for sharing data between Java and native memory were considered. Since the ultimate aim of the implementation is to maximise throughput of packets, 
+
 
 \subsection{Thread affinity}
 Thread.currentThread().getId(); just gets id of thread relative to jvm.
@@ -198,52 +191,20 @@ core thrashing - ust by the name, you know this is a bad thing. You lose perform
 Another important issue is avoiding placing a load on a HyperThreaded (non-physical) core. These cores offer a small fraction of the performance of a real core. The Windows scheduler is aware of this and will swap to them only if needed. As of mid Jan 2012 the Windows 7 and Windows 2008 R2 schedulers have a hotfix for AMD Bulldozer CPUs that see them as HyperThreaded, cutting them down from 8 physical cores to 4 physical cores, 8 logical cores. This is for two reasons: The AMD Bulldozer platform uses pairs of cores called Bulldozer Modules. Each pair shares some computation units, such as an L2 cache and FPU. To spread out the load and prevent too much load being placed on two cores that have shared computational units, the Windows patch was released, boosting performance in lightly threaded scenarios.
 
 Processor affinity takes advantage of the fact that some remnants of a process that was run on a given processor may remain in that processor's memory state (for example, data in the CPU cache) after another process is run on that CPU. Scheduling that process to execute on the same processor could result in an efficient use of process by reducing performance-degrading situations such as cache misses. A practical example of processor affinity is executing multiple instances of a non-threaded application, such as some graphics-rendering software.
-
-\begin{lstlisting}[language=C, caption={Example of setting thread affinity}, label=lst:c_affinity]
-cpu_set_t cpuset;	\\ structure used to manage cpu affinity settings
-pthread_t thread = pthread_self();  \\ get own system wide thread id
-CPU_ZERO(&cpuset); \\ zero cpuset structure
-CPU_SET(5, &cpuset); \\ set cpuset structure use with the 6th core (0-5)
-int res = pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset); \\ set affinity of thread
-\\ error handling here of res
-res = pthread_getaffinity_np(thread, sizeof(cpu_set_t), &cpuset); \\ check affinity of thread
-\\ error handling here of res
-\end{lstlisting}
-\todo{ref this}
+\todo[inline]{put code showing cpu affinity assignment}
 
 In Linux, Java thread uses the native thread(i.e, thread provided by Linux).
-This means the JVM creates a new native thread when the Java code creates a new Java thread. So, the Java threads can be organised in any way the native threads can be organised.
+This means the JVM creates a new native thread when the Java code creates a new java thread. So, the Java threads can be organised in any way the native threads can be organised.
 
-A native thread can be bound to a core through the pthread\_setaffinity\_np() function. So, a Java thread can be bound to a core. If Java standard library does not provide a function to do so, then this function need to be provided through JNI.
+A native thread can be bound to a core through the sched\_setaffinity() function. So, a Java thread can be bound to a core. If Java standard library does not provide a function to do so, then this function need to be provided through JNI.
 
 In Linux, multi-threading is same as parallel threading. Linux kernel distribute threads among processors to balance the cpu load. However the individual threads can be bound with any core as wished. So, in Linux Java multi-threading is same as parallel threading.
 
-\subsection{Endianness}
-This describes the order in which bytes of data types are stored in memory relative to pointers. In big-endian systems, the most significant bytes are stored at the pointer with every successive data bytes stored in successive memory locations. Conversely, in little-endian systems, the least significant byte is stored at the pointer. There is no advantage or disadvantage to either endian types, its simply a matter on convention for certain systems. Figure \ref{fig:endian} shows how different endian systems store the value of the hexadecimal value \textit{0x0A0B0C0D}. 
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=\textwidth]{img/endian.png}
-	\caption{Difference between little and big endian}
-	\label{fig:endian}
-\end{figure}
-
-This becomes a problem when using the Java Native Interface with native code code on Intel architectures since the Java Virtual Machine uses big-endian format while Intel uses little-endian format. Normally the JNI environment would handle this byte ordering conversion but since the JNI has been proven to be too slow \todo{ref this} to meet the requirement, this needs to be handled by the application.
+\subsection{Endian-ness}
 
 \subsection{Data type conversion}
-Between different languages the same data type can be represented by varying lengths in bytes and whether unsigned or signed (in the case of numerical values). It can also be the case that data type lengths in native languages differ depending on the architecture and whether it is 32-bit or 64-bit.
-
-This becomes more of an issue when sharing data between C and Java. Java always uses a signed integer representation with the most significant bit representing whether the number is negative or positive. C uses both signed and unsigned representation depending on the requirements with varying byte length. Again, any conversion between the differences is normally handled via the JNI, but since the implementation aims to bypass the JNI as much as possible, data type conversion will have to be handled.
-
-Lets take the integer representation as an example. In C, and integer can vary between 2, 4 and 8 bytes in length depending on the architecture and compiler. To solve this, standard integer types are used (e.g. uint8\_t \& int32\_t) which guarantee that the representation is at least the length of the type definition stated. In Java, an integer is guaranteed to be 4 bytes long regardless of the system. However, DPDK uses unsigned integers while Java uses signed integers. This requires conversion between the unsigned and signed, but since unsigned has a higher upper bound on the value it can store due to the extra bit (MSB) there can be an overflow error when converting to Java. This requires that Java uses a long (8 byte) representation to hold the C 4 byte unsigned integer.
-
-Conversion from Java to C then could then result in an underflow error if a value which can be represented by a Java long can't be represented by a C integer. This means bound checking is required on the Java side for any number conversions.
-
-\todo{get a table of this}
 
 \subsection{Protocol undertaking}
 just IP (4 and ) supporting udp and tcp (i think), no ARP etc
-
-\subsection{config files}
 
 \end{document}
