@@ -213,13 +213,13 @@ int main(int argc, char **argv) {
 
     rte_eth_promiscuous_enable(ifidx);
 
-	printf("HELLO\n");
-	fflush(stdout);
+	//printf("HELLO\n");
+	//fflush(stdout);
 
     uint32_t a;
     for (a = 0; a < 32; a++) {
-	printf("%d\n", a);
-	fflush(stdout);
+	//printf("%d\n", a);
+	//fflush(stdout);
         if (a == rte_get_master_lcore() || !rte_lcore_is_enabled(a)) {
             continue;
         }
@@ -229,8 +229,8 @@ int main(int argc, char **argv) {
         }
     }
     rte_delay_ms(1000);
-    printf("here\n");
-    fflush(stdout);
+    //printf("here\n");
+    //fflush(stdout);
     timer_setup();
 
     for(;;) {

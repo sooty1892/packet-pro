@@ -17,6 +17,12 @@ public class ReceivePoller {
 	
 	int get_size;
 	
+	UnsafeAccess unsafe;
+	List<Packet> packets;
+	
+	long mem_pointer;
+	int memory_size;
+	
 	private static final int DEFAULT_GET_SIZE = 32;
 
 	public ReceivePoller(int port_id, int queue_id) {
@@ -28,6 +34,11 @@ public class ReceivePoller {
 		get_size = DEFAULT_GET_SIZE;
 		this.port_id = port_id;
 		this.queue_id = queue_id;
+		unsafe = new UnsafeAccess();
+		packets = new ArrayList<Packet>();
+		// each packet sends back mbuf and packet_header pointer -> therefore 2
+		memory_size = ((Long.SIZE / Byte.SIZE) * get_size * 2) + Short.SIZE;
+		mem_pointer = ua.allocateMemory(memory_size);
 	}
 	
 	public int getGetSize() {
@@ -41,44 +52,41 @@ public class ReceivePoller {
 	// gets burst of packets and create packet objects via dpdk library
 	// also contains stats data collection
 	public List<Packet> getBurst() {
-		List<Packet> packets = new ArrayList<Packet>();
-		
-		// each packet sends back mbuf and packet_header pointer -> therefore 2
-		int memory_size = ((Long.SIZE / Byte.SIZE) * get_size * 2) + Short.SIZE;
-		long mem_pointer = ua.allocateMemory(memory_size);
-		long orig = mem_pointer;
+		long temp = mem_pointer;
 
-		DpdkAccess.dpdk_receive_burst(mem_pointer, port_id, queue_id);
+		DpdkAccess.dpdk_receive_burst(temp, port_id, queue_id);
 		
-		ua.setCurrentPointer(mem_pointer);
+		ua.setCurrentPointer(temp);
 		
 		int packet_count = ua.getShort();
-		packet_all += packet_count; 
-		packet_interval += packet_count;
+		//packet_all += packet_count; 
+		//packet_interval += packet_count;
 		
-		mem_pointer += ua.getOffset();
+		
 		
 		if (packet_count > 0) {
+			packets.clear();
+			
+			temp += ua.getOffset();
 			
 			for (int i = 0; i < packet_count; i++) {
 
-				long new_pointer = mem_pointer + (2*i*ua.longSize());
+				long new_pointer = temp + (2*i*ua.longSize());
 				ua.setCurrentPointer(new_pointer);
 				long mbuf = ua.getLong();
 				long packet = ua.getLong();
 				
 				Packet p = new Ipv4Packet(mbuf, packet);
-				if (p.getVersion() == 6) {
+				/*if (p.getVersion() == 6) {
 					p = new Ipv6Packet(mbuf, packet);
-				}
+				}*/
 				
-				packet_all_size += p.getLength(); // plus ethernet header?
-				packet_interval_size += p.getLength();
+				//packet_all_size += p.getLength(); // plus ethernet header?
+				//packet_interval_size += p.getLength();
 				
 				packets.add(p);
 			}
 		}
-		ua.freeMemory(orig);
 		return packets;
 	}
 	
