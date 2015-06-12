@@ -17,6 +17,8 @@
 #include <rte_ring.h>
 #include <rte_mempool.h>
 #include <rte_mbuf.h>
+#include <rte_timer.h>
+#include <rte_cycles.h>
 
 #include "main.h"
 
@@ -31,6 +33,8 @@
 #define	NB_RX_DESC 256
 
 #define	NB_TX_DESC 256
+
+struct rte_mbuf *rx_mbufs[MAX_PKT_BURST];
 
 // For configuring an ethernet port
 static struct rte_eth_conf eth_conf = { 
@@ -84,8 +88,11 @@ static struct rte_eth_rxconf rx_conf = {
 // RTE mempool structure
 static struct rte_mempool *rx_pool;
 
-void main_loop(__attribute __ ((unused)) void *args) {
+int main_loop(void *);
+
+int main_loop(__attribute__ ((unused)) void *arg) {
     long pktcount = 0;
+    int recv_cnt, i, ifidx = 0;
     while(1) {
         recv_cnt = rte_eth_rx_burst(ifidx, 0, rx_mbufs, MAX_PKT_BURST);
         if (recv_cnt < 0) {
@@ -99,47 +106,60 @@ void main_loop(__attribute __ ((unused)) void *args) {
             for (i = 0 ; i < recv_cnt; i++) {
                 rte_pktmbuf_free(rx_mbufs[i]);
             }
-            if (pktcount == 10000000)
-                printf("Received %ld packets so far\n", pktcount); 
-            printf("Received %ld packets\n", pktcount);
+           // if (pktcount == 10000000)
+             //   printf("Received %ld packets so far\n", pktcount); 
+            //printf("Received %ld packets\n", pktcount);
         }
     }
+    return 0;
 }
+
+void timer_setup(void);
+void do_stats(struct rte_timer *, void *);
 
 //received bytes
 uint64_t pre_ibytes = 0;
 //received packets - successful
 uint64_t pre_ipackets = 0;
 
-void do_stats(void) {
+void do_stats(__attribute__ ((unused)) struct rte_timer *tim, __attribute__ ((unused)) void *arg) {
+    printf("IN STATS");
+    fflush(stdout);
     struct rte_eth_stats stats;
 
-    rte_eth_stats_get(1, &stats);
+    rte_eth_stats_get(0, &stats);
     uint64_t diff_bytes = stats.ibytes - pre_ibytes;
-    ibytes = stats.ibytes;
+    pre_ibytes = stats.ibytes;
     uint64_t diff_packets = stats.ipackets - pre_ipackets;
     pre_ipackets = stats.ipackets;
     printf("Bytes: %lu\n", diff_bytes);
     printf("Packets: %lu\n", diff_packets);
+    fflush(stdout);
 }
 
 static struct rte_timer timer;
 
 void timer_setup(void) {
+    printf("ENTERED TIME\n");
+    fflush(stdout);
     int lcore_id = rte_get_master_lcore();
     rte_timer_subsystem_init();
     rte_timer_init(&timer);
-    rte_timer_reset(&timer, rte_get_timer_hz(), PERIODICAL, lcore_id, do_stats, NULL);
+    printf("GOING INTO LOOP\n");
+    fflush(stdout);
+    int ret = rte_timer_reset(&timer, rte_get_timer_hz(), PERIODICAL, lcore_id, do_stats, NULL);
+    if (ret != 0) {
+        printf("TIMER_ERROR");
+        fflush(stdout);
+    }
 }
 
 int main(int argc, char **argv) {
-    int i, ret, recv_cnt, ifidx = 0;
+    int ret, ifidx = 0;
     //unsigned lcore_id;
     uint8_t count;
 
     struct rte_eth_link link;
-
-    struct rte_mbuf *rx_mbufs[MAX_PKT_BURST];
 
     // initialise eal
     ret = rte_eal_init(argc, argv);
@@ -193,9 +213,14 @@ int main(int argc, char **argv) {
 
     rte_eth_promiscuous_enable(ifidx);
 
-    int a;
+	printf("HELLO\n");
+	fflush(stdout);
+
+    uint32_t a;
     for (a = 0; a < 32; a++) {
-        if (a ++ rte_get_master_lcore() || !rte_lcore_is_enabled(i)) {
+	printf("%d\n", a);
+	fflush(stdout);
+        if (a == rte_get_master_lcore() || !rte_lcore_is_enabled(a)) {
             continue;
         }
         ret = rte_eal_remote_launch(main_loop, NULL, a);
@@ -204,8 +229,15 @@ int main(int argc, char **argv) {
         }
     }
     rte_delay_ms(1000);
-
+    printf("here\n");
+    fflush(stdout);
     timer_setup();
+
+    for(;;) {
+        rte_timer_manage();
+    }
+
+   rte_eal_mp_wait_lcore();
 
     return 0;
 }
