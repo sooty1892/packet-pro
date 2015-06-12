@@ -39,18 +39,22 @@ public class ApplicationStarter {
 	
 	public ApplicationStarter() {
 		num_available_cores = Runtime.getRuntime().availableProcessors();
+		aff_threads = new ArrayList<AffinityThread>();
 		working = true;
+	}
+	
+	public void start_native_stats() {
+		aff_threads.add(new AffinityThread(new NativeStats(), 0, num_available_cores));
 	}
 	
 	// Puts all runnables into affinity thread and assigns them a core
 	public void createAffinityThreads(List<CoreThread> threads) {
-		aff_threads = new ArrayList<AffinityThread>();
 		if (threads.size() > num_available_cores) {
 			System.out.println("-----Too many threads for number of cores");
 			working = false;
 			return ;
 		}
-		int core = 0;
+		int core = 1;
 		for (CoreThread ct : threads) {
 			AffinityThread af = new AffinityThread(ct, core, num_available_cores);
 			if (!af.ifWorked()) {

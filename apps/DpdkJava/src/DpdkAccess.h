@@ -167,6 +167,14 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1enable_1pro
 JNIEXPORT jstring JNICALL Java_DpdkAccess_nat_1get_1mac_1info
   (JNIEnv *, jclass);
 
+/*
+ * Class:     DpdkAccess
+ * Method:    nat_start_stats
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1start_1stats
+  (JNIEnv *, jclass);
+
 #ifdef __cplusplus
 }
 #endif

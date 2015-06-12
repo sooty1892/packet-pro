@@ -46,6 +46,7 @@
 #include <rte_malloc.h>
 #include <rte_fbk_hash.h>
 #include <rte_ip.h>
+#include <rte_timer.h>
 
 #define ERROR -1
 #define SUCCESS 1
@@ -412,3 +413,50 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1enable_1pro(JNIEnv __attribute__ ((u
 		 rte_eth_promiscuous_enable(i);
 	}
 }
+
+void timer_setup(void);
+void do_stats(struct rte_timer *, void *);
+
+void do_stats(__attribute__ ((unused)) struct rte_timer *tim, __attribute__ ((unused)) void *arg) {
+    //printf("IN STATS");
+    //fflush(stdout);
+    struct rte_eth_stats stats;
+
+    rte_eth_stats_get(0, &stats);
+    uint64_t diff_bytes = stats.ibytes - pre_ibytes;
+    pre_ibytes = stats.ibytes;
+    uint64_t diff_packets = stats.ipackets - pre_ipackets;
+    pre_ipackets = stats.ipackets;
+    printf("Bytes: %lu\n", diff_bytes);
+    printf("Packets: %lu\n", diff_packets);
+    fflush(stdout);
+}
+
+static struct rte_timer timer;
+
+void timer_setup(void) {
+    //printf("ENTERED TIME\n");
+    //fflush(stdout);
+    int lcore_id = rte_get_master_lcore();
+    rte_timer_subsystem_init();
+    rte_timer_init(&timer);
+    //printf("GOING INTO LOOP\n");
+    //fflush(stdout);
+    int ret = rte_timer_reset(&timer, rte_get_timer_hz(), PERIODICAL, lcore_id, do_stats, NULL);
+    if (ret != 0) {
+        printf("TIMER_ERROR");
+        fflush(stdout);
+    }
+}
+
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1start_1stats(JNIEnv __attribute__ ((unused)) env*, jclass __attribute__ ((unused)) class) {
+	timer_setup();
+	for (;;) {
+		rte_timer_manage();
+	}
+}
+
+
+
+
+

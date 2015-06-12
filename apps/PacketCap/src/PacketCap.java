@@ -13,10 +13,10 @@ public class PacketCap {
 		
 		ApplicationStarter as = new ApplicationStarter();
 		
-		as.setupGui(false);
+		//as.setupGui(false);
 		
-		List<ReceivePoller> rps = new ArrayList<ReceivePoller>();
-		List<PacketSender> pss = new ArrayList<PacketSender>();
+		//List<ReceivePoller> rps = new ArrayList<ReceivePoller>();
+		//List<PacketSender> pss = new ArrayList<PacketSender>();
 		
 		try {
 			as.readConfig(new FileInputStream("config.properties"));
@@ -33,8 +33,8 @@ public class PacketCap {
 		PacketSender ps = new PacketSender(0, 0);
 		PacketFreeer pf = new PacketFreeer();
 		
-		rps.add(rp);
-		pss.add(ps);
+		//rps.add(rp);
+		//pss.add(ps);
 		
 		threads.add(new CaptureProcessor(ps, pf, rp));
 		
@@ -51,7 +51,7 @@ public class PacketCap {
 
 		as.dpdk_enable_pro();
 		
-		as.updateStatsInfo(rps, pss);
+		//as.updateStatsInfo(rps, pss);
 		
 		as.startAll();
 		

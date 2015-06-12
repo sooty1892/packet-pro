@@ -27,8 +27,14 @@ public class DpdkAccess {
 	
 	private static native String nat_get_mac_info();
 	
+	private static native void nat_start_stats();
+	
 	static {
 		System.loadLibrary("nat_dpdk");
+	}
+	
+	public static void dpdk_start_stats() {
+		nat_start_stats();
 	}
 
 	public static void dpdk_enable_pro() {
