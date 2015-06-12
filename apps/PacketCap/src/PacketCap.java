@@ -50,6 +50,8 @@ public class PacketCap {
 		as.dpdk_check_ports_link_status();
 
 		as.dpdk_enable_pro();
+
+		as.start_native_stats();
 		
 		//as.updateStatsInfo(rps, pss);
 		

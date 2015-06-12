@@ -5,7 +5,7 @@ endif
 # Default target, can be overriden by command line or environment
 RTE_TARGET ?= x86_64-native-linuxapp-gcc
 
-DpdkJava = /home/ash112/packet-pro/apps/DpdkJava/src/
+DpdkJava = /home/dpdk64/packet-pro/apps/DpdkJava/src/
 
 include $(RTE_SDK)/mk/rte.vars.mk
 
