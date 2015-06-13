@@ -12,10 +12,10 @@ public abstract class Packet {
 	public static final int IPV4 = 4;
 	public static final int IPV6 = 6;
 	
-	public Packet(long mbuf, long packet) {
+	public Packet(long mbuf, long packet, UnsafeAccess unsafe) {
 		mbuf_pointer = mbuf;
 		packet_pointer = packet;
-		ua = new UnsafeAccess();
+		ua = unsafe;
 		ua.setCurrentPointer(packet_pointer);
 	}
 	

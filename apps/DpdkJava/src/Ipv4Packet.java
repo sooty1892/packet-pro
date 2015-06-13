@@ -15,8 +15,8 @@ public class Ipv4Packet extends Packet {
 	private static final int SRC_ADDR_OFFSET = 12;
 	private static final int DST_ADDR_OFFSET = 16;
 
-	public Ipv4Packet(long mbuf, long packet) {
-		super(mbuf, packet);
+	public Ipv4Packet(long mbuf, long packet, UnsafeAccess ua) {
+		super(mbuf, packet, ua);
 	}
 
 	public String toString() {

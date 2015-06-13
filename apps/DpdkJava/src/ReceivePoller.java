@@ -76,7 +76,7 @@ public class ReceivePoller {
 				long mbuf = ua.getLong();
 				long packet = ua.getLong();
 				
-				Packet p = new Ipv4Packet(mbuf, packet);
+				Packet p = new Ipv4Packet(mbuf, packet, unsafe);
 				/*if (p.getVersion() == 6) {
 					p = new Ipv6Packet(mbuf, packet);
 				}*/

@@ -13,8 +13,8 @@ public class Ipv6Packet extends Packet {
 	
 	private static final int BYTES_IPV6 = 16;
 
-	public Ipv6Packet(long mbuf, long packet) {
-		super(mbuf, packet);
+	public Ipv6Packet(long mbuf, long packet, UnsafeAccess ua) {
+		super(mbuf, packet, ua);
 	}
 	
 	public String toString() {
