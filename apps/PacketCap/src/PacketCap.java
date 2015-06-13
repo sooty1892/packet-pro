@@ -30,7 +30,7 @@ public class PacketCap {
 		List<CoreThread> threads = new ArrayList<CoreThread>();
 		
 		ReceivePoller rp1 = new ReceivePoller(0, 0);
-		ReceivePoller rp2 = new ReceivePoller(0, 1);
+//		ReceivePoller rp2 = new ReceivePoller(0, 1);
 		PacketSender ps = new PacketSender(0, 0);
 		PacketFreeer pf = new PacketFreeer();
 		
@@ -38,7 +38,7 @@ public class PacketCap {
 		//pss.add(ps);
 		
 		threads.add(new CaptureProcessor(ps, pf, rp1));
-		threads.add(new CaptureProcessor(ps, pf, rp2));
+//		threads.add(new CaptureProcessor(ps, pf, rp2));
 		
 		as.createAffinityThreads(threads);
 		
