@@ -183,6 +183,8 @@ int main(int argc, char **argv) {
                                 sizeof (struct rte_pktmbuf_pool_private),
                                 rte_pktmbuf_pool_init, NULL,
                                 rte_pktmbuf_init, NULL, socketid, 0);
+
+   
     if (rx_pool == NULL) {
         rte_exit(EXIT_FAILURE, "rte_mempool_create(): error\n");
     }

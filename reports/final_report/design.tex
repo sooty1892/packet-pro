@@ -10,7 +10,7 @@ The JNI is inherently \todo{article on this} seen as a bottleneck of an applicat
 As this application would be forced to use the JNI, numeric values of its performance was helpful to evaluate the bridge in speed required to be overcome.
 
 \subsection{Benchmarking Algorithm}
-As discussed previously \todo{ref this}, there are always advantages and disadvantages of any algorithm used for benchmarking. In order to minimise the disadvantages, an algorithm was used which tried to mimic the procedures which would be used in the real application, just without the complications. Algorithm \ref{alg:lang} shows that the program basically creates 100,000 packets individually and populates their fields with random data, which is then processed and return in the 'result' field. This simulates retrieving low-level packet data, interpreting and acting upon the data, and then setting data within the raw packet.
+As discussed previously \todo{ref this}, there are always advantages and disadvantages of any algorithm used for benchmarking. In order to minimise the disadvantages, an algorithm was used which tried to mimic the procedures which would be used in the real application, just without the complications. Algorithm \ref{alg:lang} shows that the program basically creates 100,000 packets individually and populates their fields with random data, which is then processed and returne in the 'result' field. This simulates retrieving low-level packet data, interpreting and acting upon the data, and then setting data within the raw packet.
 
 \begin{algorithm}[H]
 	\caption{Language Benchmark Algorithm}
@@ -51,6 +51,11 @@ Due to the very poor performance of the JNI compared to other languages, further
 \todo{Is this relevant}
 
 \section{Design Considerations}
+https://code.google.com/p/fast-serialization/wiki/StructsIntroduction
+http://stackoverflow.com/questions/6091615/difference-between-on-heap-and-off-heap
+http://java.dzone.com/articles/heap-vs-heap-memory-usage
+http://stackoverflow.com/questions/1262328/how-is-the-java-memory-pool-divided
+http://pubs.vmware.com/vfabric52/index.jsp?topic=/com.vmware.vfabric.em4j.1.2/em4j/conf-heap-management.html
 \subsection{Data Sharing}
 The proposed application will be sharing data between the DPDK code written in C (low level) and the Java (medium level) side used for the highly abstracted part of the application. This requires a large amount of data, most noticeably packets, to be transferred between 'sides' in a small amount of time.
 \todo[inline]{Diagram of packets from NIC using c through 'technique' and then processing packets in java and then back}
@@ -60,7 +65,14 @@ A few techniques for this are available with Java and C, all with different perf
 By far the simplest technique available is using the Java Native Interface (JNI) in order to interact with native code and then retrieve the required via this. This can be done 2 ways, either by creating the object and passing it as a parameter to the native methods or creating an object on the native side via the Java environment parameter. Both ways require the population of the fields to be done on the native side. From then on, any data manipulation and processing could be done on the Java side. Unfortunately, this does require all data to be taken from the object and placed back into the structs before packets can be forwarded. Obviously this results in a lot of unneeded data copying, while the actual JNI calls can significantly reduce the speed of the application as shown in \todo{ref this}.
 
 \subsubsection{ByteBuffers - Non-heap and heap memory}
-\todo{bytebuffer uses unsafe but does bound checking}
+http://stackoverflow.com/questions/11174231/compare-direct-and-non-direct-bytebuffer-get-put-operations
+http://www.kdgregory.com/?page=java.byteBuffer
+http://www.javacodegeeks.com/2013/08/which-memory-is-faster-heap-or-bytebuffer-or-direct.html
+http://mindprod.com/jgloss/bytebuffer.
+http://tutorials.jenkov.com/java-nio/buffers.html
+https://worldmodscode.wordpress.com/2012/12/14/the-java-bytebuffer-a-crash-course/
+http://www.javabeat.net/how-to-use-bytebuffer-in-java/
+\todo{bytebuffer uses unsafe but does bound checking, can spsecify endian wih this}
 \todo{cant use bytebuffers directly with DPDK as dont use hugepages}
 ByteBuffers are a Java class which allow for memory to be allocated on the Java heap (non direct) or outside of the JVM (direct). Non direct ByteBuffer's are simply a wrapper for a byte array on the heap and are generally used as they allow easier access to bytes, as well as other primitive data types.
 
@@ -97,8 +109,12 @@ Using Unsafe then allows direct native memory access (off heap) to retrieve data
 \subsubsection{Evaluation}
 
 \subsubsection{JNA?}
+https://github.com/twall/jna
 
 \subsubsection{Packing C Structs - in its own section?}
+http://stackoverflow.com/questions/4306186/structure-padding-and-structure-packing
+http://stackoverflow.com/questions/13927378/nested-structure-padding-c-64-bit-linux
+http://stackoverflow.com/questions/1287903/using-c-struct-in-java
 Structs are a way of defining complex data into a grouped set in order to make this data easier to access and reference as shown in Code \ref{lst:c_struct}.
 
 \begin{lstlisting}[language=C, caption={Example C Struct}, label=lst:c_struct]
@@ -184,7 +200,8 @@ Self-alignment makes access faster because it facilitates generating single-inst
 casting to an odd pointer will slow down code and could work. Other architectures will take the word which the pointer points to and therefore the problem occurs above.
 
 \subsubsection{Javolution}
-
+http://jnkjava.blogspot.co.uk/2013/06/parsing-cc-struct-in-java.html
+http://javolution.org/
 
 \subsection{Performance testing}
 In order to evaluate the most suitable data sharing technique, performance testing on 4 different implementation options for sharing data between Java and native memory were considered. Since the ultimate aim of the implementation is to maximise throughput of packets, the performance test tried to mimic this by processing data on 1 million packets per iteration. This processing involved retrieving data from the native packet struct, loading that data into a Java object, changing the data and then setting the data back into the original struct. Various techniques to do this were used to try and find the best performance possible. All of the techniques made use of a static native struct which acted like a new packet been received. The changed data was then set back into this struct.
