@@ -34,10 +34,11 @@ public class FirewallProcessor extends PacketProcessor {
 				return true;
 			}
 		} else if (version == 6) {
-			System.out.println("Not handling IPv6 - skipping and freeing");
+			//System.out.println("Not handling IPv6 - skipping and freeing");
 			pf.get(0).freePacket(currentPacket);
 		} else {
-			System.out.println("Packet received where version isn't 4 or 6 - skipping and freeing");
+			//System.out.println("Packet received where version isn't 4 or 6 - skipping and freeing");
+			pf.get(0).freePacket(currentPacket);
 		}
 		return false;
 	}
