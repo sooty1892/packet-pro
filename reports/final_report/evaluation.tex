@@ -4,12 +4,14 @@
 
 \section{Evaluation}
 
+This section focusses on the comparison testing which was carried out between the C and Java implementations of basic middleboxes. Evaluation of the results will then be discussed and further improvements to the Java solutions will be considered. \todo{mention machine specs} 
+
 \subsection{Packet Generating}
 Packet generating is the act of creating packets with random payloads to be sent to certain MAC addresses on the network. This can either be done via the use of specialised hardware or using software. They are used for load testing of packet processing applications to test the amount of data which applications can process per second. This can reveal whether limitations on a system is software or hardware based.
 
 \todo[inline]{Talk about pktgen module in kernel - does dpdk version use this}
 
-Pktgen is open source software tool, maintained by Intel, which aims to generate packets using the DPDK framework. It can generate up to 10Gbits of data per second and send the data in the form of packets across a compatible network interface card/controller. It has a number of benefits which include:
+Pktgen is open source software tool, maintained by Intel, which aims to generate packets using the DPDK framework. It can generate up to 10Gbits of data per second with 64 byte frame sizez, and send the data in the form of packets across a compatible network interface card/controller. It has a number of benefits which include:
 
 \begin{itemize}
 	\item Real time packet configuration and port control
@@ -19,6 +21,8 @@ Pktgen is open source software tool, maintained by Intel, which aims to generate
 \end{itemize}
 
 \todo[inline]{how does pktgen work and why we used it}
+
+Pktgen has limitations though, since 10Gbps transmitting is only possible with 64 byte frames. Frames of greater size up to 1024 bytes can be transmitted although total bytes per seconds is reduced, therefore limiting the testing ability. \todo{possibly run more ports on more than 1 core?}
 
 \subsection{Initial Testing}
 The initial testing of applications \todo{which ones?} was carried out an a local Mac OS X machine running Ubuntu 14.04 LTS 64-bit on a VirtualBox \todo{ref this and ubuntu} virtual machine. Although this set-up didn't provide the ability to load test on very high speeds (anything above 1Gbit/s), it allowed for basic testing to check that the application was running as expected. Load testing of speeds up to roughly 700Mbit/s were also possible which have a basic testing platform without the need to move code to servers.
@@ -33,7 +37,26 @@ Pktgen and the custom application were booted up simultaneously running in paral
 \subsubsection{Results}
 
 \subsection{Further Testing}
-On servers
+In order to fully understand the capabilites of the middleboxes, testing was carried out on Imperial College's Large Scale Distributed Systems (LSDS) testbed. Although this system consists of numerous machines, tests were carried out using just 2. The first machines was used to host the middlebox application and received the packets. The other machine was used as the client and ran the pktgen software allowing it to generate packets at up to 10Gbps in order to take advantage of the machines network interface controllers.
+
+The first test on the LSDS testbed involved comparing the C and Java implementations of a packet capturing application which simply received the packets and freed them straight away without forwarding them. The C implementation is used to give the optimal readings possible from this and further tests, since very limited processing is carried out between receiving and dropping the packet. The figure below shows the performance of the application at varying packet sizes.
+
+\missingfigure{Graph of c packet capture, 1 core, different frame sizes, will need to reference transmit speed of pktgen}
+
+\todo{what does the results show}
+
+The same testing was carried out with an identical packet capture algorithm which was instead implemented in Java using the DPDKJava framework descirbed previously. These results are shown below.
+
+\missingfigure{Graph of java packet capture, 1 core, different frame sizes, will need to reference transmit speed of pktgen}
+
+The results above are very low to what was expected for such a simple application. \todo{expand on this}
+
+To check where the problems lied within the code, a Java profiler (JProfiler) was used to check multiple parts of the code including memory usage, cpu usage and the number of method calls and the avergae time per method call. This provided invalueable analysis of where the problems were. As can be seen by figure ??, the major problem lied with???
+
+\missingfigure{Screenshot of profiler showing problems}
+
+
+
 %http://www.oracle.com/technetwork/java/hotspotfaq-138619.html#perf%5Fscaling
 %http://stackoverflow.com/questions/11054548/what-does-the-usecompressedoops-jvm-flag-do-and-when-should-i-use-it
 %http://www.oracle.com/technetwork/systems/index-156457.html
