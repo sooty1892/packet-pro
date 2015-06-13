@@ -179,10 +179,12 @@ int main(int argc, char **argv) {
     unsigned cpu = rte_lcore_id();
     unsigned socketid = rte_lcore_to_socket_id(cpu);
 
-    rx_pool = rte_mempool_create("rx_pool", 8*1024, MAX_PKT_SIZE, 0,
+    rx_pool = rte_mempool_create("rx_pool", 16*1024, MAX_PKT_SIZE, 0,
                                 sizeof (struct rte_pktmbuf_pool_private),
                                 rte_pktmbuf_pool_init, NULL,
                                 rte_pktmbuf_init, NULL, socketid, 0);
+
+   
     if (rx_pool == NULL) {
         rte_exit(EXIT_FAILURE, "rte_mempool_create(): error\n");
     }
