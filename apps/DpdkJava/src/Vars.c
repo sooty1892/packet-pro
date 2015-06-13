@@ -7,6 +7,7 @@
 // ethernet port config - more options available
 const struct rte_eth_conf port_conf = {
 	.rxmode = {
+		.mq_mode = ETH_MQ_RX_RSS,
 		.split_hdr_size = 0,
 		.header_split   = 0, /**< Header Split disabled */
 		.hw_ip_checksum = 0, /**< IP checksum offload disabled */
@@ -14,6 +15,12 @@ const struct rte_eth_conf port_conf = {
 		.jumbo_frame    = 0, /**< Jumbo Frame Support disabled */
 		.hw_strip_crc   = 0, /**< CRC stripped by hardware */
 	},
+	.rx_adv_conf = {
+      	  .rss_conf = {
+            .rss_key = NULL,
+            .rss_hf = ETH_RSS_IP,
+        },
+    },
 	.txmode = {
 		.mq_mode = ETH_MQ_TX_NONE,
 	},

@@ -170,7 +170,7 @@ int main(int argc, char **argv) {
     count = rte_eth_dev_count();
     printf("# of eth ports = %d\n", count);
     memset(&eth_conf, 0, sizeof eth_conf);
-    ret = rte_eth_dev_configure(ifidx, NB_RX_QUEUE, NB_TX_QUEUE, &eth_conf);
+    ret = rte_eth_dev_configure(ifidx, 2, NB_TX_QUEUE, &eth_conf);
     if (ret < 0) {
         rte_exit(EXIT_FAILURE, "Cannot configure device: error=%d, port=%d\n", ret, ifidx);
     }
@@ -179,10 +179,12 @@ int main(int argc, char **argv) {
     unsigned cpu = rte_lcore_id();
     unsigned socketid = rte_lcore_to_socket_id(cpu);
 
-    rx_pool = rte_mempool_create("rx_pool", 8*1024, MAX_PKT_SIZE, 0,
+    rx_pool = rte_mempool_create("rx_pool", 16*1024, MAX_PKT_SIZE, 0,
                                 sizeof (struct rte_pktmbuf_pool_private),
                                 rte_pktmbuf_pool_init, NULL,
                                 rte_pktmbuf_init, NULL, socketid, 0);
+
+   
     if (rx_pool == NULL) {
         rte_exit(EXIT_FAILURE, "rte_mempool_create(): error\n");
     }
@@ -192,6 +194,11 @@ int main(int argc, char **argv) {
         rte_exit(EXIT_FAILURE, "rte_eth_rx_dev_queue_setup(): error=%d, port=%d\n", ret, ifidx);
     }
     printf("If %d rte_eth_rx_queue_setup() successful\n", ifidx);
+
+    ret = rte_eth_rx_queue_setup(0, 1, NB_RX_DESC, socketid, &rx_conf, rx_pool);
+    if (ret < -1) {
+	rte_exit(EXIT_FAILURE, "2 probs");
+    }
 
     ret = rte_eth_tx_queue_setup(ifidx, 0, NB_TX_DESC, socketid, &tx_conf);
     if (ret < 0) {
