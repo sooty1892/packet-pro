@@ -29,22 +29,25 @@ public class PacketCap {
 		
 		List<CoreThread> threads = new ArrayList<CoreThread>();
 		
-		ReceivePoller rp = new ReceivePoller(0, 0);
+		ReceivePoller rp1 = new ReceivePoller(0, 0);
+		ReceivePoller rp2 = new ReceivePoller(0, 1);
 		PacketSender ps = new PacketSender(0, 0);
 		PacketFreeer pf = new PacketFreeer();
 		
 		//rps.add(rp);
 		//pss.add(ps);
 		
-		threads.add(new CaptureProcessor(ps, pf, rp));
+		threads.add(new CaptureProcessor(ps, pf, rp1));
+		threads.add(new CaptureProcessor(ps, pf, rp2));
 		
 		as.createAffinityThreads(threads);
 		
 		as.dpdk_init_eal();
 		as.dpdk_create_mempool("mbufs", 8192, 32);
 		as.dpdk_check_ports();
-		as.dpdk_configure_dev(0, 1, 1);
+		as.dpdk_configure_dev(0, 2, 1);
 		as.dpdk_configure_rx_queue(0, 0);
+		as.dpdk_configure_rx_queue(0, 1);
 		as.dpdk_configure_tx_queue(0, 0);
 		as.dpdk_dev_start(0);
 		as.dpdk_check_ports_link_status();

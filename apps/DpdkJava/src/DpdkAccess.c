@@ -419,8 +419,15 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1enable_1pro(JNIEnv __attribute__ ((u
 //void do_stats(struct rte_timer *, void *);
 void do_stats(void);
 
-uint64_t pre_ibytes = 0;
-uint64_t pre_ipackets = 0;
+struct port_data {
+	uint64_t pre_ibytes;
+	uint64_t pre_ipackets;
+};
+
+struct port_data *pdata[num_ports];
+
+//uint64_t pre_ibytes = 0;
+//uint64_t pre_ipackets = 0;
 
 //void do_stats(__attribute__ ((unused)) struct rte_timer *tim, __attribute__ ((unused)) void *arg) {
 void do_stats(void) {
@@ -428,11 +435,23 @@ void do_stats(void) {
     //fflush(stdout);
     struct rte_eth_stats stats;
 
-    rte_eth_stats_get(0, &stats);
-    uint64_t diff_bytes = stats.ibytes - pre_ibytes;
-    pre_ibytes = stats.ibytes;
-    uint64_t diff_packets = stats.ipackets - pre_ipackets;
-    pre_ipackets = stats.ipackets;
+    unint64_t diff_bytes = 0;
+    unint64_t diff_packets = 0;
+
+    int i;
+    for (i = 0; i < num_ports; i++) {
+    	rte_eth_stats_get(i, &stats);
+    	diff_bytes += stats.ibytes - port_data[i].pre_ibytes;
+    	port_data[i].pre_ibytes = stats.ibytes;
+    	diff_packets += stats.ipackets - port_data[i].pre_ipackets;
+    	port_data[i].pre_ipackets = stats.ipackets;
+    }
+
+    //uint64_t diff_bytes = stats.ibytes - pre_ibytes;
+    //pre_ibytes = stats.ibytes;
+    //uint64_t diff_packets = stats.ipackets - pre_ipackets;
+    //pre_ipackets = stats.ipackets;
+
     printf("Bytes: %lu\n", diff_bytes);
     printf("Packets: %lu\n", diff_packets);
     fflush(stdout);
@@ -460,6 +479,14 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1start_1stats(JNIEnv __attribute__ ((
 /*	for (;;) {
 		rte_timer_manage();
 	} */
+
+	pdata = malloc(sizeof(struct port_data *) * num_pors);
+	int i;
+	for (i = 0; i < num_ports; i++) {
+		pdata[i] = malloc(sizeof(struct port_data));
+		pdata[i].pre_ibytes = 0;
+		pdata[i].pre_ipackets = 0;
+	}
 
 	for(;;) {
 		sleep(1);
