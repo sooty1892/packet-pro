@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
 
 /*
  * Frees given packets from native memory via DPDK library
@@ -8,21 +6,27 @@ import java.util.List;
 // How to spell free-er is the real question here
 public class PacketFreeer {
 	
-	private List<Packet> list;
 	UnsafeAccess ua;
 	long past_freed;
 	
 	int free_burst;
+	
+	int current_count;
+	
+	long start_pointer;
+	long mbuf_pointer;
 	
 	private static final int DEFAULT_FREE_BURST = 32;
 	private static final long MILLI_SECOND = 1000;
 	private static final int SHORT_SIZE = 2;
 	
 	public PacketFreeer() {
-		list = new ArrayList<Packet>();
 		ua = new UnsafeAccess();
 		past_freed = System.currentTimeMillis();
 		free_burst = DEFAULT_FREE_BURST;
+		current_count = 0;
+		start_pointer = ua.allocateMemory((ua.longSize()*free_burst)+2);
+		mbuf_pointer = start_pointer + 2;
 	}
 	
 	public int getFreeBurst() {
@@ -42,8 +46,10 @@ public class PacketFreeer {
 	// packet added to free list and checks made for
 	// timeout period and list size
 	public void freePacket(Packet p) {
-		list.add(p);
-		if (list.size() >= free_burst || isTimedOut()) {
+		ua.setCurrentPointer(mbuf_pointer + (ua.longSize() * current_count));
+		ua.putLong(p.getMbuf_pointer());
+		current_count += 1;
+		if (current_count >= free_burst || isTimedOut()) {
 			freeBurst();
 			past_freed = System.currentTimeMillis();
 		}
@@ -52,26 +58,20 @@ public class PacketFreeer {
 	// frees burst of packets via dpdk library
 	private void freeBurst() {
 		int num = 0;
-		if (list.size() > free_burst) {
+		if (current_count > free_burst) {
 			num = free_burst;
 		} else {
-			num = list.size();
+			num = current_count;
 		}
-		long memory_needed = (num * ua.longSize()) + SHORT_SIZE;
-		long pointer = ua.allocateMemory(memory_needed);
-		ua.setCurrentPointer(pointer);
+
+		ua.setCurrentPointer(start_pointer);
 		
 		ua.putShort(num);
-
-		for (int i = 0; i < num; i++) {
-			ua.putLong(list.get(i).getMbuf_pointer());
-		}
-
-		list.subList(0, num).clear();
 		
-		DpdkAccess.dpdk_free_packets(pointer);
+		DpdkAccess.dpdk_free_packets(start_pointer);
 		
-		ua.freeMemory(pointer);
+		current_count -= num;
+		
 	}
 
 }
