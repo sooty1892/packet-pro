@@ -13,10 +13,10 @@ public class Firewall {
 		
 		ApplicationStarter as = new ApplicationStarter();
 		
-		as.setupGui(false);
+//		as.setupGui(false);
 		
-		List<ReceivePoller> rps = new ArrayList<ReceivePoller>();
-		List<PacketSender> pss = new ArrayList<PacketSender>();
+//		List<ReceivePoller> rps = new ArrayList<ReceivePoller>();
+//		List<PacketSender> pss = new ArrayList<PacketSender>();
 		
 		try {
 			as.readConfig(new FileInputStream("config.properties"));
@@ -33,8 +33,8 @@ public class Firewall {
 		PacketSender ps = new PacketSender(0, 0);
 		PacketFreeer pf = new PacketFreeer();
 		
-		rps.add(rp);
-		pss.add(ps);
+//		rps.add(rp);
+//		pss.add(ps);
 		
 		threads.add(new FirewallProcessor(ps, pf, rp));
 		
@@ -49,7 +49,11 @@ public class Firewall {
 		as.dpdk_dev_start(0);
 		as.dpdk_check_ports_link_status();
 		
-		as.updateStatsInfo(rps, pss);
+//		as.updateStatsInfo(rps, pss);
+
+		as.dpdk_enable_pro();
+
+		as.start_native_stats();
 		
 		as.dpdk_get_mac_info();
 		
