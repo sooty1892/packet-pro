@@ -3,6 +3,9 @@
 \begin{document}
 
 \section{DPDK}
+%https://embedded.communities.intel.com/thread/6828
+%http://dpdk.org/ml/archives/dev/2013-June/000237.html
+\label{sec:dpdk}
 This section will go into much more detail about the Data Plane Development Kit (DPDK), focussing on the basic concepts used by the fast packet processing framework for use within custom applications. DPDK does have a number of more advanced features which can be exploited but aren't discussed in this report. \todo{ref manual}
 
 \subsection{Environment Abstraction Layer (EAL)}
@@ -12,11 +15,18 @@ On the start-up of an application, the EAL is responsible for finding PCI inform
 
 \subsection{Logical Cores}
 \label{subsec:logical_cores}
+%http://www.tomshardware.co.uk/forum/306079-28-what-core-thread
+%https://computing.llnl.gov/tutorials/pthreads/
+%https://en.wikipedia.org/wiki/Native_POSIX_Thread_Library
+%http://stackoverflow.com/questions/1888160/distinguish-java-threads-and-os-threads
+%http://wimhesselink.nl/pub/whh241b.pdf
 Also know as lcores within DPDK, logical cores shouldn't be confused with processor cores. Lcores are threads which allow different applications functions to be run within different threads. This can allow different lcores to control different ports and queues while processing packets as well.
 
 Within DPDK lcores are implemented with POSIX threads (on linux) and make use of processor affinity (CPU pinning). This allows lcores to be only run on certain processing cores which reduces context switching and cache memory swapping and therefore increasing overall perforamance. However, this only works of the number of lcores is equal or less than the number of available processing cores so the number of lcores which are allowed to be initiated are limited. This feature can also exploit modern processors which allow for hyper-threaded cores but the performance increase isn't as guarenteed as it is with non-hyper-threaded cores.
 
 \subsection{Huge Pages}
+%https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
+%https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Performance_Tuning_Guide/s-memory-transhuge.html
 \label{subsec:hugepages}
 Huge pages are a way of increasing performance when dealing with large amounts of memory. Normally, memory is managed in 4096 byte (4KB) blocks known as pages, which are listed within the CPU memory management unit (MMU). However, if a system uses a large amount of memory, increasing the number of standard pages is expensive on the CPU as the MMU can only handle thousands of pages and not millions.
 

@@ -2,20 +2,36 @@
 
 \begin{document}
 
+\todo{cite ALL images}
+
 \section{Background}
 
-\subsection{Network Components}
+This section focusses on a number of background concepts which will help to gain further understanding of networking practices and protocols which the solution must adhere to. It then gives an overview of the architecture of the Java langugage and explores on some of the key techniques which will be exploited. As this report focusses on performance testing throughout, this section will then cover techniques to test custom programs. It finally looks at related works within the research area and existing frameworks which could be exploited.
 
-\subsubsection{Network Models}
-Generally there are 2 well known network models. The Open System Interconnection (OSI) model represents an ideal to which all network communication should adhere to while the Transmission Control Protocol/Inter Protocol (TCP/IP) model represents reality in the world. The TCP/IP model combines multiple OSI layers into 1 TCP/IP layer simply because not all systems will go through these exact stages depending on the use of the system.
+\subsection{Network Components}
+%http://www.oreilly.com/openbook/linag2/book/ch09.html
+%http://etutorials.org/Networking/Check+Point+FireWall/Chapter+10.+Network+Address+Translation/Implementing+NAT+A+Step-by-Step+Example/
+%http://computer.howstuffworks.com/nat.htm
+%http://www.sans.org/reading-room/whitepapers/vpns/implementing-nat-checkpoint-firewall-1-733
+%http://www.erg.abdn.ac.uk/users/gorry/course/inet-pages/arp.html
+
+\todo{intros for background section}
+
+\subsubsection{Models}
+\label{sec:models}
+%http://www.networksorcery.com/enp/protocol/ip.htm
+%http://www.thegeekstuff.com/2012/03/ip-protocol-header/
+%http://www.howtogeek.com/169540/what-exactly-is-a-mac-address-used-for/
+%http://wiki.openwrt.org/doc/networking/praxis
+%http://www.linuxfoundation.org/collaborate/workgroups/networking/kernel_flow
+Generally there are 2 well known network models. The Open System Interconnection (OSI) model in Figure \ref{fig:layers} represents an ideal to which all network communication should adhere to while the Transmission Control Protocol/Inter Protocol (TCP/IP) model represents reality in the world. The TCP/IP model combines multiple OSI layers into 1 TCP/IP layer simply because not all systems will go through these exact stages depending on the system implementation.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{img/layers.jpg}
-	\caption{OSI vc TCP/IP Model}
+	\caption{OSI vs TCP/IP Model}
 	\label{fig:layers}
 \end{figure}
-\todo{cite this}
 
 The TCP/IP application layer doesn't represent an actual application but instead its a set of protocols which provides services to applications. These services include HTTP, FTP, SMTP, POP3 and more. It acts as an interface for software to communicate between systems (e.g. client retrieving data from server via SMTP).
 
@@ -25,18 +41,17 @@ The network/internet layer attaches a protocol header for packet addressing and 
 
 The network interface or link layer will firstly attach its own ethernet header (or suitable protocol header) to the packets, along with an ethernet trailer. This header will specify the destination and source of the media access control (MAC) address which are specific to network interfaces. The next step is to put the packet onto the physical layer, which may be fibre optic, wireless or standard cables.
 
-This will eventually build a packet of data which include the original raw data along with multiple headers for each layer of the model. \todo{ref image and source}
+This will eventually build a packet of data which include the original raw data along with multiple headers for each layer of the model (Figure \ref{fig:headers}).
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{img/headers.png}
-	\caption{Network model headers}
+	\caption{Network model building up of data headers}
 	\label{fig:headers}
 \end{figure}
-\todo{cite headers}
 
 \subsubsection{Network Packets}
-A network packet is responsible for carrying data from a source to a destination. Packets are routed, fragmented and dropped via information stored within the packet's header. Note: in this report packets and datagrams are interchangeable. Data within the packets are generally input from the application layer, and headers are appended to the front of this data depending on the network level described in \todo{ref this}. Packets are routed to their destination based on a combination of an IP address and MAC address which corresponds to a specific computer located within the network, whether that is a public or private network. In this project we will only be concerned with the Internet Protocol (IP) and therefore IPv4 and IPv6 packet headers. \todo{update software for ipv6} \todo{ref packet headers below}
+A network packet is responsible for carrying data from a source to a destination. Packets are routed, fragmented and dropped via information stored within the packet's header. Note: in this report packets and datagrams are interchangeable. Data within the packets are generally input from the application layer, and headers are appended to the front of this data depending on the network level described in Section \ref{sec:models}. Packets are routed to their destination based on a combination of an IP address and MAC address which corresponds to a specific computer located within the network, whether that is a public or private network. In this project we will only be concerned with the Internet Protocol (IP) and therefore IPv4 (Figure \ref{fig:ipv4}) and IPv6 (Figure \ref{fig:ipv6}) packet headers.
 
 \begin{figure}[H]
 	\centering
@@ -44,7 +59,7 @@ A network packet is responsible for carrying data from a source to a destination
 	\caption{IPv4 Packet Header}
 	\label{fig:ipv4}
 \end{figure}
-\todo{cite{ipv4}}
+
 
 \begin{itemize}
 	\item Version - IP version number (set to 4 for IPv4)
@@ -84,13 +99,72 @@ A network packet is responsible for carrying data from a source to a destination
 \end{itemize}
 
 \subsubsection{Packet Handling}
-\subsubsection{Network Interface Card (NIC)}
-\subsubsection{Network Address Translator (NAT)}
-\subsubsection{Firewall}
+\label{subsec:handling}
+\todo{is this section right}
+Once the kernel of the given operating system has received data to transmit from a given application, the data is then placed into a packet with the correct header and these packets are placed on a IP stack (Figure~\ref{fig:buffer}). Through a few intermediate steps the packets arrive at the driver queue, also known as the transmission queue. This queue is implemented as a ring buffer, therefore has a maximum capacity before it starts to overwrite packets which are still to be transmitted. As long as the queue isn't empty, the network interface card (NIC) will take packets from the queue and place them on the transmission medium. A similar process occurs when receiving packets, but in the opposite direction. For each NIC, there is a receive and transmit queue which are independent of each other allow communication to be bidirectional, although this depends on the kernel and its handling of events associated with packets.
 
-\subsection{Java Features}
-\subsubsection{Java Virtual Machine (JVM)}
-The Java Virtual Machine is an abstract computer that allows Java programs to run on any computer without dependant compilation. This works by all Java source been compiled down into Java byte code, which is interpreted by the JVM's just in time (JIT) compiler to machine code. However, it does require each computer to have the Java framework installed which is dependant on the OS and architecture. It provides an appealing coding language due to the vast support, frameworks and code optimisations available such as garbage collections and multithreading. Figure~\ref{fig:jvm} shows the basic JVM architecture with the relevant sections explained in the list below.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{img/buffer.jpg}
+	\caption{Linux packet handling \cite{buffer}}
+	\label{fig:buffer}
+\end{figure}
+
+\subsubsection{Network Interface Controller (NIC)}
+Also known as a Network Interface Card, they provide the ability for a computer to connect to a network through a variety of mediums such as wireless, ethernet and fibre optics. They provide both the data link and physical layer of the network model (Figure \ref{fig:layers}), allowing a protocol stack to communicate with other computers on the local area network (LAN) or over a wider area via the IP protocol using IP addresses.
+
+NICs can run at speeds of up to 100Gbps but more commonly run at 10Gbps for servers and 1Gbps for standard computers. The kernel or other applications retreive packets via the NIC by polling or itterupts. Polling is where the kernel or application will periodically check the NIC for received packets while the use of interupts allows the NIC to tell the kernel or application that it has received packets. Generally NICs provide the ability for 1 or more recieve and transmit queues to be assigned per port, allowing for increased performance by assigning queues to different threads.
+
+\subsubsection{Middleboxes}
+Middleboxes are a device within a network that inspect, alter and forwats packers them depending on certain rules and the intended functionaility of the middlebox. A few different types are described below and can be combined into 1 single application:
+
+\paragraph*{Firewall}
+Firewalls (Figure~\ref{fig:firewall}) are generally the major applications which sit between the public and private network of a system. They provide packet filtering which controls which packets can enter the private network via establishing a set of rules which packets have to adhere to. Filtering can be based on a number attributes of the packet such as the source and destination IP address and port and the destination service. Firewalls can also offer a number of other useful features such as NAT's or dynamic host configuration protocol (DCHP) to allow dynamic assignment of IP addresses within a network. As well as providing protection on a network level, application layer firewalls exist which stop certain applications from sending or receiving a packet.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\textwidth]{img/firewall.png}
+	\caption{Firewall intercepting packets as a security measure \cite{firewall}}
+	\label{fig:firewall}
+\end{figure}
+
+\paragraph*{Network Address Translator (NAT)}
+\todo{complete this with help from links}
+As a routing device, a NAT is responsible for remapping an IP address to another by altering the IP datagram packet header. NAT's have become extremely important in modern networking systems due to IPv4 address exhaustion, allowing a single public IP address to map to multiple private IP addresses. This is particularly useful in large corporations where only a limited public network connection is required, meaning that all private IP addresses (usually associated with a single machine) are mapped to the same public IP address. A NAT will make use of multiple connection ports to identify which packets are for which private IP address and then re-assign the packet header so the internal routers can forward the packet correctly. As can be seen by Table~\ref{tab:ip} and Figure~\ref{fig:nat}, each internal address is mapped to via the port number associated with the external address. NAT's are generally implemented as part of a network firewall as they inspect the datagram packets for malicious data and sources.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular} { | c | c | }
+		\hline
+		\textbf{Private IP Address} & \textbf{Public IP Address} \\
+		\hline
+		10.0.0.1 & 14.1.23.5:62450 \\
+		\hline
+		10.0.0.2 & 14.1.23.5:62451 \\
+		\hline
+		10.0.0.3 & 14.1.23.5:62452 \\
+		\hline
+		10.0.0.4 & 14.1.23.5:62453 \\
+		\hline
+	\end{tabular}
+	\caption{Example of public IP address and ports mapping to private IP address}
+	\label{tab:ip}
+\end{table}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{img/nat.jpg}
+	\caption{NAT translating public IP addresses into private IP addresses \cite{nat-table}}
+	\label{fig:nat}
+\end{figure}
+
+\todo{any more middleboxes - packet cap?}
+
+\subsection{Java}
+
+\subsubsection{JVM}
+
+The Java Virtual Machine is an abstract computer that allows Java programs to run on any computer without dependant compilation. This works by all Java source code been compiled down into Java byte code, which is interpreted by the JVM's just in time (JIT) compiler to machine code. However, it does require each computer to have the Java framework installed which is dependant on the OS and architecture. It provides an appealing coding language due to the vast support, frameworks and code optimisations available such as garbage collections and multithreading. Figure~\ref{fig:jvm} shows the basic JVM architecture with the relevant sections explained in the list below.
 
 \begin{figure}[H]
 	\centering
@@ -114,6 +188,19 @@ The Java Virtual Machine is an abstract computer that allows Java programs to ru
 Typically, any network communication from a Java application occurs via the JVM and through the operating system. This is because the JVM is still technically an application running on top of the OS and therefore doesn't have any superuser access rights. Any network operation results in a kernel system call, which is then put into a priority queue in order to be executed. This is one of the main reasons why network calls through the JVM and kernel can be seen as 'slow', in relative speeds compared to network line rate speeds.
 
 \subsubsection{Java Native Interface (JNI)}
+%http://stackoverflow.com/questions/13973035/what-is-the-quantitative-overhead-of-making-a-jni-call
+%http://normanmaurer.me/blog/2014/01/07/JNI-Performance-Welcome-to-the-dark-side/
+%http://stackoverflow.com/questions/7823665/why-jni-call-to-native-method-is-slower-than-similar-in-sun-misc-unsafe
+%http://stackoverflow.com/questions/7699020/what-makes-jni-calls-slow
+%http://stackoverflow.com/questions/17709210/jni-passing-large-amounts-of-data-between-java-and-native-code
+%http://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/types.html#wp16432
+%http://www.public.iastate.edu/~java/docs/guide/nativemethod/types.doc.html
+%http://journals.ecs.soton.ac.uk/java/tutorial/native1.1/implementing/method.html
+%http://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/types.html
+%http://www.ibm.com/developerworks/java/library/j-jni/#reaching
+%http://www.mastercorp.free.fr/Ing1/Cours/Java/java_lesson1/doc/Tutorial/performance/JPNativeCode_fm.htm
+%http://janet-project.sourceforge.net/papers/jnibench.pdf
+
 Provided by the Java Software Development Kit (SDK), the JNI is a native programming interface that lets Java applications use libraries written in other languages. The JNI also includes the invocation API which allows a JVM to be embedded into native applications. This project and therefore this overview will only focus on Java code using C libraries via the JNI on a linux based system.
 
 In order to call native libraries from Java applications a number of steps have to be undertaken as shown below, which are described in more detail later:
@@ -221,10 +308,14 @@ Although the JNI provides a very useful interface to interact with native librar
 	\item The Java application that relies on the JNI loses its portability with the JVM as it relies on natively compiled code.
 	\item Errors within the native code can potentially crash the JVM, with certain errors been very difficult to reproduce and debug.
 	\item Anything instantiated with the native code won't be collected by the garbage collector with the JVM, so freeing memory should be a concern.
-	\item If using the JNI on large scale, converting between Java objects and C structs can be difficult
+	\item If using the JNI on large scale, converting between Java objects and C structs can be difficult and slow
 \end{itemize}
 
+
+
 \subsubsection{Current Java Networking Methods}
+http://haumacher.de/publ/parallel/p086.pdf
+http://www.javacoffeebreak.com/articles/javarmi/javarmi.html
 For high performance computing in Java, a number of existing programming options are available in order for applications to communicate over a network. These can be classified as: (1) Java sockets; and (2) Remote Method Invocation (RMI); (3) shared memory programming. As will be discussed, none of these are capable of truly high performance networking, especially at line rate speeds.
 
 \paragraph{Java Sockets}\mbox{}\\ %subsubsubsection
@@ -239,7 +330,9 @@ Shared memory programming provides high performance JVM interaction due to Java'
 
 Even though these 3 techniques allow for communication between JVM's and other applications, the major issue is that incoming packets are still handled by the kernel and then passed onto the corresponding JVM. This means that packets are destined for certain applications, meaning that generic packets can't be intercepted and checked, which is a requirement for common middlebox software.
 
-\subsection{jVerbs}
+\subsection{Related Works}
+
+\subsubsection{jVerbs}
 Ultra-low latency for Java applications has been partially solved by the jVerbs \cite{jverbs} framework. Using remote direct memory access (RDMA), jVerbs provides an interface for which Java applications can communicate, mainly useful within large scale data centre applications.
 
 RDMA is a technology that allows computers within a network to transfer data between each other via direct memory operations, without involving the processor, cache or operating system of either communicating computer. RDMA implements a transport protocol directly within the network interface card (NIC), allowing for zero copy networking, which allows a computer to read from another computer and write to its own direct main memory without intermediate copies. High throughput and performance is a feature of RDMA due to the lack of kernel involvement, but the major downside is that it requires specific hardware which supports the RDMA protocol, while also requiring the need for specific computer connections set up by sockets.
@@ -255,21 +348,30 @@ As jVerbs takes advantage of mapping the network device directly into the JVM, b
 
 jVerbs provides a useful example framework which re-emphasises that packet processing in Java is very possible with low latency, while assisting in certain implementation and design choices which can be analysed in more detail.
 
-\subsection{Native I/O API's}
+\subsubsection{Native I/O API's}
 Currently available native networking API's are capable of reading and writing packets to the NIC transmission and receive queues at line rate. This is due to a number of techniques which tend to alter the kernels understand of the underlying NIC, therefore requiring specialist hardware and software to use such tools. DPDK (Section~\ref{subsec:dpdk}) is one of the tools that is open source and publicly available for use.
+
+\subsubsection{Packet Shader, infiniband - any more}
 
 \subsubsection{Data Plane Development Kit (DPDK)}
 \label{subsec:dpdk}
-\todo{refer to in-depth section - also is this right?}
-Data Plane Development Kit (DPDK) \cite{dpdk} is a set of libraries and drivers which enabled fast packet processing with certain system set ups. Since DPDK is developed by Intel, it only supports Intel x86 CPU's and certain network interface controllers (NIC). DPDK overwrites the NIC's drivers meaning that the operating system doesn't recognise the network cards and can't interact with them. It make use of drivers run in user space allowing it to interact with certain memory locations without permission from the kernel or even involving it in any way.
+%https://www.youtube.com/watch?v=BqV833_xd-Y
+%file:///Users/ashleyhemingway/Downloads/communications-packet-processing-brief.pdf
+Data Plane Development Kit (DPDK) \cite{dpdk} is a set of libraries and drivers which enables fast packet processing reaching speeds of 80 Mpps on certain system set ups. Since DPDK is developed by Intel, it only supports Intel x86 CPU's and certain network interface controllers (NIC). DPDK binds the NIC's to new drivers meaning that the operating system doesn't recognise the network cards and can't interact with them. It make use of drivers run in user space allowing it to interact with certain memory locations without permission from the kernel or even involving it in any way.
 
 DPDK makes use of an environment abstraction layer (EAL) which hides the environmental specifics and provides a standard interface which any application can interact with. Due to this, if the system changes in any way, the DPDK library needs to be re-compiled with other features been re-enabled in order to allow applications to run correctly again.
 
 In order to use the DPDK libraries for the intended purpose, data packets have to be written into the correct buffer location so they are inserted onto the network. I similar approach is used when receiving packets on the incoming buffer ring, but instead of the system using interrupts to acknowledge the arrival of a new packet, which is performance costly, it constantly polls the buffer space to check for new packets. DPDK also allows for multiple queues per NIC and can handle multiple NIC's per system, therefore scalability is a major bonus of the libraries.
 
-DPDK is very well documented on a number of levels. Firstly there is a online API which gives in depth details about what the methods, constants and structs do. There are a number of well written guides which give step-by-step details of how to install, set-up and use DPDK on various platforms and finally, there are many sample programs included with the build which give understanding of how the overall library works.
+DPDK is very well documented on a number of levels. Firstly there is a online API which gives in depth details about what the methods, constants and structs do. There are a number of well written guides which give step-by-step details of how to install, set-up and use DPDK on various platforms and finally, there are many sample programs included with the build which give understanding of how the overall library works. DPDK is discussed in much more detail in Section \ref{sec:dpdk}.
 
-\subsection{Benchmarking}
+\subsection{Performance Testing Techniques}
+%http://stackoverflow.com/questions/10942985/measuring-overhead-of-calling-through-jni
+%https://code.google.com/p/multi-language-bench/source/checkout
+%https://days2011.scala-lang.org/sites/days2011/files/ws3-1-Hundt.pdf
+%http://www.jeremyong.com/blog/2013/08/29/stop-comparing-programming-languages-with-benchmarks/
+%https://attractivechaos.github.io/plb/
+%http://economics.sas.upenn.edu/~jesusfv/comparison_languages.pdf
 Benchmarking is a process of testing hardware, individual components or full end to end systems to determine the performance of the application or hardware \todo{Examples of hardware comparisons}. Generally, benchmarking should be repeatable under numerous iterations without only minor variations in performance results. This is firstly to allow minor changes to be made to the application/component with re-runs of the benchmark showing the performance changes. Secondly, it allows accurate comparisons to be drawn between similar software or hardware with different implementations in order to derive \todo{better word for derive} a better product.
 
 \todo{why I need benchmarking}
