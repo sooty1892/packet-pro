@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <sys/queue.h>
 
+#include <rte_ip.h>
 #include <rte_memory.h>
 #include <rte_memzone.h>
 #include <rte_launch.h>
@@ -94,34 +95,28 @@ struct mbuf_list {
 static struct rte_mempool *rx_pool;
 static void send_packet(struct rte_mbuf *);
 static void free_packet(struct rte_mbuf *);
-static void send_burst();
-static void free_burst()
+static void send_burst(void);
+static void free_burst(void);
 
 static uint32_t blacklist[] = {0, 1};
-static int size = 2;
+int size = 2;
 
-static void free_packet()
-{
+static void free_burst(void) {
     struct rte_mbuf **list = (struct rte_mbuf **)free_list.list;
 
-    ret = rte_eth_tx_burst(0, 0, list, MAX_PKT_BURST);
-
-    return 0;
+    rte_eth_tx_burst(0, 0, list, MAX_PKT_BURST);
 }
 
-static void send_burst()
-{
+static void send_burst(void) {
     struct rte_mbuf **list = (struct rte_mbuf **)send_list.list;
 
-    ret = rte_eth_tx_burst(0, 0, list, MAX_PKT_BURST);
+    int ret = rte_eth_tx_burst(0, 0, list, MAX_PKT_BURST);
     
-    if (unlikely(ret < n)) {
+    if (unlikely(ret < MAX_PKT_BURST)) {
         do {
-            free_packet(m_table[ret]);
-        } while (++ret < n);
+            free_packet(list[ret]);
+        } while (++ret < MAX_PKT_BURST);
     }
-
-    return 0;
 }
 
 static void send_packet(struct rte_mbuf *m) {
@@ -228,13 +223,13 @@ void do_stats(__attribute__ ((unused)) struct rte_timer *tim, __attribute__ ((un
 static struct rte_timer timer;
 
 void timer_setup(void) {
-    printf("ENTERED TIME\n");
-    fflush(stdout);
+    //printf("ENTERED TIME\n");
+    //fflush(stdout);
     int lcore_id = rte_get_master_lcore();
     rte_timer_subsystem_init();
     rte_timer_init(&timer);
-    printf("GOING INTO LOOP\n");
-    fflush(stdout);
+    //printf("GOING INTO LOOP\n");
+    //fflush(stdout);
     int ret = rte_timer_reset(&timer, rte_get_timer_hz(), PERIODICAL, lcore_id, do_stats, NULL);
     if (ret != 0) {
         printf("TIMER_ERROR");
