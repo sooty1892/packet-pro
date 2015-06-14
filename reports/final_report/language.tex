@@ -1,0 +1,53 @@
+\documentclass[final_report.tex]{subfiles}
+
+\begin{document}
+
+\section{Initial language comparison}
+Before any implementation or specific design considerations were undertaken, an evaluation of the performance of C, Java and the Java Native Interface (JNI) was carried out. Although data from existing articles and websites could be used for Java and C, there was no existing direct comparisons between them and the JNI, therefore custom tests were carried out.
+
+The JNI is inherently \todo{article on this} seen as a bottleneck of an application (even after its vast update in Java 7). \todo{reasons why JNI is slow}
+
+As this application would be forced to use the JNI, numeric values of its performance was helpful to evaluate the bridge in speed required to be overcome.
+
+\subsection{Benchmarking Algorithm}
+As discussed previously \todo{ref this}, there are always advantages and disadvantages of any algorithm used for benchmarking. In order to minimise the disadvantages, an algorithm was used which tried to mimic the procedures which would be used in the real application, just without the complications. Algorithm \ref{alg:lang} shows that the program basically creates 100,000 packets individually and populates their fields with random data, which is then processed and returne in the 'result' field. This simulates retrieving low-level packet data, interpreting and acting upon the data, and then setting data within the raw packet.
+
+\begin{algorithm}[H]
+	\caption{Language Benchmark Algorithm}
+	\label{alg:lang}
+	\begin{algorithmic}[1]
+		\Function{Main}{}
+			\For{i = 1 to 100000}
+				\State $\textit{p} \gets \textit{Initialise Packet}$
+				\State \Call{PopPacket}{p}
+				\State \Call{ProPacket}{p}
+			\EndFor
+		\EndFunction
+		\newline
+		\Function{PopPacket}{Packet p} \Comment{Set data in a packet}
+			\State $\textit{p.a} \gets \textit{randomInt()}$
+			\State $\textit{p.b} \gets \textit{randomInt()}$
+			\State $\textit{p.c} \gets \textit{randomInt()}$
+			\State $\textit{p.d} \gets \textit{randomInt()}$
+			\State $\textit{p.e} \gets \textit{randomInt()}$
+		\EndFunction
+		\newline
+		\Function{ProPacket}{Packet p} \Comment{Process a packet}
+			\State $\textit{res} \gets \textit{p.a * p.b * p.c * p.d * p.e}$
+			\State $\textit{p.result} \gets \textit{res}$
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm}
+
+For the JNI version, the same algorithm was used, however, the \textit{PopPacket} method was carried out on the native side to simulate retrieving raw packet data. The \textit{ProPacket} method was executed on the Java side with the result been passed back to the native side to be entered back into the packet structure.
+
+Timing within the algorithm for all variations was carried out between each iteration. This firstly eliminated any initial start-up time associated with the application which is common with the JVM. Secondly, any calls for time stamps to the system would be miminised as 100,000 iterations would occur in-between them.
+
+\subsection{Results}
+Each language had the algorithm run 1,000 times in order to minimise any variations due to external factors. Figures \todo{ref this} show that C was considerably quicker than Java, while Java using the JNI was extremely slow. \todo{expand on this}
+
+\subsection{Further Investigation}
+Due to the very poor performance of the JNI compared to other languages, further investigations were carried out to find more specific results surrounding the JNI.
+\todo{Is this relevant}
+
+\end{document}

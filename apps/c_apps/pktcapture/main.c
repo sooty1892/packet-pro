@@ -123,8 +123,8 @@ uint64_t pre_ibytes = 0;
 uint64_t pre_ipackets = 0;
 
 void do_stats(__attribute__ ((unused)) struct rte_timer *tim, __attribute__ ((unused)) void *arg) {
-    printf("IN STATS");
-    fflush(stdout);
+    //printf("IN STATS");
+    //fflush(stdout);
     struct rte_eth_stats stats;
 
     rte_eth_stats_get(0, &stats);

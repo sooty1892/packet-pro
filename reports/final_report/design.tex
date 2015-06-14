@@ -2,84 +2,47 @@
 
 \begin{document}
 
-\section{Initial language comparison}
-Before any implementation or specific design considerations were undertaken, an evaluation of the performance of C, Java and the Java Native Interface (JNI) was carried out. Although data from existing articles and websites could be used for Java and C, there was no existing direct comparisons between them and the JNI, therefore custom tests were carried out.
-
-The JNI is inherently \todo{article on this} seen as a bottleneck of an application (even after its vast update in Java 7). \todo{reasons why JNI is slow}
-
-As this application would be forced to use the JNI, numeric values of its performance was helpful to evaluate the bridge in speed required to be overcome.
-
-\subsection{Benchmarking Algorithm}
-As discussed previously \todo{ref this}, there are always advantages and disadvantages of any algorithm used for benchmarking. In order to minimise the disadvantages, an algorithm was used which tried to mimic the procedures which would be used in the real application, just without the complications. Algorithm \ref{alg:lang} shows that the program basically creates 100,000 packets individually and populates their fields with random data, which is then processed and returne in the 'result' field. This simulates retrieving low-level packet data, interpreting and acting upon the data, and then setting data within the raw packet.
-
-\begin{algorithm}[H]
-	\caption{Language Benchmark Algorithm}
-	\label{alg:lang}
-	\begin{algorithmic}[1]
-		\Function{Main}{}
-			\For{i = 1 to 100000}
-				\State $\textit{p} \gets \textit{Initialise Packet}$
-				\State \Call{PopPacket}{p}
-				\State \Call{ProPacket}{p}
-			\EndFor
-		\EndFunction
-		\newline
-		\Function{PopPacket}{Packet p} \Comment{Set data in a packet}
-			\State $\textit{p.a} \gets \textit{randomInt()}$
-			\State $\textit{p.b} \gets \textit{randomInt()}$
-			\State $\textit{p.c} \gets \textit{randomInt()}$
-			\State $\textit{p.d} \gets \textit{randomInt()}$
-			\State $\textit{p.e} \gets \textit{randomInt()}$
-		\EndFunction
-		\newline
-		\Function{ProPacket}{Packet p} \Comment{Process a packet}
-			\State $\textit{res} \gets \textit{p.a * p.b * p.c * p.d * p.e}$
-			\State $\textit{p.result} \gets \textit{res}$
-		\EndFunction
-	\end{algorithmic}
-\end{algorithm}
-
-For the JNI version, the same algorithm was used, however, the \textit{PopPacket} method was carried out on the native side to simulate retrieving raw packet data. The \textit{ProPacket} method was executed on the Java side with the result been passed back to the native side to be entered back into the packet structure.
-
-Timing within the algorithm for all variations was carried out between each iteration. This firstly eliminated any initial start-up time associated with the application which is common with the JVM. Secondly, any calls for time stamps to the system would be miminised as 100,000 iterations would occur in-between them.
-
-\subsection{Results}
-Each language had the algorithm run 1,000 times in order to minimise any variations due to external factors. Figures \todo{ref this} show that C was considerably quicker than Java, while Java using the JNI was extremely slow. \todo{expand on this}
-
-\subsection{Further Investigation}
-Due to the very poor performance of the JNI compared to other languages, further investigations were carried out to find more specific results surrounding the JNI.
-\todo{Is this relevant}
-
 \section{Design Considerations}
-https://code.google.com/p/fast-serialization/wiki/StructsIntroduction
-http://stackoverflow.com/questions/6091615/difference-between-on-heap-and-off-heap
-http://java.dzone.com/articles/heap-vs-heap-memory-usage
-http://stackoverflow.com/questions/1262328/how-is-the-java-memory-pool-divided
-http://pubs.vmware.com/vfabric52/index.jsp?topic=/com.vmware.vfabric.em4j.1.2/em4j/conf-heap-management.html
+%https://code.google.com/p/fast-serialization/wiki/StructsIntroduction
+%http://stackoverflow.com/questions/6091615/difference-between-on-heap-and-off-heap
+%http://java.dzone.com/articles/heap-vs-heap-memory-usage
+%http://stackoverflow.com/questions/1262328/how-is-the-java-memory-pool-divided
+%http://pubs.vmware.com/vfabric52/index.jsp?topic=/com.vmware.vfabric.em4j.1.2/em4j/conf-heap-management.html
+
 \subsection{Data Sharing}
-The proposed application will be sharing data between the DPDK code written in C (low level) and the Java (medium level) side used for the highly abstracted part of the application. This requires a large amount of data, most noticeably packets, to be transferred between 'sides' in a small amount of time.
+\todo{expand on where data is allocated between native and java - use links above}
+The proposed application will be sharing data between the DPDK code written in C (low level) and the Java (medium level) side used for the highly abstracted part of the application. This requires a large amount of data, most noticeably packets, to be transferred between 'sides' in a small amount of time. This section will explore possible techniques for this data sharing, discuss the advantages and disadvantages and finally reason about a decission.
 \todo[inline]{Diagram of packets from NIC using c through 'technique' and then processing packets in java and then back}
-A few techniques for this are available with Java and C, all with different performances and ease-of-use.
 
-\subsubsection{Objects and JNI - using heap and lots of jni calls}
-By far the simplest technique available is using the Java Native Interface (JNI) in order to interact with native code and then retrieve the required via this. This can be done 2 ways, either by creating the object and passing it as a parameter to the native methods or creating an object on the native side via the Java environment parameter. Both ways require the population of the fields to be done on the native side. From then on, any data manipulation and processing could be done on the Java side. Unfortunately, this does require all data to be taken from the object and placed back into the structs before packets can be forwarded. Obviously this results in a lot of unneeded data copying, while the actual JNI calls can significantly reduce the speed of the application as shown in \todo{ref this}.
+\subsubsection{Objects and JNI}
+By far the simplest technique available is using the Java Native Interface (JNI) in order to interact with native code and then retrieve the required data via object method accessing provided by the JNI environment pointer. This can be done 2 ways, either by creating the object and passing it as a parameter to the native methods or creating an object on the native side. Both ways require the population of the fields to be done on the native side. From then on, any data manipulation and processing could be done on the Java side. Unfortunately, this does require all data to be taken from the object and placed back into the structs before packets can be forwarded. Obviously this results in a lot of unneeded data copying, while the actual JNI calls can significantly reduce the speed of the application as shown in \todo{ref this}.
 
-\subsubsection{ByteBuffers - Non-heap and heap memory}
-http://stackoverflow.com/questions/11174231/compare-direct-and-non-direct-bytebuffer-get-put-operations
-http://www.kdgregory.com/?page=java.byteBuffer
-http://www.javacodegeeks.com/2013/08/which-memory-is-faster-heap-or-bytebuffer-or-direct.html
-http://mindprod.com/jgloss/bytebuffer.
-http://tutorials.jenkov.com/java-nio/buffers.html
-https://worldmodscode.wordpress.com/2012/12/14/the-java-bytebuffer-a-crash-course/
-http://www.javabeat.net/how-to-use-bytebuffer-in-java/
-\todo{bytebuffer uses unsafe but does bound checking, can spsecify endian wih this}
+There are a few frameworks which aim to solve the problem of mapping structs to objects while trying to increase the overall speed of the JNI using different techniques.
+
+\paragraph*{Java Native Access (JNA)}
+The JNA is a community developed framework which aims to abstract the JNI and native code away from developers who want to use native shared libraries. It uses its own data mapping between native and Java datatypes with automatic conversion of string and object to character arrays and structs. Although this framework provides much of the functionality within this project, it focusses on correctness and ease of use and therefore neglects performance.
+
+\paragraph*{Javolution}
+Javolution is similar to the JNA but focusses more on real-time performance witin Java. It provides a number of high performance utilities for this purpose while allowing access to native libraries. For this purpose, struct and union classes are created automatically for mapping between objects. Javolution provides the functionality reqruied for this project but it requires a lot inital set-up which can be heavy, especially for small applications like middleboxes.
+
+\paragraph*{Swig}
+\todo{do this}
+
+\paragraph*{Preon}
+\todo{do this}
+
+\subsubsection{ByteBuffers}
 \todo{cant use bytebuffers directly with DPDK as dont use hugepages}
-ByteBuffers are a Java class which allow for memory to be allocated on the Java heap (non direct) or outside of the JVM (direct). Non direct ByteBuffer's are simply a wrapper for a byte array on the heap and are generally used as they allow easier access to bytes, as well as other primitive data types.
+ByteBuffers are a Java class which allow for memory to be allocated on the Java heap (non direct) or outside of the JVM off heap (direct), while abstracting pointer arithmetic and boundary checks away from the application. Non direct ByteBuffer's are simply a wrapper for a byte array on the heap and are generally used as they allow easier access to the data as multiple byte reading and datatype conversion is handled by the class. Direct ByteBuffers allocate memory outside of the JVM in native memory which means that the only limit on the size of bte buffers is memory itself.
 
-Direct ByteBuffers allocate memory outside of the JVM in native memory. This firstly means that the only limit on the size of ByteBuffers is memory itself. Furthermore, the Java garbage collector doesn't have access to this memory. Direct ByteBuffers have increased performance since the JVM isn't slowed down by the garbage collector and intrinsic native methods can be called on the memory for faster data access.
+The performance characteristics of direct and non-direct byte buffers are very similar. Direct byte buffers can be improved by aligning the bytes with the native endian (normally little endian) format since the class makes use of the Java Unsafe native access which allows for the methods to be inlined with machine code.
 
-\subsubsection{Java Unsafe - non-heap}
-The Java Unsafe class is actually only used internally by Java for its memory management. It generally shouldn't be used within Java since it makes a safe programming language like Java an unsafe language (hence the name) since memory access exceptions can be thrown. It can be used for a number of things such as:
+The Java garbage collector doesn't have access to native memory and therefore direct byte buffers allow the application to manage memory and reduce memory usage. Garbage collection bottlenecks within high performance system are therefore reduced, while allowing direct referencing of objects stored natively as the garbage collector doesn't compact the heap and move objects around.
+
+Direct byte buffers would be an ideal choice for data sharing if it was possible to redirect DPDK mbuf structs onto the byte buffer directly, consequently allowing the Java side easy access to the data using the api. However, since DPDK make use of huge pages and handles its own memory management, it's not possible to use byte buffers directly as the memory for the NIC queues. Instead, data would have to be copied from structs and extracted into objects and vice versa.
+
+\subsubsection{Java Unsafe}
+The Java Unsafe class is actually only used internally by Java for its memory management. It generally shouldn't be used within Java since it makes a safe programming language like Java an unsafe language (hence the name) since memory access exceptions can be thrown which will ultimately crash the JVM. Even so, it has a number of uses such as:
 
 \paragraph*{Object initialisation skipping}
 This is where any instance of an object can be created from the class, but no constructors are used meaning that the object created without any of the fields set. This has a number of uses including security check bypassing, creating instances of objects which don't have a public constructor and allowing multiple objects of a singleton class.
@@ -104,18 +67,10 @@ f.setAccessible(true);
 Unsafe unsafe = (Unsafe) f.get(null);
 \end{lstlisting}
 
-Using Unsafe then allows direct native memory access (off heap) to retrieve data in any of the primitive data formats. Custom objects with a set structure can then be created, accessed and altered using Unsafe which provides a vast increase in performance over traditional objects stored on the heap. This is mainly thanks to the JIT compiler which can use machine code more efficiently. This also removes the need for copying of data between memory locations, structs and objects, therefore meaning it is zero-copy.
+Using Unsafe then allows direct native memory access (off heap) to retrieve data in any of the primitive data formats. Custom objects with a set structure can then be created, accessed and altered using Unsafe which provides a vast increase in performance over traditional objects stored on the heap. This is mainly thanks to the JIT compiler which can use machine code more efficiently by inlining certain memory access directly with assembly code. This also removes the need for copying of data between memory locations, structs and objects, therefore meaning it is zero-copy.
 
-\subsubsection{Evaluation}
-
-\subsubsection{JNA?}
-https://github.com/twall/jna
-
-\subsubsection{Packing C Structs - in its own section?}
-http://stackoverflow.com/questions/4306186/structure-padding-and-structure-packing
-http://stackoverflow.com/questions/13927378/nested-structure-padding-c-64-bit-linux
-http://stackoverflow.com/questions/1287903/using-c-struct-in-java
-Structs are a way of defining complex data into a grouped set in order to make this data easier to access and reference as shown in Code \ref{lst:c_struct}.
+\subsection{Packing Structures}
+Structures (structs) are a way of defining complex data into a grouped set in order to make this data easier to access and reference as shown in Code \ref{lst:c_struct}. They are heavily used with C applications and can be seen as Java object without the associated methods.
 
 \begin{lstlisting}[language=C, caption={Example C Struct}, label=lst:c_struct]
 struct example {
@@ -149,8 +104,17 @@ struct example {
 \end{lstlisting}
 \todo[inline]{Mention this is on 64-bit machine and obviously you don't notice padding and order of elements can pay an important part in this}
 
-\todo[inline]{Example making sure compiler doesn't pad}
-Since the proposed application in this report requires high throughput of data, the initial thought would be that this optimisation is a benefit to the program. Generally this is the case, but for data which is likely to be shared between the C side and Java side a large amount, data accessing is far quicker \todo{Proof on speed} on the Java side if the struct is packed (no padding). This results in certain structs been forced to be packed when compiled, more noticeably, those used for packet headers.
+\begin{lstlisting}[language=C, caption={Example C Struct stopping padding}, label=lst:c_packed_struct]
+struct __attribute__((__packed__)) example {
+    char *p;       // 8 bytes
+    char c;        // 1 byte
+    short x;       // 2 bytes
+    char y[50];    // 50 bytes
+    int z;         // 4 bytes
+};
+\end{lstlisting}
+
+Since the proposed application in this report requires high throughput of data, the initial thought would be that this optimisation is a benefit to the program. Generally this is the case, but for data which is likely to be shared between the C side and Java side a large amount, data accessing is far quicker \todo{Proof on speed} on the Java side if the struct is packed (no padding). This results in certain structs been forced to be packed when compiled, more noticeably, those used for packet and protocol headers.
 
 Packed structures mean there are no gaps between elements, required alignment is set to 1 byte. Also \_\_attribute\_\_((packed)) definition means that compiler will deal with accessing members which may get misaligned due to 1 byte alignment and packing so reading and writing is correct. However, compilers will only deal with this misalignment if structs are accessed via direct access. Using a pointer to a packed struct member (and therefore pointer arithmetic) can result in the wrong value for the dereferenced pointer. This is since certain members may not be aligned to 1 byte. In the below example, unint32 is 4 byte aligned and therefore it is possible for a pointer to it to expect 4 byte alignment therefore resulting in the wrong results.
 
@@ -181,13 +145,7 @@ int main ()
 }
 \end{lstlisting}
 
-On an x86 system (which does not enforce memory access alignment), this will produce
-
-y=2, *py=2
-
-as expected. On the other hand on my ARM Linux board, for example, it produced the seemingly wrong result
-
-y=2, *py=1
+On an x86 system (which does not enforce memory access alignment), this will give y=2 and *py=2 which is as expected. Conversely, other systems using the SPARC architecure or similar will give y=2 and *py=1 which isn't what the user would expect.
 
 However, since a packed struct is much easier to traverse from Java than a padded struct, the decision was made to make certain structs packed within the DPDK framework and then recompile the libraries. This decision could be made since other structs within the DPDK framework were also packed and therefore consideration of this was already made.
 
@@ -195,13 +153,9 @@ Note that if a struct contains another struct, that struct should be packed recu
 
 Char doesn't have alignment and can start on any address. But 2-byte shorts must start on an even address, 4-byte ints or floats must start on an address divisible by 4, and 8-byte longs or doubles must start on an address divisible by 8. Signed or unsigned makes no difference.
 
-Self-alignment makes access faster because it facilitates generating single-instruction fetches and puts of the typed data. Without alignment constraints, on the other hand, the code might end up having to do two or more accesses spanning machine-word boundaries. Characters are a special case; theyÕre equally expensive from anywhere they live inside a single machine word. ThatÕs why they donÕt have a preferred alignment.
+Self-alignment makes access faster because it facilitates generating single-instruction fetches and puts of the typed data. Without alignment constraints, on the other hand, the code might end up having to do two or more accesses spanning machine-word boundaries. Characters are a special case; they're equally expensive from anywhere they live inside a single machine word. That's why they don't have a preferred alignment.
 
-casting to an odd pointer will slow down code and could work. Other architectures will take the word which the pointer points to and therefore the problem occurs above.
-
-\subsubsection{Javolution}
-http://jnkjava.blogspot.co.uk/2013/06/parsing-cc-struct-in-java.html
-http://javolution.org/
+Casting to an odd pointer will slow down code and could work. Other architectures will take the word which the pointer points to and therefore the problem occurs above.
 
 \subsection{Performance testing}
 In order to evaluate the most suitable data sharing technique, performance testing on 4 different implementation options for sharing data between Java and native memory were considered. Since the ultimate aim of the implementation is to maximise throughput of packets, the performance test tried to mimic this by processing data on 1 million packets per iteration. This processing involved retrieving data from the native packet struct, loading that data into a Java object, changing the data and then setting the data back into the original struct. Various techniques to do this were used to try and find the best performance possible. All of the techniques made use of a static native struct which acted like a new packet been received. The changed data was then set back into this struct.
@@ -231,12 +185,12 @@ In order to evaluate the most suitable data sharing technique, performance testi
 
 Considering there were 4 different data sharing techniques tested, the \textit{retrieveData}, \textit{setNewData} and \textit{saveData} methods were different and are described below:
 
-\paragraph*{Objects}
+\paragraph*{Object Passing}
 The object technique involved creating a packet and sending its reference through the JNI to the native code. From there, this packet could be populated with data from a given struct through the Java environment pointer. For each setter method called, the method id of that method must be retrieved for the given class so the combination of that and the packet reference could set the data.
 
 From there, new data is input into the packet from the Java side and passed back through to JNI so the struct can be set with the new data. This is done using getters for the objects' fields via the Java environment pointer.
 
-\paragraph*{ByteBuffer}
+\paragraph*{Byte Buffer}
 The technique involved declaring a direct byte buffer to assign off heap memory of the size of the packet struct. From there, the pointer to this memory location was sent to the native code, where data from the struct was directly copied into the byte buffer, therefore populating the byte buffer with duplicate data. The Java code then pulled the data from this via the byte buffer's inbuilt methods and set the data into a new packet object. From there the packet object could be used whenever desired.
 
 To save the data back into the original struct, the data was copied from the packet object back into the byte buffer in the order of the members of the struct. The data was then pulled from the memory of the byte buffer and set back into the original struct.
@@ -348,10 +302,10 @@ Lets take the integer representation as an example. In C, and integer can vary b
 
 Conversion from Java to C then could then result in an underflow error if a value which can be represented by a Java long can't be represented by a C integer. This means bound checking is required on the Java side for any number conversions.
 
-\todo{write java code to check and make own exception}
 \todo{get a table of this}
 
 \subsection{Protocol undertaking}
+
 just IP (4 and ) supporting udp and tcp (i think), no ARP etc
 
 \subsection{config files}

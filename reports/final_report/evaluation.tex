@@ -55,7 +55,19 @@ To check where the problems lied within the code, a Java profiler (JProfiler) wa
 
 \missingfigure{Screenshot of profiler showing problems}
 
+The first improvements were to the PacketCapture application itself, by storing the ReceivePoller objects within individual fields instead of lists. This removed the unnessary list accessing, especially since the application was only using a single receive poller per processor. The other improvements were made to the actual DPDKJava framework. These involved utilising objects throughout the application lifespan instead of creating new ones on every loop. This dramatically reduced the number of initializing methods invoked for the objects and reduced the memory usage in the heap, which reduced the number of times the Java garbage collector was invoked. The class which caused the most problem with this was the ArrayList, which were created on every loop to pass packets through the Java system. Since the framework uses threads without the need to synchronise objects, an ArrayList could be created on initialisation and simply cleared before been used again. Finally, instead of allocating new off heap memory to receive the packet pointers through on every loop, a memory bank was allocated on initialisation and the same memory was simply overwritten on every loop iteration. These improvements resulted in the graph below.
 
+\missingfigure{Graph for improvements}
+
+\todo{explain results compated to previous ones and c version}
+
+\missingfigure{more profiling?}
+
+Again, the results didn't fully reflect the expected results. Further profiling was done to identify more bottlenecks within the application. This showed that for every Packet creation (which was unavoidable), there was also a new UnsafeAccess object been initialized. However, since each thread controls its own packets and therefore can only process 1 packet at a time, 1 UnsafeAccess object could be shared between all packets which signifantly reduced the number of objects on the heap. Further problems were identified with the lists of packets awaiting to be sent and freed. This list was been iterated over with the Packet's mbuf pointer then been stored in an off heap memory bank waiting to be freed. This was pointless since the packets mbuf pointer could directly be put into the off heap memory, therefore elminiating the need for the list while also allowing the packet objects to be dereference quicker.
+
+\missingfigure{Graph for improvements}
+
+The results show that the performance was further improved and pretty close to that of the C implementation. After further profiling, there was only 1 obvious improvement which could be made, This would be to replace the list storing packets received from the poller. However, replacing this with a custom implemenation using off heap memory would firstly reduce the usability of the code and would also mean that the code was drifting away from the Java language. It was decided not to impplement this fix and instead to continue with testing of other applications, assuming that the would be negated by applications. This initial series of testing also proved that a dramatic increase in performance can be achieved simply by programming the applications efficiently, by trying to reduce the number of objects created.
 
 %http://www.oracle.com/technetwork/java/hotspotfaq-138619.html#perf%5Fscaling
 %http://stackoverflow.com/questions/11054548/what-does-the-usecompressedoops-jvm-flag-do-and-when-should-i-use-it
