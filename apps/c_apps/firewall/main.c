@@ -96,6 +96,8 @@ int main_loop(void *);
 int main_loop(__attribute__ ((unused)) void *arg) {
     long pktcount = 0;
     int recv_cnt, i, ifidx = 0;
+    struct ipv4_hdr *iphdr;
+    struct rte_mbuf *m;
     while(1) {
         recv_cnt = rte_eth_rx_burst(ifidx, 0, rx_mbufs, MAX_PKT_BURST);
         if (recv_cnt < 0) {
@@ -107,6 +109,7 @@ int main_loop(__attribute__ ((unused)) void *arg) {
         if ( recv_cnt > 0) {
             pktcount += recv_cnt;
             for (i = 0 ; i < recv_cnt; i++) {
+		m = rx_mbufs[i];
                 iphdr = (struct ipv4_hdr *)rte_pktmbuf_adj(m, (uint16_t)sizeof(struct ether_hdr));
                 RTE_MBUF_ASSERT(iphdr != NULL);
 
