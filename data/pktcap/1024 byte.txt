@@ -1,0 +1,21 @@
+Packets: 845390
+Packets: 845382
+Packets: 845352
+Packets: 845357
+Packets: 845381
+Packets: 845379
+Packets: 845349
+Packets: 845363
+Packets: 845368
+Packets: 845385
+
+Bytes: 865674638
+Bytes: 865661916
+Bytes: 865633983
+Bytes: 865644740
+Bytes: 865662744
+Bytes: 865665152
+Bytes: 865635530
+Bytes: 865646164
+Bytes: 865651146
+Bytes: 865669514

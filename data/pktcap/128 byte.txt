@@ -1,0 +1,21 @@
+Packets: 7068454
+Packets: 7068448
+Packets: 7068460
+Packets: 7068448
+Packets: 7068451
+Packets: 7068443
+Packets: 7068438
+Packets: 7068458
+Packets: 7068443
+Packets: 7068451
+
+Bytes: 904762116
+Bytes: 904760926
+Bytes: 904762633
+Bytes: 904761216
+Bytes: 904761590
+Bytes: 904760596
+Bytes: 904759950
+Bytes: 904762062
+Bytes: 904761034
+Bytes: 904761284
