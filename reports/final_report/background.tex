@@ -24,7 +24,7 @@ This section focusses on a number of background concepts which will help to gain
 %http://www.howtogeek.com/169540/what-exactly-is-a-mac-address-used-for/
 %http://wiki.openwrt.org/doc/networking/praxis
 %http://www.linuxfoundation.org/collaborate/workgroups/networking/kernel_flow
-Generally there are 2 well known network models. The Open System Interconnection (OSI) model in Figure \ref{fig:layers} represents an ideal to which all network communication should adhere to while the Transmission Control Protocol/Inter Protocol (TCP/IP) model represents reality in the world. The TCP/IP model combines multiple OSI layers into 1 TCP/IP layer simply because not all systems will go through these exact stages depending on the system implementation.
+Generally there are 2 well known network models. The Open System Interconnection (OSI) model in Figure \ref{fig:layers} represents an ideal to which all network communication should adhere to while the Transmission Control Protocol/Inter Protocol (TCP/IP) model represents reality in the world. The TCP/IP model combines multiple OSI layers into 1 of its layers simply because not all systems will go through these exact stages depending on the required  application.
 
 \begin{figure}[H]
 	\centering
@@ -348,16 +348,14 @@ As jVerbs takes advantage of mapping the network device directly into the JVM, b
 
 jVerbs provides a useful example framework which re-emphasises that packet processing in Java is very possible with low latency, while assisting in certain implementation and design choices which can be analysed in more detail.
 
-\subsubsection{Native I/O API's}
-Currently available native networking API's are capable of reading and writing packets to the NIC transmission and receive queues at line rate. This is due to a number of techniques which tend to alter the kernels understand of the underlying NIC, therefore requiring specialist hardware and software to use such tools. DPDK (Section~\ref{subsec:dpdk}) is one of the tools that is open source and publicly available for use.
-
-\subsubsection{Packet Shader, infiniband - any more}
+\subsubsection{Packet Shader}
+The CPU can be a potential bottleneck in high speed software based routers and Packet Shader which aims to eliminate this. It takes advantage of graphic processing units (GPU) which offer greater execution power than typical CPUs due to their ability to run thousands of threads in parallel. By using the GPU and running packet processing threads on the GPU packet shader can increase performance to routers up to 40Gbps. However, the research behind this project has been suspended in favour of DPDK (\ref{subsec:dpdk}).
 
 \subsubsection{Data Plane Development Kit (DPDK)}
 \label{subsec:dpdk}
 %https://www.youtube.com/watch?v=BqV833_xd-Y
 %file:///Users/ashleyhemingway/Downloads/communications-packet-processing-brief.pdf
-Data Plane Development Kit (DPDK) \cite{dpdk} is a set of libraries and drivers which enables fast packet processing reaching speeds of 80 Mpps on certain system set ups. Since DPDK is developed by Intel, it only supports Intel x86 CPU's and certain network interface controllers (NIC). DPDK binds the NIC's to new drivers meaning that the operating system doesn't recognise the network cards and can't interact with them. It make use of drivers run in user space allowing it to interact with certain memory locations without permission from the kernel or even involving it in any way.
+Data Plane Development Kit (DPDK) \cite{dpdk} is a set of libraries and drivers which enables fast packet processing reaching speeds of 80 million packets per second on certain system set ups. Since DPDK is developed by Intel, it only supports Intel x86 CPU's and certain network interface controllers (NIC). DPDK binds the NIC's to new drivers meaning that the operating system doesn't recognise the network cards and therefore the network stack associated with the ports don't work. It make use of drivers run in user space allowing it to interact with certain memory locations without permission from the kernel or even involving it in any way.
 
 DPDK makes use of an environment abstraction layer (EAL) which hides the environmental specifics and provides a standard interface which any application can interact with. Due to this, if the system changes in any way, the DPDK library needs to be re-compiled with other features been re-enabled in order to allow applications to run correctly again.
 

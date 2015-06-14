@@ -31,6 +31,8 @@ DPDK requires a number of initialising procedures to create the environment abst
 
 When writing custom applications, all initialising should be complete before starting the threads. This is to stop any DPDK errors when trying to access uninitialised ports, memory pools or queues. For this reason, the last thing which should be called is 'startAll()' which starts all threads and affinity threads one by one in quick succession to allow the actual packet processing to take place.
 
+\todo{mention using malloc against will of dpdk is allowed}
+
 \subsection{Processing Threads}
 The framework supports multiple processing procedures which can run simultaneously and even with different implementations depending on the requirements. This allows an application to be built where certain processing objects do the polling of packets, and then pass these objects to be inspected, and then onto another object for sending and freeing of the packets. This basically creates a pipelined application, although a more simple processing object would receiver, process and forward packets in the same thread. This is instead of multiple processing units doing exactly the same job.
 
@@ -79,7 +81,10 @@ It also has the option of running a graphical user interface (GUI) which display
 
 \todo{put image of gui, also write output to files}
 
-\subsection{Testing}
+\subsection{Correctness Testing}
+Not testing performance but packet data movement and pddk set-up
+setting u VM since needed specific environments.
+%http://www.javacodegeeks.com/2013/02/analysing-a-java-core-dump.html
 
 \section{Applications}
 Since a Java DPDK framework was designed, any applications are relatively easy to create and only use Java code so no interaction with the native DPDK is necessary from a users point of view. Below are 2 simple applications created using this framework, which both show the small amount of code required to make a working application. However, either of these could be heavily extended to use multiple threads, different processing objects, shared ports in order to design more complex application such as packet fragmentation, reassembly, multi-casting or ordering.

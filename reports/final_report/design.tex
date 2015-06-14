@@ -3,16 +3,16 @@
 \begin{document}
 
 \section{Design Considerations}
-%https://code.google.com/p/fast-serialization/wiki/StructsIntroduction
-%http://stackoverflow.com/questions/6091615/difference-between-on-heap-and-off-heap
-%http://java.dzone.com/articles/heap-vs-heap-memory-usage
-%http://stackoverflow.com/questions/1262328/how-is-the-java-memory-pool-divided
-%http://pubs.vmware.com/vfabric52/index.jsp?topic=/com.vmware.vfabric.em4j.1.2/em4j/conf-heap-management.html
 
 \subsection{Data Sharing}
-\todo{expand on where data is allocated between native and java - use links above}
-The proposed application will be sharing data between the DPDK code written in C (low level) and the Java (medium level) side used for the highly abstracted part of the application. This requires a large amount of data, most noticeably packets, to be transferred between 'sides' in a small amount of time. This section will explore possible techniques for this data sharing, discuss the advantages and disadvantages and finally reason about a decission.
+The proposed application will be sharing data between the DPDK code written in C (low level) and the Java (medium level) side used for the highly abstracted part of the application. This requires a large amount of data, most noticeably packets, to be transferred between 'sides' in a small amount of time. This section will explore possible techniques for this data sharing, discuss the advantages and disadvantages and finally reason about a decision.
+
+\subsubsection{Memory Usage}
 \todo[inline]{Diagram of packets from NIC using c through 'technique' and then processing packets in java and then back}
+
+Programs written in most languages make use of memory on heap, off heap and in a stack. Stack memory is used for local, short term variables which this report isn't concerned with. Heap memory is a block of memory associated with a program for it to store long lasting data on which can be shared among multiple threads. Some languages require allocation of data on heap memory to be freed.
+
+Within Java, heap memory is subjected to a garbage collector which scans the heap when the JVM is running out of memory and dereferences any objects which aren't in use any more while compact the heap by moving references around. Although memory management is taken away from the user, the garbage collector can slow down an application as it traverses memory at random intervals. Off heap memory isn't subjected to the garbage collector which allows fast processing applications to take advantage of this while memory can be referenced directly.
 
 \subsubsection{Objects and JNI}
 By far the simplest technique available is using the Java Native Interface (JNI) in order to interact with native code and then retrieve the required data via object method accessing provided by the JNI environment pointer. This can be done 2 ways, either by creating the object and passing it as a parameter to the native methods or creating an object on the native side. Both ways require the population of the fields to be done on the native side. From then on, any data manipulation and processing could be done on the Java side. Unfortunately, this does require all data to be taken from the object and placed back into the structs before packets can be forwarded. Obviously this results in a lot of unneeded data copying, while the actual JNI calls can significantly reduce the speed of the application as shown in \todo{ref this}.
@@ -20,26 +20,25 @@ By far the simplest technique available is using the Java Native Interface (JNI)
 There are a few frameworks which aim to solve the problem of mapping structs to objects while trying to increase the overall speed of the JNI using different techniques.
 
 \paragraph*{Java Native Access (JNA)}
-The JNA is a community developed framework which aims to abstract the JNI and native code away from developers who want to use native shared libraries. It uses its own data mapping between native and Java datatypes with automatic conversion of string and object to character arrays and structs. Although this framework provides much of the functionality within this project, it focusses on correctness and ease of use and therefore neglects performance.
+The JNA is a community developed framework which aims to abstract the JNI and native code away from developers who want to use native shared libraries. It uses its own data mapping between native and Java data types with automatic conversion of string and object to character arrays and structs. Although this framework provides much of the functionality within this project, it focusses on correctness and ease of use and therefore neglects performance.
 
 \paragraph*{Javolution}
-Javolution is similar to the JNA but focusses more on real-time performance witin Java. It provides a number of high performance utilities for this purpose while allowing access to native libraries. For this purpose, struct and union classes are created automatically for mapping between objects. Javolution provides the functionality reqruied for this project but it requires a lot inital set-up which can be heavy, especially for small applications like middleboxes.
+Javolution is similar to the JNA but focusses more on real-time performance witin Java. It provides a number of high performance utilities for this purpose while allowing access to native libraries. For this purpose, struct and union classes are created automatically for mapping between objects. Javolution provides the functionality reqruied for this project but it requires a lot initial set-up which can be heavy, especially for small applications like middleboxes.
 
 \paragraph*{Swig}
-\todo{do this}
+Simplified Wrapper and Interface Generator(Swig) differs from JNA and Javolution simply because the framework only focusses on object and struct mapping. It abstracts all creation of objects, structs, access methods and memory allocation away from the user via an interface. Although very useful, it lacks performance when handling numerous objects in quick succession. 
 
-\paragraph*{Preon}
-\todo{do this}
+\subsubsection{Byte Buffers}
+\todo{cant use byte buffers directly with DPDK as dont use hugepages}
+Byte buffers are a Java class which allow for memory to be allocated on the Java heap (non direct) or outside of the JVM off heap (direct), while abstracting pointer arithmetic and boundary checks away from the application. Non direct byte buffers are simply a wrapper for a byte array on the heap and are generally used as they allow easier access to the data as multiple byte reading and data type conversion is handled by the class. Direct byte buffers allocate memory outside of the JVM in native memory which means that the only limit on the size of byte buffers is memory itself.
 
-\subsubsection{ByteBuffers}
-\todo{cant use bytebuffers directly with DPDK as dont use hugepages}
-ByteBuffers are a Java class which allow for memory to be allocated on the Java heap (non direct) or outside of the JVM off heap (direct), while abstracting pointer arithmetic and boundary checks away from the application. Non direct ByteBuffer's are simply a wrapper for a byte array on the heap and are generally used as they allow easier access to the data as multiple byte reading and datatype conversion is handled by the class. Direct ByteBuffers allocate memory outside of the JVM in native memory which means that the only limit on the size of bte buffers is memory itself.
-
-The performance characteristics of direct and non-direct byte buffers are very similar. Direct byte buffers can be improved by aligning the bytes with the native endian (normally little endian) format since the class makes use of the Java Unsafe native access which allows for the methods to be inlined with machine code.
+The performance characteristics of direct and non-direct byte buffers are very similar. Direct byte buffers can be improved by aligning the bytes with the native endian (normally little endian) format since the class makes use of the Java Unsafe native access which allows for the methods to be in-lined with machine code.
 
 The Java garbage collector doesn't have access to native memory and therefore direct byte buffers allow the application to manage memory and reduce memory usage. Garbage collection bottlenecks within high performance system are therefore reduced, while allowing direct referencing of objects stored natively as the garbage collector doesn't compact the heap and move objects around.
 
 Direct byte buffers would be an ideal choice for data sharing if it was possible to redirect DPDK mbuf structs onto the byte buffer directly, consequently allowing the Java side easy access to the data using the api. However, since DPDK make use of huge pages and handles its own memory management, it's not possible to use byte buffers directly as the memory for the NIC queues. Instead, data would have to be copied from structs and extracted into objects and vice versa.
+
+object stored on heap, actual memory is off heap.
 
 \subsubsection{Java Unsafe}
 The Java Unsafe class is actually only used internally by Java for its memory management. It generally shouldn't be used within Java since it makes a safe programming language like Java an unsafe language (hence the name) since memory access exceptions can be thrown which will ultimately crash the JVM. Even so, it has a number of uses such as:
