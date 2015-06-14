@@ -85,11 +85,74 @@ static struct rte_eth_rxconf rx_conf = {
     .rx_drop_en = 0,
 };
 
+struct mbuf_list {
+    unsigned len;
+    struct rte_mbuf *list[MAX_PKT_BURST];
+} free_list, send_list;
+
 // RTE mempool structure
 static struct rte_mempool *rx_pool;
+static void send_packet(struct rte_mbuf *);
+static void free_packet(struct rte_mbuf *);
+static void send_burst();
+static void free_burst()
 
 static uint32_t blacklist[] = {0, 1};
 static int size = 2;
+
+static void free_packet()
+{
+    struct rte_mbuf **list = (struct rte_mbuf **)free_list.list;
+
+    ret = rte_eth_tx_burst(0, 0, list, MAX_PKT_BURST);
+
+    return 0;
+}
+
+static void send_burst()
+{
+    struct rte_mbuf **list = (struct rte_mbuf **)send_list.list;
+
+    ret = rte_eth_tx_burst(0, 0, list, MAX_PKT_BURST);
+    
+    if (unlikely(ret < n)) {
+        do {
+            free_packet(m_table[ret]);
+        } while (++ret < n);
+    }
+
+    return 0;
+}
+
+static void send_packet(struct rte_mbuf *m) {
+
+    unsigned len = send_list.len;
+    send_list.list[len] = m;
+    len++;
+
+    /* enough pkts to be sent */
+    if (unlikely(len == MAX_PKT_BURST)) {
+        send_burst();
+        len = 0;
+    }
+
+    send_list.len = len;
+}
+
+static void free_packet(struct rte_mbuf *m) {
+
+    unsigned len = free_list.len;
+    free_list.list[len] = m;
+    len++;
+
+    /* enough pkts to be sent */
+    if (unlikely(len == MAX_PKT_BURST)) {
+        free_burst();
+        len = 0;
+    }
+
+    free_list.len = len;
+}
 
 int main_loop(void *);
 
@@ -109,7 +172,7 @@ int main_loop(__attribute__ ((unused)) void *arg) {
         if ( recv_cnt > 0) {
             pktcount += recv_cnt;
             for (i = 0 ; i < recv_cnt; i++) {
-		m = rx_mbufs[i];
+                m = rx_mbufs[i];
                 iphdr = (struct ipv4_hdr *)rte_pktmbuf_adj(m, (uint16_t)sizeof(struct ether_hdr));
                 RTE_MBUF_ASSERT(iphdr != NULL);
 
@@ -125,10 +188,11 @@ int main_loop(__attribute__ ((unused)) void *arg) {
                 }
 
                 if (drop == 0) {
-                    rte_eth_tx_burst(0, 0, rx_mbufs[i], 1);
+                    send_packet(m);
+                    continue;
                 }
 
-                rte_pktmbuf_free(rx_mbufs[i]);
+                free_packet(rx_mbufs[i]);
             }
            // if (pktcount == 10000000)
              //   printf("Received %ld packets so far\n", pktcount); 
