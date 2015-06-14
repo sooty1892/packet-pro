@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <sys/queue.h>
 
+#include <rte_ip.h>
 #include <rte_memory.h>
 #include <rte_memzone.h>
 #include <rte_launch.h>
@@ -85,17 +86,76 @@ static struct rte_eth_rxconf rx_conf = {
     .rx_drop_en = 0,
 };
 
+struct mbuf_list {
+    unsigned len;
+    struct rte_mbuf *list[MAX_PKT_BURST];
+} free_list, send_list;
+
 // RTE mempool structure
 static struct rte_mempool *rx_pool;
+static void send_packet(struct rte_mbuf *);
+static void free_packet(struct rte_mbuf *);
+static void send_burst(void);
+static void free_burst(void);
 
 static uint32_t blacklist[] = {0, 1};
-static int size = 2;
+int size = 2;
+
+static void free_burst(void) {
+    struct rte_mbuf **list = (struct rte_mbuf **)free_list.list;
+
+    rte_eth_tx_burst(0, 0, list, MAX_PKT_BURST);
+}
+
+static void send_burst(void) {
+    struct rte_mbuf **list = (struct rte_mbuf **)send_list.list;
+
+    int ret = rte_eth_tx_burst(0, 0, list, MAX_PKT_BURST);
+    
+    if (unlikely(ret < MAX_PKT_BURST)) {
+        do {
+            free_packet(list[ret]);
+        } while (++ret < MAX_PKT_BURST);
+    }
+}
+
+static void send_packet(struct rte_mbuf *m) {
+
+    unsigned len = send_list.len;
+    send_list.list[len] = m;
+    len++;
+
+    /* enough pkts to be sent */
+    if (unlikely(len == MAX_PKT_BURST)) {
+        send_burst();
+        len = 0;
+    }
+
+    send_list.len = len;
+}
+
+static void free_packet(struct rte_mbuf *m) {
+
+    unsigned len = free_list.len;
+    free_list.list[len] = m;
+    len++;
+
+    /* enough pkts to be sent */
+    if (unlikely(len == MAX_PKT_BURST)) {
+        free_burst();
+        len = 0;
+    }
+
+    free_list.len = len;
+}
 
 int main_loop(void *);
 
 int main_loop(__attribute__ ((unused)) void *arg) {
     long pktcount = 0;
     int recv_cnt, i, ifidx = 0;
+    struct ipv4_hdr *iphdr;
+    struct rte_mbuf *m;
     while(1) {
         recv_cnt = rte_eth_rx_burst(ifidx, 0, rx_mbufs, MAX_PKT_BURST);
         if (recv_cnt < 0) {
@@ -107,6 +167,7 @@ int main_loop(__attribute__ ((unused)) void *arg) {
         if ( recv_cnt > 0) {
             pktcount += recv_cnt;
             for (i = 0 ; i < recv_cnt; i++) {
+                m = rx_mbufs[i];
                 iphdr = (struct ipv4_hdr *)rte_pktmbuf_adj(m, (uint16_t)sizeof(struct ether_hdr));
                 RTE_MBUF_ASSERT(iphdr != NULL);
 
@@ -122,10 +183,11 @@ int main_loop(__attribute__ ((unused)) void *arg) {
                 }
 
                 if (drop == 0) {
-                    rte_eth_tx_burst(0, 0, rx_mbufs[i], 1);
+                    send_packet(m);
+                    continue;
                 }
 
-                rte_pktmbuf_free(rx_mbufs[i]);
+                free_packet(rx_mbufs[i]);
             }
            // if (pktcount == 10000000)
              //   printf("Received %ld packets so far\n", pktcount); 
@@ -161,13 +223,13 @@ void do_stats(__attribute__ ((unused)) struct rte_timer *tim, __attribute__ ((un
 static struct rte_timer timer;
 
 void timer_setup(void) {
-    printf("ENTERED TIME\n");
-    fflush(stdout);
+    //printf("ENTERED TIME\n");
+    //fflush(stdout);
     int lcore_id = rte_get_master_lcore();
     rte_timer_subsystem_init();
     rte_timer_init(&timer);
-    printf("GOING INTO LOOP\n");
-    fflush(stdout);
+    //printf("GOING INTO LOOP\n");
+    //fflush(stdout);
     int ret = rte_timer_reset(&timer, rte_get_timer_hz(), PERIODICAL, lcore_id, do_stats, NULL);
     if (ret != 0) {
         printf("TIMER_ERROR");
