@@ -341,6 +341,13 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packets(JNIEnv __attribute__ (
 	}
 }
 
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packet(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jlong mem_pointer) {
+	uint8_t *point = (uint8_t*)mem_pointer;
+	int offset = sizeof(uint16_t);
+	struct rte_mbuf *freeing = (struct rte_mbuf*)get64(point, offset);
+	rte_pktmbuf_free(freeing);
+}
+
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jlong mem_pointer, jint port_id, jint tx_id) {
 	uint8_t *point = (uint8_t*)mem_pointer;
 	int offset = 0;
@@ -348,16 +355,20 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv __attribute__ (
 	uint16_t packet_count = get16(point, 0);
 	offset += sizeof(uint16_t);
 
-	rte_eth_tx_burst(port_id, tx_id, (struct rte_mbuf**)(point+offset), packet_count);
+	int ret = rte_eth_tx_burst(port_id, tx_id, (struct rte_mbuf**)(point+offset), packet_count);
 
-
-	offset = sizeof(uint16_t);
+	/*if (ret < packet_count) {
+		do {
+			rte_pktmbuf_free(list[ret]);
+		} while (++ret < packet_count);
+	}*/
+	/*offset = sizeof(uint16_t);
 	int i;
 	for (i = 0; i < packet_count; i++) {
 		struct rte_mbuf *freeing = (struct rte_mbuf*)get64(point, offset);
 		rte_pktmbuf_free(freeing);
 		offset += sizeof(uint64_t);
-	}
+	}*/
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jint core, jint __attribute__ ((unused)) avail) {

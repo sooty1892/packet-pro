@@ -46,13 +46,16 @@ public class PacketFreeer {
 	// packet added to free list and checks made for
 	// timeout period and list size
 	public void freePacket(Packet p) {
-		ua.setCurrentPointer(mbuf_pointer + (ua.longSize() * current_count));
-		ua.putLong(p.getMbuf_pointer());
-		current_count += 1;
-		if (current_count >= free_burst || isTimedOut()) {
-			freeBurst();
-			past_freed = System.currentTimeMillis();
-		}
+//		ua.setCurrentPointer(mbuf_pointer + (ua.longSize() * current_count));
+//		ua.putLong(p.getMbuf_pointer());
+//		current_count += 1;
+//		if (current_count >= free_burst || isTimedOut()) {
+//			freeBurst();
+//			past_freed = System.currentTimeMillis();
+//		}
+		ua.setCurrentPointer(start_pointer);	
+		ua.putShort(1);
+		DpdkAccess.dpdk_free_packets(start_pointer);
 	}
 	
 	// frees burst of packets via dpdk library

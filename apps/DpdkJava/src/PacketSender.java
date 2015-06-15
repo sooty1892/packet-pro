@@ -79,7 +79,7 @@ public class PacketSender {
 		
 		ua.putShort(num);
 		
-		DpdkAccess.dpdk_free_packets(start_pointer);
+		DpdkAccess.dpdk_send_packets(start_pointer, port_id, queue_id);
 		
 		current_count -= num;
 	}

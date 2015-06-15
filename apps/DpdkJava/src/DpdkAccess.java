@@ -14,6 +14,7 @@ public class DpdkAccess {
 	private static native void nat_receive_burst(long pointer, int port_id, int rx_id);
 	private static native void nat_free_packets(long pointer);
 	private static native void nat_send_packets(long pointer, int port_id, int tx_id);
+	private static native void nat_free_packet(long pointer);
 	
 	private static native void nat_set_receive_burst(int value);
 	private static native void nat_set_program_name(String value);
@@ -115,6 +116,10 @@ public class DpdkAccess {
 	
 	public static String dpdk_get_mac_info() {
 		return nat_get_mac_info();
+	}
+	
+	public static void dpdk_free_packet(long pointer) {
+		nat_free_packet(pointer);
 	}
 	
 }

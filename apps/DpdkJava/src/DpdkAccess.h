@@ -97,6 +97,14 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets
 
 /*
  * Class:     DpdkAccess
+ * Method:    nat_free_packet
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_DpdkAccess_nat_1free_1packet
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     DpdkAccess
  * Method:    nat_set_receive_burst
  * Signature: (I)V
  */
