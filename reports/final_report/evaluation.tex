@@ -3,15 +3,18 @@
 \begin{document}
 
 \section{Evaluation}
+\label{sec:evaluation}
 
-This section focusses on the comparison testing which was carried out between the C and Java implementations of basic middleboxes. Evaluation of the results will then be discussed and further improvements to the Java solutions will be considered. \todo{mention machine specs} 
+This section focusses on the comparison testing which was carried out between the C and Java implementations of basic middleboxes. Evaluation of the results will then be discussed and further improvements to the Java solutions will be considered.
+
+In order to fully understand the capabilities of middleboxes, testing was carried out on Imperial College's Large Scale Distributed Systems (LSDS) test-bed. Although this system consists of numerous machines, tests were carried out using just 2. The first machine was used to host the middlebox application and receive the packets. The other machine was used as the client and ran the pktgen software allowing it to generate packets at up to 10Gbps in order to take advantage of the machines network interface controllers. Each machine had 2 Intel Xeon ES-2690 2.90Ghz processor which when hyer-threaded, resulted in 16 cores and had 32GB of memory.
 
 \subsection{Packet Generating}
 Packet generating is the act of creating packets with random payloads to be sent to certain MAC addresses on the network. This can either be done via the use of specialised hardware or using software. They are used for load testing of packet processing applications to test the amount of data which applications can process per second. This can reveal whether limitations on a system is software or hardware based.
 
 \todo[inline]{Talk about pktgen module in kernel - does dpdk version use this}
 
-Pktgen is open source software tool, maintained by Intel, which aims to generate packets using the DPDK framework. It can generate up to 10Gbits of data per second with  varying frame sizes, and send the data in the form of packets across a compatible network interface card/controller. It has a number of benefits which include:
+Pktgen is open source software tool, maintained by Intel, which aims to generate packets using the DPDK framework. It can generate up to 10Gbits of data per second with varying frame sizes ranging from 64 to 1518 bytes, and send the data in the form of packets across a compatible network interface card/controller. It has a number of benefits which include:
 
 \begin{itemize}
 	\item Real time packet configuration and port control
@@ -20,9 +23,7 @@ Pktgen is open source software tool, maintained by Intel, which aims to generate
 	\item Can be commanded via a Lua \ref{ref this} script
 \end{itemize}
 
-\todo[inline]{how does pktgen work and why we used it, only does 32 packet bursts or less}
-
-Pktgen's transmitting performance can be is reduced when increasing the frame size to those greater than 64 bytes. This can be negated by running the application with multiple lcores on the same port with different queues, which allow the transmitting speed to match those of the NIC. With the packet size varying, obviously the number of packets transmitted per second is depends on this. The differences are shown in Table \ref{tab:pktgen}.
+Pktgen's transmitting performance can be reduced depending on the frame size. This was negated to keep it a constant within the tests by running the application with multiple lcores on the same port with different queues, which allow the transmitting speed to match those of the NIC. With the packet size varying, obviously the number of packets transmitted per second is dependant on this. The differences are shown in Table \ref{tab:pktgen}.
 
 \begin{table}[H]
 	\centering
@@ -43,58 +44,58 @@ Pktgen's transmitting performance can be is reduced when increasing the frame si
 		1518 (max) & 0.8 & 9999 \\
 		\hline
 	\end{tabular}
-	\caption{Pktgen speed at 32 packet burst, used 2 processors to get meet NIC speed}
+	\caption{Pktgen performance for varying packet sizes transmitting in 32 packet burst.}
 	\label{tab:pktgen}
 \end{table}
 
-\subsection{Initial Testing}
-The initial testing of applications \todo{which ones?} was carried out an a local Mac OS X machine running Ubuntu 14.04 LTS 64-bit on a VirtualBox \todo{ref this and ubuntu} virtual machine. Although this set-up didn't provide the ability to load test on very high speeds (anything above 1Gbit/s), it allowed for basic testing to check that the application was running as expected. Load testing of speeds up to roughly 700Mbit/s were also possible which have a basic testing platform without the need to move code to servers.
-
-\subsubsection{Set-up}
-Testing could be carried out using the 2 available 1Gbit NICs of the machine via a bridged network from the host to guest machine which severely reduced transmission speed. This allowed an ethernet cable to be looped back and connected between the ports, meaning anything transmitted via 1 port was guaranteed to be received by the other port.
-
-Pktgen and the custom application were booted up simultaneously running in parallel. Careful memory allocation, port addressing and processor core assignment had to be carried out to stop shared resourced impacting the overall performance of either application. This allowed Pktgen to send packets and the application to receive and process them.
-
-\subsubsection{Methods}
-
-\subsubsection{Results}
-
 \subsection{Further Testing}
-In order to fully understand the capabilities of the middle boxes, testing was carried out on Imperial College's Large Scale Distributed Systems (LSDS) test-bed. Although this system consists of numerous machines, tests were carried out using just 2. The first machine was used to host the middlebox application and receive the packets. The other machine was used as the client and ran the pktgen software allowing it to generate packets at up to 10Gbps in order to take advantage of the machines network interface controllers.
+The first test on the LSDS test-bed involved comparing the C and Java implementations of a packet capturing application which simply received the packets and freed them straight away without any further transmission. The C implementation is used to give the optimal readings possible from this and further tests, since very limited processing is carried out between receiving and dropping the packet. The figure below shows the performance of the application at varying packet sizes.
 
-The first test on the LSDS test-bed involved comparing the C and Java implementations of a packet capturing application which simply received the packets and freed them straight away without forwarding them. The C implementation is used to give the optimal readings possible from this and further tests, since very limited processing is carried out between receiving and dropping the packet. The figure below shows the performance of the application at varying packet sizes.
-
-\missingfigure{Graph of c packet capture, 1 core, different frame sizes, will need to reference transmit speed of pktgen}
+\missingfigure{Graph of c packet capture, 1 core, different frame sizes, will need to reference transmit speed of pktgen - are results of this correct?}
 
 \todo{what does the results show}
 
-The same testing was carried out with an identical packet capture algorithm which was instead implemented in Java using the DPDKJava framework described previously. These results are shown below.
+The same testing was carried out with an identical packet capture algorithm which was instead implemented in Java using the DPDKJava framework described in section \ref{sec:dpdk}. All testing was done using 64 byte frames to make sure a consistency was kept throughout. Frame size of 64 bytes was chosen as this size is the hardest for applications to process simply because of the sheer number of packets per second which are received. This is an ultimate test of an applications packet throughput, and generally if it can handle packets at 64 bytes, it can handle much larger packets since the packet rate will be reduced. These results are shown in figure \ref{cap}.
 
-\missingfigure{Graph of java packet capture, 1 core, different frame sizes, will need to reference transmit speed of pktgen}
-
-The results above are very low to what was expected for such a simple application. \todo{expand on this}
-
-To check where the problems lied within the code, a Java profiler (JProfiler) was used to check multiple parts of the code including memory usage, cpu usage and the number of method calls and the average time per method call. This provided invaluable analysis of where the problems were, although the profiler significantly reduced the performance of the application since it connects to the JVM and reads the data itself.
-
-\begin{figure}
+\begin{figure}[H]
 	\centering
-	\begin{subfigure}{0.5\textwidth}
-		\centering
-		\includegraphics[width=0.5\textwidth]{img/buffer.jpg}
-		\caption{fds}
-		\label{sdf}
+	\begin{subfigure}{0.5\textwidth}\textbf{•}
+		\includegraphics[width=\textwidth]{../../data/pctest1/packets.png}
+		\caption{Millions of packets per second}
+		\label{fig:cappackets}
 	\end{subfigure}%
 	\begin{subfigure}{0.5\textwidth}
-		\centering
-		\includegraphics[width=0.5\textwidth]{img/endian.png}
-		\caption{fds}
-		\label{sdf}
+		\includegraphics[width=\textwidth]{../../data/pctest1/bytes.png}
+		\caption{Millions of bytes per second}
+		\label{fig:capbytes}
 	\end{subfigure}
-	\caption{sdfd}
-	\label{fdssdf}
+	\caption{Performance results of C vs Java implementations of packet capture application for all rounds of testing}
+	\label{fig:cap}
 \end{figure}
 
-Figure ?? shows some of the output from the profiler which indicated where the main problems were in terms of memory usage and performance. From this, a number of performance upgrades were implemented:
+\todo{different frame sizes?}
+
+Figures \ref{fig:cappackets} and \ref{fig:capbytes} indicate that after the first testing using the initial DPDKJava framework that the packet and data throughput was extremely low compared to the C version. Obviously these results are extremely closely related to each other resulting in the C version been roughly 8 times quicker after the first test. Although the native implementation was expected to be slightly quicker, this gap was way too high considering the design considerations and framework implementation.
+
+To check where the problems lied within the code, a Java profiler (JProfiler) was used to check multiple parts of the code including memory usage, cpu usage and the number of method calls and the average time per method call. This provided invaluable analysis of where the problems were, although the profiler significantly reduced the performance of the application since it connects to the JVM and reads the data itself. Even so, obvious bottlenecks could be spotted allowing for performance improvement implementations to be made.
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{0.5\textwidth}
+		\includegraphics[width=\textwidth]{../../data/pctest1/memory_all_objects.png}
+		\caption{Object allocation in memory}
+		\label{fig:mem1}
+	\end{subfigure}%
+	\begin{subfigure}{0.5\textwidth}
+		\includegraphics[width=\textwidth]{../../data/pctest1/cpu_call_tree.png}
+		\caption{Call tree of most cpu intensive methods}
+		\label{fig:cpu1}
+	\end{subfigure}
+	\caption{Profiler output when analysing the first test of packet capture}
+	\label{fig:pro1}
+\end{figure}
+
+Figure \ref{fig:pro1} shows some of the output from the profiler which indicated where the main problems were in terms of memory usage and performance. From this, a number of performance upgrades were implemented:
 
 \paragraph*{Capture Processor fields}
 The first improvement were to the Packet Capture application itself. The associated processor originally stored the ReceivePoller and PacketFreeer objects within a list to allow for easy iteration if there were numerous objects. Since the Packet Capture application only used 1 of each, seperate fields could be used for the objects which removed the list accessing times and iterations.
@@ -103,24 +104,32 @@ The first improvement were to the Packet Capture application itself. The associa
 The other improvements were made to the actual DPDKJava framework. These involved utilising objects throughout the application lifespan instead of creating new ones on every loop. This dramatically reduced the number of initializing methods invoked for the objects and reduced the memory usage in the heap, which reduced the number of times the Java garbage collector was invoked. The class which caused the most problem with this was the ArrayList, which were created on every loop to pass packets through the Java system. Since the framework uses threads without the need to synchronise objects, an ArrayList could be created on initialisation and simply cleared before been used again.
 
 \paragraph*{Off heap allocation}
-Finally, instead of allocating new off heap memory to receive the packet pointers through on every loop, a memory bank was allocated on initialisation and the same memory was simply overwritten on every loop iteration. These improvements resulted in the graph below.
+Finally, instead of allocating new off heap memory to receive the packet pointers through on every loop, a memory bank was allocated on initialisation and the same memory was simply overwritten on every loop iteration. This stopped expensive calls to the allocate and free methods.
 
-Again, the same tests were carried out to check the performance increase of the framework implementation.
+Again, the same tests were carried out to check the performance increase of the new framework implementation. Shown in figure \ref{fig:cap} by comparing the blue and green lines, there was a slight performance increase of roughly 1 millions packets per second just by these simple changes, although it was still significantly down on performance to the C version.
 
-\missingfigure{Graph for improvements}
+Further profiling of the application was undertaken on the improved application. Figure \ref{fig:pro2} shows the analysis which outlined 2 further major improvements which could be made. Each one of these improvements were undertaken and performance tested individual.
 
-\todo{explain results compared to previous ones and c version}
-
-\missingfigure{more profiling?}
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{0.5\textwidth}\textbf{•}
+		\includegraphics[width=\textwidth]{../../data/pctest2/memory_all_objects.png}
+		\caption{Object allocation in memory}
+		\label{fig:mem2}
+	\end{subfigure}%
+	\begin{subfigure}{0.5\textwidth}
+		\includegraphics[width=\textwidth]{../../data/pctest1/cpu_methods.png}
+		\caption{Most cpu intensive methods along with relevant stats}
+		\label{fig:cpu2}
+	\end{subfigure}
+	\caption{Profiler output when analysing the first test of packet capture}
+	\label{fig:pro2}
+\end{figure}
 
 \paragraph*{Packet creation}
-Of course, for every packet entering the application a packet object is created for easy referencing further down the application pipe-line. However, not using packet objects would significantly reduce the usability and scalability of applications. It was decided not to alter this. However, for each packet initialization a new UnsafeAccess object was been created for use with accessing packet header information. However, since each thread controls its own packets and therefore can only process 1 packet at a time, 1 UnsafeAccess object could be shared between all packets which significantly reduced the number of objects on the heap.
+Of course, for every packet entering the application a packet object is created for easy referencing further down the application pipe-line. However, not using packet objects would significantly reduce the usability and scalability of applications. It was decided not to alter this. However, for each packet initialization a new UnsafeAccess object was been created for use with accessing packet header information. However, since each thread controls its own packets and therefore can only process 1 packet at a time, 1 UnsafeAccess object could be shared between all packets which significantly reduced the number of objects on the heap. This improvement created a vast performance increase, rising the number from 2.4 million to just over 10 million packets per second as indicated with the red line in figure \ref{fig:cap}.
 
-\paragraph*{Send and Free lists} Further problems were identified with the lists of packets awaiting to be sent and freed. This list was been iterated over with the Packet's mbuf pointer then been stored in an off heap memory bank waiting to be freed. This was pointless since the packets mbuf pointer could directly be put into the off heap memory, therefore eliminating the need for the list while also allowing the packet objects to be dereference quicker.
-
-\todo{image of this}
-
-\missingfigure{Graph for improvements}
+\paragraph*{Send and Free lists} Further problems were identified with the lists of packets awaiting to be sent and freed. This list was been iterated over with the Packet's mbuf pointer then been stored in an off heap memory bank waiting to be freed. This was pointless since the packets mbuf pointer could directly be put into the off heap memory, therefore eliminating the need for the list while also allowing the packet objects to be dereference quicker. Again, this bottleneck was fixed and resulted in a further improvement of roughly 1 million packets per second as indicated with the turqoise line in figure \ref{fig:cap}.
 
 The results show that the performance was further improved and pretty close to that of the C implementation. After further profiling, there was only 1 obvious improvement which could be made, This would be to replace the list storing packets received from the poller. However, replacing this with a custom implementation using off heap memory would firstly reduce the usability of the code and would also mean that the code was drifting away from the Java language. It was decided not to implement this fix and instead to continue with testing of other applications, assuming that the would be negated by applications. This initial series of testing also proved that a dramatic increase in performance can be achieved simply by programming the applications efficiently, by trying to reduce the number of objects created.
 

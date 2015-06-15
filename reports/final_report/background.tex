@@ -5,6 +5,7 @@
 \todo{cite ALL images}
 
 \section{Background}
+\label{sec:background}
 
 This section focusses on a number of background concepts which will help to gain further understanding of networking practices and protocols which the solution must adhere to. It then gives an overview of the architecture of the Java langugage and explores on some of the key techniques which will be exploited. As this report focusses on performance testing throughout, this section will then cover techniques to test custom programs. It finally looks at related works within the research area and existing frameworks which could be exploited.
 
@@ -163,6 +164,7 @@ As a routing device, a NAT is responsible for remapping an IP address to another
 \subsection{Java}
 
 \subsubsection{JVM}
+\label{subsec:jvm}
 
 The Java Virtual Machine is an abstract computer that allows Java programs to run on any computer without dependant compilation. This works by all Java source code been compiled down into Java byte code, which is interpreted by the JVM's just in time (JIT) compiler to machine code. However, it does require each computer to have the Java framework installed which is dependant on the OS and architecture. It provides an appealing coding language due to the vast support, frameworks and code optimisations available such as garbage collections and multithreading. Figure~\ref{fig:jvm} shows the basic JVM architecture with the relevant sections explained in the list below.
 
@@ -188,6 +190,7 @@ The Java Virtual Machine is an abstract computer that allows Java programs to ru
 Typically, any network communication from a Java application occurs via the JVM and through the operating system. This is because the JVM is still technically an application running on top of the OS and therefore doesn't have any superuser access rights. Any network operation results in a kernel system call, which is then put into a priority queue in order to be executed. This is one of the main reasons why network calls through the JVM and kernel can be seen as 'slow', in relative speeds compared to network line rate speeds.
 
 \subsubsection{Java Native Interface (JNI)}
+\label{subsec:jni}
 %http://stackoverflow.com/questions/13973035/what-is-the-quantitative-overhead-of-making-a-jni-call
 %http://normanmaurer.me/blog/2014/01/07/JNI-Performance-Welcome-to-the-dark-side/
 %http://stackoverflow.com/questions/7823665/why-jni-call-to-native-method-is-slower-than-similar-in-sun-misc-unsafe
@@ -318,14 +321,13 @@ http://haumacher.de/publ/parallel/p086.pdf
 http://www.javacoffeebreak.com/articles/javarmi/javarmi.html
 For high performance computing in Java, a number of existing programming options are available in order for applications to communicate over a network. These can be classified as: (1) Java sockets; and (2) Remote Method Invocation (RMI); (3) shared memory programming. As will be discussed, none of these are capable of truly high performance networking, especially at line rate speeds.
 
-\paragraph{Java Sockets}\mbox{}\\ %subsubsubsection
-\label{subsec:sockets}
+\paragraph*{Java Sockets}
 Java sockets are the standard low level communication for applications as most networking protocols have socket implementations. They allow for streams of data to be sent between applications as a socket is one end point for a 2 way communication link, meaning that data can be read from and written to a socket in order to transfer data. Even though sockets are a viable option for networking, both of the Java socket implementations (IO sockets \& NIO (new I/O) sockets) are inefficient over high speed networks \cite{sockets} and therefore lack the performance that is required. As discussed previously, the poor performance is due to the JVM interacting with network cards via the OS kernel.
 
-\paragraph{Remote Method Invocation (RMI)}\mbox{}\\ %subsubsubsection
+\paragraph*{Remote Method Invocation (RMI)}
 Remote Method Invocation (RMI) is a protocol developed by Java which allows an object running in a JVM to invoke methods on another object running on a different JVM. Although this method provides a relatively easy interface for which JVM's can communicate, its major drawback relates to the speed. Since RMI uses Java sockets as its basic level communication method, it faces the same performance issues as mentioned in section~\ref{subsec:sockets}.
 
-\paragraph{Shared Memory Programming}\mbox{}\\ %subsubsubsection
+\paragraph*{Shared Memory Programming}
 Shared memory programming provides high performance JVM interaction due to Java's multithread and parallel programming support. This allows different JVM's to communicate via objects within memory which is shared between the JVM's. However, this technique requires the JVM's to be on the same shared memory system, which is a major drawback for distributed systems as scalability options decrease.
 
 Even though these 3 techniques allow for communication between JVM's and other applications, the major issue is that incoming packets are still handled by the kernel and then passed onto the corresponding JVM. This means that packets are destined for certain applications, meaning that generic packets can't be intercepted and checked, which is a requirement for common middlebox software.
@@ -353,7 +355,6 @@ The CPU can be a potential bottleneck in high speed software based routers and P
 
 \subsubsection{Data Plane Development Kit (DPDK)}
 \label{subsec:dpdk}
-%https://www.youtube.com/watch?v=BqV833_xd-Y
 %file:///Users/ashleyhemingway/Downloads/communications-packet-processing-brief.pdf
 Data Plane Development Kit (DPDK) \cite{dpdk} is a set of libraries and drivers which enables fast packet processing reaching speeds of 80 million packets per second on certain system set ups. Since DPDK is developed by Intel, it only supports Intel x86 CPU's and certain network interface controllers (NIC). DPDK binds the NIC's to new drivers meaning that the operating system doesn't recognise the network cards and therefore the network stack associated with the ports don't work. It make use of drivers run in user space allowing it to interact with certain memory locations without permission from the kernel or even involving it in any way.
 

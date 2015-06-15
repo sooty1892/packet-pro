@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
 
 /*
  * Class to aid in sending packets via certain port and queue
@@ -7,7 +5,6 @@ import java.util.List;
 
 public class PacketSender {
 	
-	private List<Packet> list;
 	UnsafeAccess ua;
 	long packet_all;
 	long packet_all_size;
@@ -19,21 +16,27 @@ public class PacketSender {
 	
 	int send_burst;
 	
+	int current_count;
+	
+	long start_pointer;
+	long mbuf_pointer;
+	
 	private static final int DEFAULT_SEND_BURST = 32;
 	private static final long MILLI_SECOND = 1000;
 	private static final int SHORT_SIZE = 2;
 	
 	public PacketSender(int port_id, int queue_id) {
-		list = new ArrayList<Packet>();
 		ua = new UnsafeAccess();
-		packet_all = 0;
-		packet_all_size = 0;
-		packet_interval = 0;
-		packet_interval_size = 0;
+//		packet_all = 0;
+//		packet_all_size = 0;
+//		packet_interval = 0;
+//		packet_interval_size = 0;
 		past_sent = System.currentTimeMillis();
 		send_burst = DEFAULT_SEND_BURST;
 		this.port_id = port_id;
 		this.queue_id = queue_id;
+		start_pointer = ua.allocateMemory((ua.longSize()*send_burst)+2);
+		mbuf_pointer = start_pointer + 2;
 	}
 	
 	public int getSendBurst() {
@@ -53,8 +56,10 @@ public class PacketSender {
 	// packet added to sends list and checks made for
 	// timeout period and list size
 	public void sendPacket(Packet p) {
-		list.add(p);
-		if (list.size() >= send_burst || isTimedOut()) {
+		ua.setCurrentPointer(mbuf_pointer + (ua.longSize() * current_count));
+		ua.putLong(p.getMbuf_pointer());
+		current_count += 1;
+		if (current_count >= send_burst || isTimedOut()) {
 			sendBurst();
 			past_sent = System.currentTimeMillis();
 		}
@@ -64,35 +69,19 @@ public class PacketSender {
 	// also contains stats data collection
 	private void sendBurst() {
 		int num = 0;
-		if (list.size() > send_burst) {
+		if (current_count > send_burst) {
 			num = send_burst;
 		} else {
-			num = list.size();
+			num = current_count;
 		}
-		long memory_needed = (num * ua.longSize()) + SHORT_SIZE;
-		long pointer = ua.allocateMemory(memory_needed);
-		ua.setCurrentPointer(pointer);
+
+		ua.setCurrentPointer(start_pointer);
 		
 		ua.putShort(num);
 		
-		for (int i = 0; i < num; i++) {
-			ua.putLong(list.get(i).getMbuf_pointer());
-
-			packet_all_size += ((Ipv4Packet)list.get(i)).getLength(); // plus ethernet header?
-			packet_interval_size += ((Ipv4Packet)list.get(i)).getLength();
-		}
+		DpdkAccess.dpdk_free_packets(start_pointer);
 		
-		list.subList(0, num).clear();
-		
-		packet_all += num;
-		packet_interval += num;
-		
-		DpdkAccess.dpdk_send_packets(pointer, port_id, queue_id);
-
-		packet_all += num;
-		packet_interval += num;
-		
-		ua.freeMemory(pointer);
+		current_count -= num;
 	}
 	
 	public long getPacketAll() {

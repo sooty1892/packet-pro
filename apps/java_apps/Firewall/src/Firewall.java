@@ -22,13 +22,13 @@ public class Firewall {
 			as.readConfig(new FileInputStream("config.properties"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-			System.exit(-1);
+			//System.exit(-1);
 		}
 		
 		as.sendDPDKInformation();
 		
 		List<CoreThread> threads = new ArrayList<CoreThread>();
-		
+//		
 		ReceivePoller rp = new ReceivePoller(0, 0);
 		PacketSender ps = new PacketSender(0, 0);
 		PacketFreeer pf = new PacketFreeer();
@@ -54,7 +54,7 @@ public class Firewall {
 		as.dpdk_enable_pro();
 
 		as.start_native_stats();
-		
+//		
 		as.dpdk_get_mac_info();
 		
 		as.startAll();

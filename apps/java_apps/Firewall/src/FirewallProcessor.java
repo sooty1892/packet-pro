@@ -15,11 +15,18 @@ public class FirewallProcessor extends PacketProcessor {
 	
 	Set<Long> blacklist;
 	
+	PacketFreeer pf_ind;
+	ReceivePoller rp_ind;
+	PacketSender ps_ind;
+	
 	public FirewallProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp) {
 		super(ps, pf, rp);
 		blacklist = new HashSet<Long>();
 		readBlacklist();
 		//printBlacklist();
+		pf_ind = pf;
+		rp_ind = rp;
+		ps_ind = ps;
 	}
 
 	private boolean inspect(Packet currentPacket) {
@@ -28,17 +35,17 @@ public class FirewallProcessor extends PacketProcessor {
 		if (version == 4) {
 			Ipv4Packet cp = (Ipv4Packet)currentPacket;
 			if (blacklist.contains(cp.getSrcAddr())) {
-				pf.get(0).freePacket(currentPacket);
+				pf_ind.freePacket(currentPacket);
 			} else {
-				ps.get(0).sendPacket(currentPacket);
+				ps_ind.sendPacket(currentPacket);
 				return true;
 			}
 		} else if (version == 6) {
 			//System.out.println("Not handling IPv6 - skipping and freeing");
-			pf.get(0).freePacket(currentPacket);
+			pf_ind.freePacket(currentPacket);
 		} else {
 			//System.out.println("Packet received where version isn't 4 or 6 - skipping and freeing");
-			pf.get(0).freePacket(currentPacket);
+			pf_ind.freePacket(currentPacket);
 		}
 		return false;
 	}
@@ -78,7 +85,7 @@ public class FirewallProcessor extends PacketProcessor {
 	@Override
 	public void run() {
 		while (true) {
-			List<Packet> packets = rp.get(0).getBurst();
+			List<Packet> packets = rp_ind.getBurst();
 			for (Packet p : packets) {
 				inspect(p);
 			}

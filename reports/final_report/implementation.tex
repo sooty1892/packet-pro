@@ -3,12 +3,26 @@
 \begin{document}
 
 \section{DPDK Java}
-Since the Data Plane Development Kit is a framework, it was decided that instead of implementing separate middleboxes, a Java framework would be implemented. This would allow any number of other applications to be designed with ease. \todo[inline]{mention applications below for demonstrations of ease of use of framework, also mention only subset of availability of dpdk, and mention further extensions easy to do like packet fragmentation etc}
+\label{sec:implementation}
+Since the Data Plane Development Kit is a framework, it was decided that instead of implementing separate middleboxes, a Java framework would be implemented. This would allow any number of other applications to be designed with ease. The DPDK Java framework only supports a subset of the original DPDK features, however, it provides suitable functionality to produce a fully working application which can make use of the key concepts. A number of example applications are implemented in section \ref{sec:apps} using the DPDK Java framework, all of which are easy to extend into more complicated applications which support features like packet fragmentation and packet payload inspection.
 
-\todo[inline]{important to check for errors at every stage to stop jvm crashes}
-
-\subsection{Overview (better name?)}
+\subsection{Overview}
 As proven earlier in the report, for fast packet processing in Java the number of JNI calls should be minimised as possible due to their large overhead. However, since DPDK is a native library some JNI calls were obviously mandatory, mainly those initialising the application and packet interactions. This was minimised by making the majority of the JNI calls at the start of the application, before individual processing threads had been started. From then on, JNI calls would only be made at vital times within the application.
+
+An overview of the DPDK Java structure is shown in figure \ref{fig:overview} which shows the key concepts of the framework. Any application requires 2 user defined class:
+
+\paragraph*{Application Main} This class is responsible for starting the DPDK framework indirectly, via a number of method calls to the application starter, passing the required configurations as parameters. Some of this is done via the config file and other properties have to be passed as parameters to the application starter class by the user. It also initialises the custom processor unit class described below and passes them to the application starter. A statistics module can be initialised at the start as well which runs on its own thread.
+
+\paragraph*{Processor Unit} This class is the main unit of the application which is eventually threaded by the framework. It therefore has to extend the Runnable class. It's responsible for requesting packets, processing them and then sending or freeing the packets. These classes can share the Packet Free-er and Packet sender classes but most have their own receive poller class which is associated with a given port and queue.
+
+As figure \ref{fig:overview} shows, most of these classes interface with the native methods, either on a regular basis or on initial start-up. Most of these native methods interact with the DPDK framework in some capacity. However, these native methods are abstracted away from the users application requiring no knowledge of the JNI calls or the underlying memory layout.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{img/app.png}
+	\caption{DPDK Java basic class overview}
+	\label{fig:overview}
+\end{figure}
 
 \subsection{Native Libraries}
 For the Java framework to work, it requires a native shared library which includes all of the native methods to be called. This shared library can be placed anywhere as long as the correct Java path is set to its location, however, the common place is to install it within the users library directory (/usr/lib/) in Linux.
@@ -29,9 +43,9 @@ By far the best option is to use the DPDK makefile. It is generally used when th
 \subsection{Initialisation}
 DPDK requires a number of initialising procedures to create the environment abstraction layer, start ports, allocate memory pools and setup the port specific queues. Each of these procedures is directly mapped to a Java implementation of them, which also handle error checking. Generally any native applications using DPDK create a number of threads depending on the number of available cores to split the work and maximise throughput. However, since the Java side creates its own affinity threads for this, DPDK is always initialised with only 1 thread to be used for the set-up.
 
-When writing custom applications, all initialising should be complete before starting the threads. This is to stop any DPDK errors when trying to access uninitialised ports, memory pools or queues. For this reason, the last thing which should be called is 'startAll()' which starts all threads and affinity threads one by one in quick succession to allow the actual packet processing to take place.
+The native initialisation functions make use of a number of memory allocation (malloc) calls, which goes against the recommended procedures. These calls are used to dynamically create variables such as those used for initialisation parameters for the EAL. After further research into the memory usage, malloc calls are supported and are only discouraged due to the reduced speed of accessing the memory locations over those stored within the huge pages. However, since they are only used at initialisation, performance isn't a factor here.
 
-\todo{mention using malloc against will of dpdk is allowed}
+When writing custom applications, all initialising should be complete before starting the threads. This is to stop any DPDK errors when trying to access uninitialised ports, memory pools or queues. For this reason, the last thing which should be called is 'startAll()' which starts all threads and affinity threads one by one in quick succession to allow the actual packet processing to take place.
 
 \subsection{Processing Threads}
 The framework supports multiple processing procedures which can run simultaneously and even with different implementations depending on the requirements. This allows an application to be built where certain processing objects do the polling of packets, and then pass these objects to be inspected, and then onto another object for sending and freeing of the packets. This basically creates a pipelined application, although a more simple processing object would receiver, process and forward packets in the same thread. This is instead of multiple processing units doing exactly the same job.
@@ -61,9 +75,14 @@ Since the native mbuf and ipv4/ipv6 structures are forced to be packed, \todo{re
 \subsection{Packet Polling}
 Packet polling as the act of receiving data from the memory buffers used to store packets received by the network interface card/controller. When an application requests new packets from the received queue of a specific port, it does so using native methods via the JNI. These are the only JNI calls used after the initial start up (i.e used in processing threads) in order to increase performance. The native methods' parameters specify the port id, queue id and a memory location pointer, while defaulting to fetching the default number of packets set on the application initialisation. Before this call happens, Java DPDK allocates a set number of bytes within the native memory and holds its pointer in memory in long format. This pointer location is then passed as one of the parameters to the native method.
 
-\todo[inline]{get image of setup of memory location, ie number then list of packet pointers}
-
 Within the native method, the number of received packets is put as a short data type into the memory location of the pointer. Every subsequent value inserted into the memory location is first a pointer to the mbuf location of a given packet and then a pointer to the location of the packet header. This happens for all of the packets received by the call.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{img/memory.png}
+	\caption{Example memory setup for getting burst of packets}
+	\label{fig:overview}
+\end{figure}
 
 Within the Java side, using the UnsafeMemory class, the number of packets is pulled from the memory location. From there, the pointers can be pulled within a loop and added to their own packet class, depending if they are IPv4 or IPv6 headers. A list of packets is then returned from the method.
 
@@ -77,16 +96,40 @@ Once the packets have been put onto the queue, a loop if made through the pointe
 \subsection{Statistic Profiling}
 The statistic profiling is an optional part of the framework which allows statistics to be gathered on the number and sizes of packets received and packets sent. It gathers data every second by default, but can be user set to find information about the number of packets sent/received for a given time unit. It's up to the user to set which ReceivePoller and PacketSender objects to gather information on. In order to be most efficient for the application, it runs on its own thread, although not an affinity thread, so it can be context switched into any of the cores.
 
-It also has the option of running a graphical user interface (GUI) which displays the data in better format instead of constant prints to the console. It also redirects other console information on the running of the application to a user console on the GUI for easier use as DPDK outputs a lot of information which isn't that useful.
+It also has the option of running a graphical user interface (GUI, figure \ref{fig:gui}) which displays the data in better format instead of constant prints to the console. It also redirects other console information on the running of the application to a user console on the GUI for easier use as DPDK outputs a lot of information which isn't that useful.
 
-\todo{put image of gui, also write output to files}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{img/gui.png}
+	\caption{Statistics GUI showing packet data and console output}
+	\label{fig:gui}
+\end{figure}
+
+The implementation for the statistic collector simply involves each packet sender and receive poller iterating counters on the required data. This can potentially have synchronisation issues, which aren't solved to prohibit performance reduction. This means the statistics aren't fully accurate, although they do provide good estimations of the data.
+
+To solve this issue, another statistics profiler was implemented which makes use of some DPDK libraries and native timer libraries to continously poll the NIC for its very accurate on-board data collection. Again, this process is run in a separate thread but it doesn't allow for interaction with the GUI.
 
 \subsection{Correctness Testing}
 Not testing performance but packet data movement and pddk set-up
 setting u VM since needed specific environments.
 %http://www.javacodegeeks.com/2013/02/analysing-a-java-core-dump.html
 
+\subsection{Initial Testing}
+The initial testing of applications \todo{which ones?} was carried out an a local Mac OS X machine running Ubuntu 14.04 LTS 64-bit on a VirtualBox \todo{ref this and ubuntu} virtual machine. Although this set-up didn't provide the ability to load test on very high speeds (anything above 1Gbit/s), it allowed for basic testing to check that the application was running as expected. Load testing of speeds up to roughly 700Mbit/s were also possible which have a basic testing platform without the need to move code to servers.
+
+\todo[inline]{important to check for errors at every stage to stop jvm crashes}
+
+\subsubsection{Set-up}
+Testing could be carried out using the 2 available 1Gbit NICs of the machine via a bridged network from the host to guest machine which severely reduced transmission speed. This allowed an ethernet cable to be looped back and connected between the ports, meaning anything transmitted via 1 port was guaranteed to be received by the other port.
+
+Pktgen and the custom application were booted up simultaneously running in parallel. Careful memory allocation, port addressing and processor core assignment had to be carried out to stop shared resourced impacting the overall performance of either application. This allowed Pktgen to send packets and the application to receive and process them.
+
+\subsubsection{Methods}
+
+\subsubsection{Results}
+
 \section{Applications}
+\label{sec:apps}
 Since a Java DPDK framework was designed, any applications are relatively easy to create and only use Java code so no interaction with the native DPDK is necessary from a users point of view. Below are 2 simple applications created using this framework, which both show the small amount of code required to make a working application. However, either of these could be heavily extended to use multiple threads, different processing objects, shared ports in order to design more complex application such as packet fragmentation, reassembly, multi-casting or ordering.
 
 \subsection{Firewall}
