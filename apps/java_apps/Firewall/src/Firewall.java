@@ -13,7 +13,7 @@ public class Firewall {
 		
 		ApplicationStarter as = new ApplicationStarter();
 		
-//		as.setupGui(false);
+//		as.setupGui(true);
 		
 //		List<ReceivePoller> rps = new ArrayList<ReceivePoller>();
 //		List<PacketSender> pss = new ArrayList<PacketSender>();
@@ -49,7 +49,7 @@ public class Firewall {
 		as.dpdk_dev_start(0);
 		as.dpdk_check_ports_link_status();
 		
-//		as.updateStatsInfo(rps, pss);
+		//as.updateStatsInfo(rps, pss);
 
 		as.dpdk_enable_pro();
 
