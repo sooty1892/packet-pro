@@ -55,6 +55,7 @@ public class PacketFreeer {
 //		}
 		ua.setCurrentPointer(start_pointer);	
 		ua.putShort(1);
+		ua.putLong(p.getMbuf_pointer());
 		DpdkAccess.dpdk_free_packets(start_pointer);
 	}
 	
