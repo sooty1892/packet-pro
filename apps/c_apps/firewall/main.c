@@ -104,7 +104,10 @@ int size = 2;
 static void free_burst(void) {
     struct rte_mbuf **list = (struct rte_mbuf **)free_list.list;
 
-    rte_eth_tx_burst(0, 0, list, MAX_PKT_BURST);
+    unsigned i;
+    for (i = 0; i < free_list.len; i++) {
+        rte_pktmbuf_free(list[i]);
+    }
 }
 
 static void send_burst(void) {
@@ -140,13 +143,13 @@ static void free_packet(struct rte_mbuf *m) {
     free_list.list[len] = m;
     len++;
 
-    /* enough pkts to be sent */
-    if (unlikely(len == MAX_PKT_BURST)) {
+     if (unlikely(len == MAX_PKT_BURST)) {
         free_burst();
         len = 0;
     }
 
     free_list.len = len;
+
 }
 
 int main_loop(void *);
