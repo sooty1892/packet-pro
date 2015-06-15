@@ -41,7 +41,7 @@ void proPacket(struct packet *p) {
 
 void process_data(struct timespec *t) {
 	uint64_t start, end;
-	////start = mach_absolute_time();
+	start = mach_absolute_time();
 	int i;
 	for (i = 0; i < NUM_PACKS; i++) {
 		struct packet p;
@@ -52,8 +52,8 @@ void process_data(struct timespec *t) {
 			printf("RESULT ERROR\n");
 		}
 	}
-	//end = mach_absolute_time();
-	//mach_absolute_difference(end, start, t);
+	end = mach_absolute_time();
+	mach_absolute_difference(end, start, t);
 }
 
 
@@ -62,8 +62,8 @@ int main(int argc, char **argv) {
 	for (i=0; i < NUM_ITER; i++) {
 		struct timespec t;
 		process_data(&t);
-		//printf("%f seconds, %lu nanoseconds\n", (double)t.tv_sec, t.tv_nsec);
-		//printf("%lu\n", t.tv_nsec / NUM_PACKS);
+		printf("%f seconds, %lu nanoseconds\n", (double)t.tv_sec, t.tv_nsec);
+		printf("%lu\n", t.tv_nsec / NUM_PACKS);
 	}
 	return 0;
 }
