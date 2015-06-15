@@ -179,7 +179,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1dev(JNIEnv __attribute__ 
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jint port_id, jint rx_id) {
-	int ret = rte_eth_rx_queue_setup(port_id, rx_id, 256,
+	int ret = rte_eth_rx_queue_setup(port_id, rx_id, 2048,
 								socketid,
 								&rx_conf, pktmbuf_pool);
 	if (ret < 0) {
@@ -189,7 +189,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue(JNIEnv __attrib
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jint port_id, jint tx_id) {
-	int ret = rte_eth_tx_queue_setup(port_id, tx_id, 256, socketid, &tx_conf);
+	int ret = rte_eth_tx_queue_setup(port_id, tx_id, 2048, socketid, &tx_conf);
 	if (ret < 0) {
 		return ERROR;
 	}
@@ -439,6 +439,9 @@ struct port_data **pdata;
 */
 uint64_t pre_ibytes = 0;
 uint64_t pre_ipackets = 0;
+uint64_t pre_imissed = 0;
+uint64_t pre_ierrors = 0;
+uint64_t pre_opackets = 0;
 
 //void do_stats(__attribute__ ((unused)) struct rte_timer *tim, __attribute__ ((unused)) void *arg) {
 void do_stats(void) {
@@ -463,9 +466,18 @@ void do_stats(void) {
     pre_ibytes = stats.ibytes;
     uint64_t diff_packets = stats.ipackets - pre_ipackets;
     pre_ipackets = stats.ipackets;
+    uint64_t diff_missed = stats.imissed - pre_imissed;
+    pre_imissed = stats.imissed;
+    uint64_t diff_errors = stats.ierrors - pre_ierrors;
+    pre_ierrors = stats.ierrors;
+    uint64_t diff_opackets = stats.opackets - pre_opackets;
+    pre_opackets = stats.opackets;
 
     printf("Bytes: %lu\n", diff_bytes);
     printf("Packets: %lu\n", diff_packets);
+    printf("Missed: %lu\n", diff_missed);
+    printf("Errors: %lu\n", diff_errors);
+    printf("Sent: %lu\n", diff_opackets);
     fflush(stdout);
 }
 

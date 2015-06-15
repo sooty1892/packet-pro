@@ -13,7 +13,7 @@ public class Firewall {
 		
 		ApplicationStarter as = new ApplicationStarter();
 		
-//		as.setupGui(true);
+//		as.setupGui(false);
 		
 //		List<ReceivePoller> rps = new ArrayList<ReceivePoller>();
 //		List<PacketSender> pss = new ArrayList<PacketSender>();
@@ -41,7 +41,7 @@ public class Firewall {
 		as.createAffinityThreads(threads);
 		
 		as.dpdk_init_eal();
-		as.dpdk_create_mempool("mbufs", 8192, 32);
+		as.dpdk_create_mempool("mbufs", 8192*4, 32);
 		as.dpdk_check_ports();
 		as.dpdk_configure_dev(0, 1, 1);
 		as.dpdk_configure_rx_queue(0, 0);
@@ -49,7 +49,7 @@ public class Firewall {
 		as.dpdk_dev_start(0);
 		as.dpdk_check_ports_link_status();
 		
-		//as.updateStatsInfo(rps, pss);
+//		as.updateStatsInfo(rps, pss);
 
 		as.dpdk_enable_pro();
 
