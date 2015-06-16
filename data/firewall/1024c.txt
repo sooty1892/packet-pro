@@ -1,0 +1,21 @@
+Bytes: 902783174
+Bytes: 902751428
+Bytes: 902755292
+Bytes: 902776600
+Bytes: 902789514
+Bytes: 902753874
+Bytes: 902750406
+Bytes: 871739584
+Bytes: 902746112
+Bytes: 902772932
+
+Packets: 881628
+Packets: 881594
+Packets: 881606
+Packets: 881625
+Packets: 881634
+Packets: 881601
+Packets: 881593
+Packets: 851311
+Packets: 881589
+Packets: 881616

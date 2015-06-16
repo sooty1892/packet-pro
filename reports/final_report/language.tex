@@ -3,7 +3,7 @@
 \begin{document}
 
 \section{Is Java really slow?}
-Before any implementation or specific design considerations were undertaken, an evaluation of the performance of C, Java and the Java Native Interface (JNI) was carried out. Although data from existing articles and websites could be used for Java and C, there was no existing direct comparisons between them and the JNI, therefore custom tests were carried out.
+Before any implementation or specific design considerations can be undertaken, an evaluation of the performance of C, Java and the Java Native Interface (JNI) was carried out. Although data from existing articles and websites could be used for Java and C, there was no existing direct comparisons between them and the JNI, therefore custom tests were carried out.
 
 The JNI is inherently \todo{article on this} seen as a bottleneck of an application (even after its vast update in Java 7). \todo{reasons why JNI is slow}
 
@@ -49,5 +49,51 @@ Each language had the algorithm run 1,000 times in order to minimise any variati
 \subsection{Further Investigation}
 Due to the very poor performance of the JNI compared to other languages, further investigations were carried out to find more specific results surrounding the JNI.
 \todo{Is this relevant}
+
+\subsection{Performance Testing Techniques}
+Benchmarking is a process of testing hardware, individual components or full end to end systems to determine the performance of the application or hardware \todo{Examples of hardware comparisons}. Generally, benchmarking should be repeatable under numerous iterations without only minor variations in performance results. This is firstly to allow minor changes to be made to the application/component with re-runs of the benchmark showing the performance changes. Secondly, it allows accurate comparisons to be drawn between similar software or hardware with different implementations in order to derive \todo{better word for derive} a better product.
+
+\todo{why I need benchmarking}
+
+\subsubsection{Programming Languages}
+It is well known that different programming languages can provide a radical change in execution for a given program. However, direct comparisons can't truly be trusted as certain languages are suited for for specific tasks and finding a benchmarking program to incorporate this is problematic. Other factors can be introduced when deciding on the optimisation level \todo{show example of optimising java and how different it looks, also different depending on architecture} and the compiler of JIT used. \todo{better phrasing off that sentence needed}
+
+Numerous attempts have been made to compare languages, most noticeably the 'Benchmark Game' and Google. \todo{More here}
+\paragraph{Loop Recognition}\mbox{}\\
+Google inducted their own experiment on this problem, testing only C++, Java, Scala and Go on the loop recognition algorithm \todo{get paper}. Implementations made use of standard looping constructs and memory allocation schemes without the use of non-orthodox optimisation techniques. Selected results of this are shown below: \todo{explain difference with GC etc}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular} { | c | c | c | }
+		\hline
+		\textbf{Benchmark} & \textbf{Time [sec]} & \textbf{Facter} \\
+		\hline
+		c++ & 23 & 1.0x \\
+		\hline
+		Java 64-bit & 134 & 5.8x \\
+		\hline
+		Java 32-bit & 290 & 12.8x \\
+		\hline
+		Java 32-bit GC & 106 & 4.6x \\ 
+		\hline
+		Scala & 82 & 3.6x \\ 
+		\hline
+		Go 6g & 161 & 7.0x \\
+		\hline
+	\end{tabular}
+	\caption{Results from Loop Recognition benchmarking}
+	\label{tab:loop_recog}
+\end{table}
+
+\paragraph{Benchmark Game}\mbox{}\\
+The Benchmark Game is an online community which aims to find the best programming language by using multiple benchmarking algorithms running on different architecture configurations to determine the outcome. Again, even this community regard the best benchmark application to be your application. A few selected results are shown below between Java and C (those used in this report) for a few different benchmarks. \todo{get data}
+
+\paragraph{Using Economics}\mbox{}\\
+About economics paper
+
+\paragraph{Which is better?}
+
+\subsubsection{Intra-Language Techniques}
+\subsubsection{Applications}
 
 \end{document}

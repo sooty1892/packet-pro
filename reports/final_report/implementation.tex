@@ -107,33 +107,93 @@ It also has the option of running a graphical user interface (GUI, figure \ref{f
 
 The implementation for the statistic collector simply involves each packet sender and receive poller iterating counters on the required data. This can potentially have synchronisation issues, which aren't solved to prohibit performance reduction. This means the statistics aren't fully accurate, although they do provide good estimations of the data.
 
-To solve this issue, another statistics profiler was implemented which makes use of some DPDK libraries and native timer libraries to continously poll the NIC for its very accurate on-board data collection. Again, this process is run in a separate thread but it doesn't allow for interaction with the GUI.
+To solve this issue, another statistics profiler was implemented which makes use of some DPDK libraries and native timer libraries to continuously poll the NIC for its very accurate on-board data collection. Again, this process is run in a separate thread but it doesn't allow for interaction with the GUI, although it outputs much more detailed information like number of packets dropped and those with errors from the checksums.
 
 \subsection{Correctness Testing}
-Not testing performance but packet data movement and pddk set-up
-setting u VM since needed specific environments.
-%http://www.javacodegeeks.com/2013/02/analysing-a-java-core-dump.html
+During the implementation process, correctness testing was carried out on a local Mac OS X machine running Ubuntu 14.04 LTS 64-bit on a VirtualBox \todo{ref this and ubuntu} virtual machine. This involved testing the framework in a number of different ways to make sure it compiled, initialised and executed without any errors. No performance testing was carried out on this set-up simply because packets couldn't be generated at the required speed to fully test the implementation to the extreme levels.
 
-\subsection{Initial Testing}
-The initial testing of applications \todo{which ones?} was carried out an a local Mac OS X machine running Ubuntu 14.04 LTS 64-bit on a VirtualBox \todo{ref this and ubuntu} virtual machine. Although this set-up didn't provide the ability to load test on very high speeds (anything above 1Gbit/s), it allowed for basic testing to check that the application was running as expected. Load testing of speeds up to roughly 700Mbit/s were also possible which have a basic testing platform without the need to move code to servers.
-
-\todo[inline]{important to check for errors at every stage to stop jvm crashes}
-
-\subsubsection{Set-up}
 Testing could be carried out using the 2 available 1Gbit NICs of the machine via a bridged network from the host to guest machine which severely reduced transmission speed. This allowed an ethernet cable to be looped back and connected between the ports, meaning anything transmitted via 1 port was guaranteed to be received by the other port.
 
-Pktgen and the custom application were booted up simultaneously running in parallel. Careful memory allocation, port addressing and processor core assignment had to be carried out to stop shared resourced impacting the overall performance of either application. This allowed Pktgen to send packets and the application to receive and process them.
+Pktgen (section \ref{subsec:pktgen}) and the custom application were booted up simultaneously running in parallel. Careful memory allocation, port addressing and processor core assignment had to be carried out to stop shared resourced impacting the overall performance of either application. This allowed Pktgen to send packets and the application to receive and process them.
 
-\subsubsection{Methods}
+The VM also provided the perfect environment for debugging since the OSs GUI could be taken advantage of, something which wasn't possible when running the applications on a remote machine.  This became very useful when the application crashed, typically causing the JVM to crash at the same time. With a JVM crash, stack traces aren't typically outputted and the core dump can be difficult to analyse, giving the general area of the fault with no specifics.
 
-\subsubsection{Results}
+To debug the cores dumps, the GNU Project Debugger (GDB) was used which analyses the core dump providing meaningful output. GDB could also be attached to the native code to be iterated through line by line, although this causes further problems with the threaded nature of the applications. Typically the most successful method simply involved using the \textit{printf()} call making sure that \textit{fflush()} was called directly afterwards to flush the buffer before the crash occurs.
 
-\section{Applications}
+\subsection{Applications}
 \label{sec:apps}
-Since a Java DPDK framework was designed, any applications are relatively easy to create and only use Java code so no interaction with the native DPDK is necessary from a users point of view. Below are 2 simple applications created using this framework, which both show the small amount of code required to make a working application. However, either of these could be heavily extended to use multiple threads, different processing objects, shared ports in order to design more complex application such as packet fragmentation, reassembly, multi-casting or ordering.
+Since a Java DPDK framework was designed, any applications are relatively easy to create and only use Java code so no interaction with the native DPDK is necessary from a users point of view. Below are 2 simple applications created using this framework, which both show the small amount of code required to make a working application. However, either of these could be heavily extended to use multiple threads, different processing objects, shared ports in order to design more complex application such as packet fragmentation, ordering, multi-casting or reassembly.
 
-\subsection{Firewall}
+\subsubsection{Packet Capture}
+The most basic of application which can be made captures packets from the receive queues of the NICs and simply drops the packets without any further transmission. This application provides a great basis to test the maximum limitations of the framework, with analysis of this discussed in section \ref{sec:evaluation}.
 
-\subsection{Network Address Translator (NAT)}
+This implementation only requires 2 classes with the full implementation shown in code \ref{lst:pktcap}. The application only takes 55 lines of code, most of which is just standard Java paradigms such as constructors, fields and brace endings. Comparing that to the native version which takes approximately 250 lines of code to do the exact same job, the DPDKJava framework is pretty easy to use.
+
+\begin{lstlisting}[language=java, caption={Full packet capture program}, label=lst:pktcap]
+public class PacketCap {
+	public static void main(String[] args) {
+		ApplicationStarter as = new ApplicationStarter();
+		try {
+			as.readConfig(new FileInputStream("config.properties"));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		as.sendDPDKInformation();
+		List<CoreThread> threads = new ArrayList<CoreThread>();	
+		ReceivePoller rp1 = new ReceivePoller(0, 0);
+		PacketSender ps1 = new PacketSender(0, 0);
+		PacketFreeer pf1 = new PacketFreeer();
+		threads.add(new CaptureProcessor(ps1, pf1, rp1));
+		as.createAffinityThreads(threads);
+		as.dpdk_init_eal();
+		as.dpdk_create_mempool("mbufs", 16384, 0);
+		as.dpdk_check_ports();
+		as.dpdk_configure_dev(0, 1, 1);
+		as.dpdk_configure_rx_queue(0, 0);
+		as.dpdk_configure_tx_queue(0, 0);
+		as.dpdk_dev_start(0);
+		as.dpdk_check_ports_link_status();
+		as.dpdk_enable_pro();
+		as.start_native_stats();
+		as.startAll();		
+	}	
+}
+
+public class CaptureProcessor extends PacketProcessor {
+	PacketFreeer pf_ind;
+	ReceivePoller rp_ind;
+	
+	public CaptureProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp) {
+		super(ps, pf, rp);
+		pf_ind = pf;
+		rp_ind = rp;
+	}
+	
+	private boolean inspect(Packet currentPacket) {
+		pf_ind.freePacket(currentPacket);
+		return true;
+	}
+	
+	@Override
+	public void run() {
+		while (true) {
+			List<Packet> packets = rp_ind.getBurst();
+			for (Packet p : packets) {
+				inspect(p);
+			}
+		}
+	}
+}
+\end{lstlisting}
+
+The implementation in code \ref{lst:pktcap} is pretty much self explanatory, the with CaptureProcessor class simply retrieving packets, and iterating through them to free them straight away. The main method of the application basically initialises the ports, queues, threads and statistic collector.
+
+\subsubsection{Firewall}
+The firewall implementation extends on the packet capture application by actually processing the packets and forwarding them depending on rules. Firstly, each packets' headers are inspected, retrieving the source IP address and protocol type. Each of these are then checked against a set of rules combining the two together. If the checks are passes, the packet is then put on a queue waiting to be spent, otherwise the packet is dropped and freed from memory.
+
+The implementation only takes approximately 150 lines of Java code which includes reading from files for the rule sets, while the C implementation takes 350 lines. Again, this is because most of the standard error checking, packet handling and data access are abstracted away in the Java framework.
+
+Just like the packet capture application, only a processor class and starter class are required. The starter class is identical, but the processor class incorporates the rule checks into the packet inspection. It makes use of the direct memory access to the original packet struct from native memory and checks the data against the rules to check for the forwarding procedure.
 
 \end{document}

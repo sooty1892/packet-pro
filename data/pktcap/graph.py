@@ -24,22 +24,37 @@ y1024p = np.array([845390,845382,845352,845357,845381,
 y1024b = np.array([865674638,865661916,865633983,865644740,865662744,
 		865665152,865635530,865646164,865651146,865669514])
 
-y64p = y64p.sum() / 10
-y64b = y64b.sum() / 10
-y128p = y128p.sum() / 10
-y128b = y128b.sum() / 10
-y256p = y256p.sum() / 10
-y256b = y256b.sum() / 10
-y512p = y512p.sum() / 10
-y512b = y512b.sum() / 10
-y1024p = y1024p.sum() / 10
-y1024b = y1024b.sum() / 10
+y64p = y64p.sum() / 10000000.0
+y64b = y64b.sum() / 10000000000.0
+y128p = y128p.sum() / 10000000.0
+y128b = y128b.sum() / 10000000000.0
+y256p = y256p.sum() / 10000000.0
+y256b = y256b.sum() / 10000000000.0
+y512p = y512p.sum() / 10000000.0
+y512b = y512b.sum() / 10000000000.0
+y1024p = y1024p.sum() / 10000000.0
+y1024b = y1024b.sum() / 10000000000.0
 
-print(y64b)
-print(y128b)
-print(y256b)
-print(y512b)
-print(y1024b)
+index = np.arange(5)
+bar_width = 0.5
+
+chart = plt.bar([0,1,2,3,4], [y64p,y128p,y256p,y512p,y1024p], bar_width)
+
+#fig, ax = plt.subplots()
+#rects = ax.bar([1,2,3,4,5], [y64p,y128p,y256p,y512p,y1024p], width)
+
+plt.ylabel('packets per second (millions)')
+plt.xlabel('packet size (bytes)')
+plt.xticks(index + (bar_width/2), ["64", "128", "256", "512", "1024"])
+plt.yticks(np.arange(0, 15, 1))
+
+plt.show()
+
+# print(y64b)
+# print(y128b)
+# print(y256b)
+# print(y512b)
+# print(y1024b)
 
 # plt.plot(x, y64p, label="64 byte") 
 # plt.plot(x, y128p, label="128 byte")
@@ -67,15 +82,15 @@ print(y1024b)
 # plt.ylim(0, 2000)
 # plt.legend()
 
-fig, ax1 = plt.subplots()
-ax1.plot([y64b, y128b, y256b, y512b, y1024b])
-ax1.set_xlabel('dsf')
-ax1.set_ylabel('asd')
+# fig, ax1 = plt.subplots()
+# ax1.plot([y64b, y128b, y256b, y512b, y1024b])
+# ax1.set_xlabel('dsf')
+# ax1.set_ylabel('asd')
 
-ax2 = ax1.twinx()
-ax2.plot([y64p, y128p, y256p, y512p, y1024p])
-ax2.set_ylabel('asfsdd')
+# ax2 = ax1.twinx()
+# ax2.plot([y64p, y128p, y256p, y512p, y1024p])
+# ax2.set_ylabel('asfsdd')
 
 
-#plt.tight_layout()
-plt.show()
+# #plt.tight_layout()
+# plt.show()

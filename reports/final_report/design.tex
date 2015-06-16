@@ -33,7 +33,7 @@ There are a few frameworks which aim to solve the problem of mapping structs to 
 The JNA is a community developed framework which aims to abstract the JNI and native code away from developers who want to use native shared libraries. It uses its own data mapping between native and Java data types with automatic conversion of string and object to character arrays and structs. Although this framework provides much of the functionality within this project, it focusses on correctness and ease of use and therefore neglects performance.
 
 \paragraph*{Javolution}
-Javolution is similar to the JNA but focusses more on real-time performance witin Java. It provides a number of high performance utilities for this purpose while allowing access to native libraries. For this purpose, struct and union classes are created automatically for mapping between objects. Javolution provides the functionality reqruied for this project but it requires a lot initial set-up which can be heavy, especially for small applications like middleboxes.
+Javolution is similar to the JNA but focusses more on real-time performance within Java. It provides a number of high performance utilities for this purpose while allowing access to native libraries. For this purpose, struct and union classes are created automatically for mapping between objects. Javolution provides the functionality required for this project but it requires a lot initial set-up which can be heavy, especially for small applications like middleboxes.
 
 \paragraph*{Swig}
 Simplified Wrapper and Interface Generator(Swig) differs from JNA and Javolution simply because the framework only focusses on object and struct mapping. It abstracts all creation of objects, structs, access methods and memory allocation away from the user via an interface. Although very useful, it lacks performance when handling numerous objects in quick succession. 
@@ -65,7 +65,7 @@ Java doesn't allow multiple inheritance within its class declaration of casting.
 \paragraph*{Very fast serialization}
 The Java \textit{Serializable} abstraction is well known to be slow, which can be a major bottleneck in fast processing applications over a network. Even the \textit{Externalizable} functionality isn't much factor and that requires an class schema to be defined. However, custom serializing can be extremely fast using the Unsafe Class. Basically allocating memory and then putting/getting data from the memory requires little JVM usage and can be done with machine instructions.
 
-Obviously without proper precautions any of these actions can be dangerous and can result in crashing the full JVM. This is why the Unsafe class has a private constructor and calling the static Unsage.getUnsafe() will throw a security exception for untrusted code which is hard to bypass. Fortunately, Unsafe has its own instance called 'theUnsafe' which can be accessed by using Java reflection \todo{ref this}:
+Obviously without proper precautions any of these actions can be dangerous and can result in crashing the full JVM. This is why the Unsafe class has a private constructor and calling the static Unsage.getUnsafe() will throw a security exception for untrusted code which is hard to bypass. Fortunately, Unsafe has its own instance called 'theUnsafe' which can be accessed by using Java reflection:
 
 \begin{lstlisting}[language=Java, caption={Accessing Java Unsafe}, label=lst:java_unsafe]
 Field f = Unsafe.class.getDeclaredField("theUnsafe");
@@ -73,7 +73,7 @@ f.setAccessible(true);
 Unsafe unsafe = (Unsafe) f.get(null);
 \end{lstlisting}
 
-Using Unsafe then allows direct native memory access (off heap) to retrieve data in any of the primitive data formats. Custom objects with a set structure can then be created, accessed and altered using Unsafe which provides a vast increase in performance over traditional objects stored on the heap. This is mainly thanks to the JIT compiler which can use machine code more efficiently by inlining certain memory access directly with assembly code. This also removes the need for copying of data between memory locations, structs and objects, therefore meaning it is zero-copy.
+Using Unsafe then allows direct native memory access (off heap) to retrieve data in any of the primitive data formats. Custom objects with a set structure can then be created, accessed and altered using Unsafe which provides a vast increase in performance over traditional objects stored on the heap. This is mainly thanks to the JIT compiler which can use machine code more efficiently by in-lining certain memory access directly with assembly code. This also removes the need for copying of data between memory locations, structs and objects, therefore meaning it is zero-copy.
 
 \subsection{Packing Structures}
 Structures (structs) are a way of defining complex data into a grouped set in order to make this data easier to access and reference as shown in Code \ref{lst:c_struct}. They are heavily used with C applications and can be seen as Java object without the associated methods.
@@ -88,12 +88,12 @@ struct example {
 };
 \end{lstlisting}
 
-On modern processors all commercially available C compilers will arrange basic C datatypes in a constrained order to make memory access faster. This has 2 effects on the program. Firstly, all structs will actually have a memory size larger than the combined size of the datatypes in the struct as a result of padding. However, this generally is a benefit to most consumers as this memory alignment results in a faster performance when accessing the data.
+On modern processors all commercially available C compilers will arrange basic C data types in a constrained order to make memory access faster. This has 2 effects on the program. Firstly, all structs will actually have a memory size larger than the combined size of the data types in the struct as a result of padding. However, this generally is a benefit to most consumers as this memory alignment results in a faster performance when accessing the data.
 
 \todo[inline]{Explain why it has faster performance}
 \todo[inline]{Nested padding in struct?}
 \todo[inline]{C struct field always in given order}
-\todo[inline]{Inconsistencies with datatype length so using uint32t etc}
+\todo[inline]{Inconsistencies with data type length so using uint32t etc}
 
 Code \ref{lst:c_padded_struct} shows a struct which has compiler inserted padding. Any user wouldn't know the padding was there and wouldn't be able to access the data in the bits of the padding through conventional C dereferencing paradigm (only via pointer arithmetic). This example does assume use on a 64-bit machine with 8 byte alignment, but 32-bit machines or a different compiler may have different alignment rules.
 
@@ -151,13 +151,13 @@ int main ()
 }
 \end{lstlisting}
 
-On an x86 system (which does not enforce memory access alignment), this will give y=2 and *py=2 which is as expected. Conversely, other systems using the SPARC architecure or similar will give y=2 and *py=1 which isn't what the user would expect.
+On an x86 system (which does not enforce memory access alignment), this will give y=2 and *py=2 which is as expected. Conversely, other systems using the SPARC architecture or similar will give y=2 and *py=1 which isn't what the user would expect.
 
 However, since a packed struct is much easier to traverse from Java than a padded struct, the decision was made to make certain structs packed within the DPDK framework and then recompile the libraries. This decision could be made since other structs within the DPDK framework were also packed and therefore consideration of this was already made.
 
 Note that if a struct contains another struct, that struct should be packed recursively as-well to ensure the first struct has no padding at all.
 
-Char doesn't have alignment and can start on any address. But 2-byte shorts must start on an even address, 4-byte ints or floats must start on an address divisible by 4, and 8-byte longs or doubles must start on an address divisible by 8. Signed or unsigned makes no difference.
+Char doesn't have alignment and can start on any address. But 2-byte shorts must start on an even address, 4-byte integers or floats must start on an address divisible by 4, and 8-byte longs or doubles must start on an address divisible by 8. Signed or unsigned makes no difference.
 
 Self-alignment makes access faster because it facilitates generating single-instruction fetches and puts of the typed data. Without alignment constraints, on the other hand, the code might end up having to do two or more accesses spanning machine-word boundaries. Characters are a special case; they're equally expensive from anywhere they live inside a single machine word. That's why they don't have a preferred alignment.
 
@@ -204,7 +204,7 @@ To save the data back into the original struct, the data was copied from the pac
 \paragraph*{Unsafe}
 Using the Unsafe class allows for direct access to members of the struct. To take account for this this technique first allocates off heap memory for the pointer to the struct to be stored. This pointer is put into the memory location natively and accessed via Unsafe methods. From this, data can be accessed directly from the struct and input to a new packet object for later use. New data is then set in the object.
 
-To set the data in the struct, the data is removed from the object and directly put into the struct. This is done using the pointer and the correct byte offsets depending on the previous data type inputted.
+To set the data in the struct, the data is removed from the object and directly put into the struct. This is done using the pointer and the correct byte offsets depending on the previous data type entered.
 
 \paragraph*{Direct}
 Direct accessing relates to not storing the struct members in Java at all. Instead a different type of Packet object is used which just stores pointers to the struct. From there any accessing and setting of data is simply done using the Unsafe class to directly get or set the values within the struct. This different packet object also contains offset information for the struct so the correct values are accessed.
@@ -288,7 +288,7 @@ Since the Java standard library does not provide functionality for affinity thre
 
 For the implementation of affinity threads, a few further considerations need to be undertaken concerning the assignment of cores depending on the number of sockets. If there is only 1 processor socket, there is no problem, but when there are multiple sockets consideration about the thread layout on the sockets becomes vital.
 
-Figure \ref{fig:aff} shows potential layouts for threads. Compact scheduling (figure \ref{fig:aff1}) is primarily used when threads are sharing data and therefore accessing the same NUMA memory, as accessing data between sockets is relatively slow. Round robin scheduling (figure \ref{fig:aff2}) benefits from quicker memory access as its shared between fewer active cores. This can lead to increased performance but only works of the threads are independant of each other. For consideration needs to be taken into account for the socket layout of the NICs, as threads should be accessing queues on the same memory socket to increase performance.
+Figure \ref{fig:aff} shows potential layouts for threads. Compact scheduling (figure \ref{fig:aff1}) is primarily used when threads are sharing data and therefore accessing the same NUMA memory, as accessing data between sockets is relatively slow. Round robin scheduling (figure \ref{fig:aff2}) benefits from quicker memory access as its shared between fewer active cores. This can lead to increased performance but only works of the threads are independent of each other. For consideration needs to be taken into account for the socket layout of the NICs, as threads should be accessing queues on the same memory socket to increase performance.
 
 \subsection{Endianness}
 This describes the order in which bytes of data types are stored in memory relative to pointers. In big-endian systems, the most significant bytes are stored at the pointer with every successive data bytes stored in successive memory locations. Conversely, in little-endian systems, the least significant byte is stored at the pointer. There is no advantage or disadvantage to either endian types, its simply a matter on convention for certain systems. Figure \ref{fig:endian} shows how different endian systems store the value of the hexadecimal value \textit{0x0A0B0C0D}. 
@@ -314,9 +314,26 @@ Conversion from Java to C then could then result in an underflow error if a valu
 \todo{get a table of this}
 
 \subsection{Protocol undertaking}
+There are numerous protocols which need implementation in order to handle a full range of network traffic. However, since this report primarily focusses on the implementation and testing of basic middleboxes, many of these protocols will be neglected.
 
-just IP (4 and ) supporting udp and tcp (i think), no ARP etc
+Only the layer 3 Internet Protocol (IP) will be supported and consequently so will the IPv4 and IPv6 packet headers. The User Datagram Protocol (UDP) and the transmission control protocol (TCP) for the 4th layer of the IP stack with be supported in terms packet checking for these headers. Actual inspection of the headers and the data will not be supported.
 
-\subsection{config files}
+Furthermore, even though Address Resolution Protocol (ARP) is a fundamental part of the stack for Ethernet connection, this will not be supported and therefore RARP requests won't be either. By only taking a small subset of the available protocols it allows more focus to be aimed at the techniques of the implementation rather than the less interesting repetitive coding.
+
+\subsection{Configuration Files}
+DPDK takes a large number of user defined flags and values when starting the application via the command line to set up the EAL correctly. These flags can be further extended by the application to have their own specific variables. This can results in a lengthy start-up command which isn't easy to change on the fly.
+
+For this reason, the implementation will use a different style of user defined variables. A 'properties' configuration file will instead be used to simply the application start-up allowing for configuration to be swapped in and out when required. These variables are as follows:
+
+\begin{itemize}
+	\item rxburst - The number of packets to request from the queue of a NIC. Values less than this can be returned if not enough packets are stored on the specific receive queue.
+	\item txburst - The number of packets to store before transmitting a burst of packets at 1 time which increases overall performance. A time-out period is also used in the case of small traffic flow.
+	\item freeburst - The number of packets to store before freeing them all.
+	\item memorychannels - The number of memory channels for the application to use. The larger the number the more efficient the memory access but this depends on the available memory at run-time.
+	\item programid - The program identification to be used if multiple DPDK applications are running on the same machine.
+	\item programname - The name of the program used for debugging and information purposes.
+	\item memory - The amount of huge page memory to assign on application start-up.
+	\item blacklist - A list of Ethernet ports, separated by commas, which won't be counted as active ports on EAL initialisation.
+\end{itemize}
 
 \end{document}

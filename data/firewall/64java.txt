@@ -1,0 +1,21 @@
+Bytes: 322437145
+Bytes: 321513522
+Bytes: 322613341
+Bytes: 310798381
+Bytes: 294293688
+Bytes: 303284224
+Bytes: 322017395
+Bytes: 322502656
+Bytes: 322420736
+Bytes: 321638444
+
+Packets: 5038080
+Packets: 5023648
+Packets: 5040832
+Packets: 4856224
+Packets: 4598336
+Packets: 4738816
+Packets: 5031520
+Packets: 5039104
+Packets: 5037824
+Packets: 5025600
