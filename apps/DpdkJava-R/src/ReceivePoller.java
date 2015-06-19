@@ -54,11 +54,11 @@ public class ReceivePoller {
 	// gets burst of packets and create packet objects via dpdk library
 	// also contains stats data collection
 	public PacketList getBurst() {
-		long temp = mem_pointer;
+		//long temp = mem_pointer;
 
-		DpdkAccess.dpdk_receive_burst(temp, port_id, queue_id);
+		DpdkAccess.dpdk_receive_burst(mem_pointer, port_id, queue_id);
 		
-		ua.setCurrentPointer(temp);
+		ua.setCurrentPointer(mem_pointer);
 		
 		int packet_count = ua.getShort();
 		//packet_all += packet_count; 

@@ -39,6 +39,10 @@ public class PacketList implements Iterable<Packet> {
 		
 		int current = 0;
 		long offset = startPointer;
+		
+		public PacketIterator() {
+			ua.setCurrentPointer(startPointer);
+		}
 
 		@Override
 		public boolean hasNext() {
@@ -47,10 +51,8 @@ public class PacketList implements Iterable<Packet> {
 
 		@Override
 		public Packet next() {
-			returnedPacket.setMbuf_pointer(offset);
-			offset += LONG_SIZE;
-			returnedPacket.setPacket_pointer(offset);
-			offset += LONG_SIZE;
+			returnedPacket.setMbuf_pointer(ua.getLong());
+			returnedPacket.setPacket_pointer(ua.getLong());
 			current++;
 			return returnedPacket;
 		}
