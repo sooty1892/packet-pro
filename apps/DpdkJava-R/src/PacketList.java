@@ -7,18 +7,21 @@ public class PacketList implements Iterable<Packet> {
 	private long startPointer;
 	private Packet returnedPacket;
 	private int size;
-	private UnsafeAccess ua;
+	private UnsafeAccess ua_packet;
+	private UnsafeAccess ua_list;
 	
 	public PacketList() {
-		ua = new UnsafeAccess();
-		returnedPacket = new Ipv4Packet(0, 0, ua);
+		ua_packet = new UnsafeAccess();
+		ua_list = new UnsafeAccess();
+		returnedPacket = new Ipv4Packet(0, 0, ua_packet);
 	}
 
 	public PacketList(short size, long startPointer) {
 		this.startPointer = startPointer;
 		this.size = size;
-		ua = new UnsafeAccess();
-		returnedPacket = new Ipv4Packet(0, 0, ua);
+		ua_packet = new UnsafeAccess();
+		ua_list = new UnsafeAccess();
+		returnedPacket = new Ipv4Packet(0, 0, ua_packet);
 	}
 	
 	public void reset(int size, long startPointer) {
@@ -38,10 +41,9 @@ public class PacketList implements Iterable<Packet> {
 	private class PacketIterator implements Iterator<Packet> {
 		
 		int current = 0;
-		long offset = startPointer;
 		
 		public PacketIterator() {
-			ua.setCurrentPointer(startPointer);
+			ua_list.setCurrentPointer(startPointer);
 		}
 
 		@Override
@@ -51,8 +53,8 @@ public class PacketList implements Iterable<Packet> {
 
 		@Override
 		public Packet next() {
-			returnedPacket.setMbuf_pointer(ua.getLong());
-			returnedPacket.setPacket_pointer(ua.getLong());
+			returnedPacket.setMbuf_pointer(ua_list.getLong());
+			returnedPacket.setPacket_pointer(ua_list.getLong());
 			current++;
 			return returnedPacket;
 		}
