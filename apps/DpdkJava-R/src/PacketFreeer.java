@@ -11,10 +11,12 @@ public class PacketFreeer {
 	
 	int free_burst;
 	
-	int current_count;
+	//int current_count;
 	
-	long start_pointer;
-	long mbuf_pointer;
+	//long start_pointer;
+	//long mbuf_pointer;
+	
+	private PacketListCreate list;
 	
 	private static final int DEFAULT_FREE_BURST = 32;
 	private static final long MILLI_SECOND = 1000;
@@ -24,18 +26,19 @@ public class PacketFreeer {
 		ua = new UnsafeAccess();
 		past_freed = System.currentTimeMillis();
 		free_burst = DEFAULT_FREE_BURST;
-		current_count = 0;
-		start_pointer = ua.allocateMemory((ua.longSize()*free_burst)+2);
-		mbuf_pointer = start_pointer + 2;
+		//current_count = 0;
+		//start_pointer = ua.allocateMemory((ua.longSize()*free_burst)+2);
+		//mbuf_pointer = start_pointer + 2;
+		list = new PacketListCreate(free_burst);
 	}
 	
 	public int getFreeBurst() {
 		return free_burst;
 	}
 	
-	public void setFreeBurst(int free_burst) {
+	/*public void setFreeBurst(int free_burst) {
 		this.free_burst = free_burst;
-	}
+	}*/
 	
 	// checks if the given time period has occurred since last packet freeing
 	// used so packets are held in memory for too long for no reason
@@ -46,10 +49,8 @@ public class PacketFreeer {
 	// packet added to free list and checks made for
 	// timeout period and list size
 	public void freePacket(Packet p) {
-		ua.setCurrentPointer(mbuf_pointer + (ua.longSize() * current_count));
-		ua.putLong(p.getMbuf_pointer());
-		current_count += 1;
-		if (current_count >= free_burst || isTimedOut()) {
+		list.add(p);
+		if (list.size() == free_burst || isTimedOut()) {
 			freeBurst();
 			past_freed = System.currentTimeMillis();
 		}
@@ -61,20 +62,23 @@ public class PacketFreeer {
 	
 	// frees burst of packets via dpdk library
 	private void freeBurst() {
-		int num = 0;
-		if (current_count > free_burst) {
-			num = free_burst;
-		} else {
-			num = current_count;
-		}
-
-		ua.setCurrentPointer(start_pointer);
+//		int num = 0;
+//		if (current_count > free_burst) {
+//			num = free_burst;
+//		} else {
+//			num = current_count;
+//		}
+//
+//		ua.setCurrentPointer(start_pointer);
+//		
+//		ua.putShort(num);
+//		
+//		DpdkAccess.dpdk_free_packets(start_pointer);
+//		
+//		current_count -= num;
 		
-		ua.putShort(num);
-		
-		DpdkAccess.dpdk_free_packets(start_pointer);
-		
-		current_count -= num;
+		DpdkAccess.dpdk_free_packets(list.getNativePointer());
+		list.reset();
 		
 	}
 

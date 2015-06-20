@@ -2,8 +2,6 @@ import java.util.Iterator;
 
 public class PacketList implements Iterable<Packet> {
 	
-	private static final int LONG_SIZE = 8;
-	
 	private long startPointer;
 	private Packet returnedPacket;
 	private int size;
@@ -27,10 +25,6 @@ public class PacketList implements Iterable<Packet> {
 	public void reset(int size, long startPointer) {
 		this.size = size;
 		this.startPointer = startPointer;
-	}
-	
-	public int getSize() {
-		return size;
 	}
 
 	@Override
@@ -69,6 +63,14 @@ public class PacketList implements Iterable<Packet> {
 			}
 		}
 		
+	}
+
+	public int size() {
+		return size;
+	}
+
+	public boolean isEmpty() {
+		return size == 0;
 	}
 	
 	
