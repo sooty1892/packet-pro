@@ -45,7 +45,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1dev
  * Signature: (II)I
  */
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue
-  (JNIEnv *, jclass, jint, jint);
+  (JNIEnv *, jclass, jint, jint, jint);
 
 /*
  * Class:     DpdkAccess
@@ -53,7 +53,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue
  * Signature: (II)I
  */
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue
-  (JNIEnv *, jclass, jint, jint);
+  (JNIEnv *, jclass, jint, jint, jint);
 
 /*
  * Class:     DpdkAccess

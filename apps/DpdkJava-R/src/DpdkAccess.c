@@ -172,9 +172,9 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1dev(JNIEnv __attribute__ 
 	return SUCCESS;
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jint port_id, jint rx_id) {
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jint port_id, jint rx_id, jint socket_id) {
 	int ret = rte_eth_rx_queue_setup(port_id, rx_id, 2048,
-								socketid,
+								socket_id,
 								&rx_conf, pktmbuf_pool);
 	if (ret < 0) {
 		return ERROR;
@@ -182,8 +182,8 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue(JNIEnv __attrib
 	return SUCCESS;
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jint port_id, jint tx_id) {
-	int ret = rte_eth_tx_queue_setup(port_id, tx_id, 2048, socketid, &tx_conf);
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jint port_id, jint tx_id, jint socket_id) {
+	int ret = rte_eth_tx_queue_setup(port_id, tx_id, 2048, socket_id, &tx_conf);
 	if (ret < 0) {
 		return ERROR;
 	}

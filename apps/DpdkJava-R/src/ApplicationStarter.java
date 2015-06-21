@@ -131,8 +131,8 @@ public class ApplicationStarter {
 	}
 	
 	// configure rx queue for device
-	public void dpdk_configure_rx_queue(int port_id, int rx_id) {
-		if (DpdkAccess.dpdk_configure_rx_queue(port_id, rx_id) < 0) {
+	public void dpdk_configure_rx_queue(int port_id, int rx_id, int socket_id) {
+		if (DpdkAccess.dpdk_configure_rx_queue(port_id, rx_id, socket_id) < 0) {
 			System.out.println("-----dpdk_configure_rx_queue failed");
 			working = false;
 		} else {
@@ -141,8 +141,8 @@ public class ApplicationStarter {
 	}
 	
 	// configure tx queue for device
-	public void dpdk_configure_tx_queue(int port_id, int tx_id) {
-		if (DpdkAccess.dpdk_configure_tx_queue(port_id, tx_id) < 0) {
+	public void dpdk_configure_tx_queue(int port_id, int tx_id, int socket_id) {
+		if (DpdkAccess.dpdk_configure_tx_queue(port_id, tx_id, socket_id) < 0) {
 			System.out.println("-----dpdk_configure_tx_queue failed");
 			working = false;
 		} else {

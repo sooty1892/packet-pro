@@ -48,10 +48,10 @@ public class Firewall {
 		as.dpdk_create_mempool("mbufs", 8192*4, 32, 1);
 		as.dpdk_check_ports();
 		as.dpdk_configure_dev(0, 2, 2);
-		as.dpdk_configure_rx_queue(0, 0);
-		as.dpdk_configure_tx_queue(0, 0);
-		as.dpdk_configure_rx_queue(0, 1);
-		as.dpdk_configure_tx_queue(0, 1);
+		as.dpdk_configure_rx_queue(0, 0, 1);
+		as.dpdk_configure_tx_queue(0, 0, 1);
+		as.dpdk_configure_rx_queue(0, 1, 1);
+		as.dpdk_configure_tx_queue(0, 1, 1);
 		as.dpdk_dev_start(0);
 		as.dpdk_check_ports_link_status();
 		

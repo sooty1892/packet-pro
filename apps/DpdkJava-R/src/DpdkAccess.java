@@ -6,8 +6,8 @@ public class DpdkAccess {
 	private static native int nat_create_mempool(String name, int num_el, int cache_size, int socket_id);
 	private static native int nat_check_ports();
 	private static native int nat_configure_dev(int port_id, int rx_num, int tx_num);
-	private static native int nat_configure_rx_queue(int port_id, int rx_id);
-	private static native int nat_configure_tx_queue(int port_id, int tx_id);
+	private static native int nat_configure_rx_queue(int port_id, int rx_id, int socket_id);
+	private static native int nat_configure_tx_queue(int port_id, int tx_id, int socked_id);
 	private static native int nat_dev_start(int port_id);
 	private static native String nat_check_ports_link_status();
 
@@ -58,12 +58,12 @@ public class DpdkAccess {
 		return nat_configure_dev(port_id, rx_num, tx_num);
 	}
 	
-	public static int dpdk_configure_rx_queue(int port_id, int rx_id) {
-		return nat_configure_rx_queue(port_id, rx_id);
+	public static int dpdk_configure_rx_queue(int port_id, int rx_id, int socket_id) {
+		return nat_configure_rx_queue(port_id, rx_id, socket_id);
 	}
 	
-	public static int dpdk_configure_tx_queue(int port_id, int tx_id) {
-		return nat_configure_tx_queue(port_id, tx_id);
+	public static int dpdk_configure_tx_queue(int port_id, int tx_id, int socked_id) {
+		return nat_configure_tx_queue(port_id, tx_id, socked_id);
 	}
 	
 	public static int dpdk_dev_start(int port_id) {
