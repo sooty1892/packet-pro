@@ -23,7 +23,7 @@ public class PacketSender {
 	
 	private PacketListCreate list;
 	
-	private static final int DEFAULT_SEND_BURST = 32;
+	private static final int DEFAULT_SEND_BURST = 16;
 	private static final long MILLI_SECOND = 1000;
 	private static final int SHORT_SIZE = 2;
 	
@@ -60,9 +60,10 @@ public class PacketSender {
 	// timeout period and list size
 	public void sendPacket(Packet p) {
 		list.add(p);
-		if (list.size() >= send_burst || isTimedOut()) {
+		//if (list.size() >= send_burst || isTimedOut()) {
+		if (list.size() == send_burst) {
 			sendBurst();
-			past_sent = System.currentTimeMillis();
+			//past_sent = System.currentTimeMillis();
 		}
 	}
 	

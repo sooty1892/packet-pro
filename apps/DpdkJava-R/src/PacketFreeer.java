@@ -18,7 +18,7 @@ public class PacketFreeer {
 	
 	private PacketListCreate list;
 	
-	private static final int DEFAULT_FREE_BURST = 32;
+	private static final int DEFAULT_FREE_BURST = 16;
 	private static final long MILLI_SECOND = 1000;
 	private static final int SHORT_SIZE = 2;
 	
@@ -50,9 +50,10 @@ public class PacketFreeer {
 	// timeout period and list size
 	public void freePacket(Packet p) {
 		list.add(p);
-		if (list.size() == free_burst || isTimedOut()) {
+		//if (list.size() == free_burst || isTimedOut()) {
+		if (list.size() == free_burst) {
 			freeBurst();
-			past_freed = System.currentTimeMillis();
+			//past_freed = System.currentTimeMillis();
 		}
 //	/	ua.setCurrentPointer(start_pointer);	
 //		ua.putShort(1);
