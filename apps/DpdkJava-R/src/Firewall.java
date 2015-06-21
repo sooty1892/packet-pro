@@ -23,7 +23,7 @@ public class Firewall {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			//System.exit(-1);
-		}
+			}
 		
 		as.sendDPDKInformation();
 		
@@ -47,7 +47,7 @@ public class Firewall {
 		as.dpdk_init_eal();
 		as.dpdk_create_mempool("mbufs", 8192*4, 32);
 		as.dpdk_check_ports();
-		as.dpdk_configure_dev(0, 1, 1);
+		as.dpdk_configure_dev(0, 2, 2);
 		as.dpdk_configure_rx_queue(0, 0);
 		as.dpdk_configure_tx_queue(0, 0);
 		as.dpdk_configure_rx_queue(0, 1);

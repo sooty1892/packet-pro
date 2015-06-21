@@ -24,7 +24,7 @@ public class ReceivePoller {
 	long mem_pointer;
 	int memory_size;
 	
-	private static final int DEFAULT_GET_SIZE = 32;
+	private static final int DEFAULT_GET_SIZE = 512;
 
 	public ReceivePoller(int port_id, int queue_id) {
 		ua = new UnsafeAccess();

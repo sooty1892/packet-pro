@@ -298,11 +298,11 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1blacklist(JNIEnv *env, jclass _
 }
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jlong mem_pointer, jint port_id, jint rx_id) {
-	struct rte_mbuf *pkts_burst[128];
+	struct rte_mbuf *pkts_burst[512];
 
 	int offset = 0;
 
-	int nb_rx = rte_eth_rx_burst(port_id, rx_id, pkts_burst, get_burst);
+	int nb_rx = rte_eth_rx_burst(port_id, rx_id, pkts_burst, 512);
 
 	uint16_t packet_count = (uint16_t)nb_rx;
 	uint8_t *point = (uint8_t*)mem_pointer;
@@ -468,7 +468,7 @@ void do_stats(void) {
     pre_ipackets = stats.ipackets;
     uint64_t diff_missed = stats.imissed - pre_imissed;
     pre_imissed = stats.imissed;
-    uint64_t diff_errors = stats.ierrors - pre_ierrors;
+//    uint64_t diff_errors = stats.ierrors - pre_ierrors;
     pre_ierrors = stats.ierrors;
     uint64_t diff_opackets = stats.opackets - pre_opackets;
     pre_opackets = stats.opackets;
@@ -476,8 +476,8 @@ void do_stats(void) {
     printf("Bytes: %lu\n", diff_bytes);
     printf("Packets: %lu\n", diff_packets);
     printf("Missed: %lu\n", diff_missed);
-    printf("Errors: %lu\n", diff_errors);
-    printf("Sent: %lu\n", diff_opackets);
+//    printf("Errors: %lu\n", diff_errors);
+    printf("Sent: %lu\n\n", diff_opackets);
     fflush(stdout);
 }
 
