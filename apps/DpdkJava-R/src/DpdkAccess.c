@@ -53,10 +53,6 @@
 #define SUCCESS 1
 #define MBUF_SIZE (2048 + sizeof(struct rte_mbuf) + RTE_PKTMBUF_HEADROOM)
 
-
-#define CHECK_INTERVAL 100 /* 100ms */
-#define MAX_CHECK_TIME 90 /* 9s (90 * 100ms) in total */
-
 struct rte_mempool *pktmbuf_pool = NULL;
 
 int num_ports;
@@ -136,13 +132,8 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal(JNIEnv __attribute__ ((unu
 	}
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1create_1mempool(JNIEnv *env, jclass __attribute__ ((unused)) class, jstring name, jint num_el, jint cache_size) {
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1create_1mempool(JNIEnv *env, jclass __attribute__ ((unused)) class, jstring name, jint num_el, jint cache_size, jint socket_id) {
 	const char *n = (*env)->GetStringUTFChars(env, name, 0);
-
-	// ID of the execution unit we are running on
-	unsigned cpu = rte_lcore_id();
-	// Get the ID of the physical socket of the specified lcore
-	socketid = rte_lcore_to_socket_id(cpu);
 
 	pktmbuf_pool = rte_mempool_create(
 						n, //name of mempool
@@ -154,7 +145,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1create_1mempool(JNIEnv *env, jclass 
 						NULL,
 						rte_pktmbuf_init,
 						NULL,
-						socketid,
+						socket_id,
 						0);
 	if (pktmbuf_pool == NULL) {
 		return ERROR;
@@ -377,7 +368,7 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv __attribute__ (
 	}*/
 }
 
-JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jint core, jint __attribute__ ((unused)) avail) {
+JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jint core) {
 
 	cpu_set_t cpuset;
 

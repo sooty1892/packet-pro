@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /*
@@ -19,8 +18,8 @@ public class FirewallProcessor extends PacketProcessor {
 	ReceivePoller rp_ind;
 	PacketSender ps_ind;
 	
-	public FirewallProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp) {
-		super(ps, pf, rp);
+	public FirewallProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp, int core) {
+		super(ps, pf, rp, core);
 		blacklist = new HashSet<Long>();
 		readBlacklist();
 		//printBlacklist();
@@ -29,8 +28,8 @@ public class FirewallProcessor extends PacketProcessor {
 		ps_ind = ps;
 	}
 	
-	public FirewallProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp, String name) {
-		super(ps, pf, rp, name);
+	public FirewallProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp, String name, int core) {
+		super(ps, pf, rp, name, core);
 		blacklist = new HashSet<Long>();
 		readBlacklist();
 		//printBlacklist();
@@ -96,13 +95,7 @@ public class FirewallProcessor extends PacketProcessor {
 	public void run() {
 		while (true) {
 			PacketList packets = rp_ind.getBurst();
-		/*	if (packets == null) {
-				System.out.println(this.getName() + " - 0");
-			} else {
-				System.out.println(this.getName() + " - " + packets.size());
-			} */
 			if (packets != null) {
-//			System.out.println(this.getName() + " GOT " + packets.size());
 				for (Packet p : packets) {
 					inspect(p);
 				}

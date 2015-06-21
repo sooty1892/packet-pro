@@ -11,8 +11,8 @@ public abstract class PacketProcessor extends CoreThread {
 	List<PacketFreeer> pf;
 	List<ReceivePoller> rp;
 	
-	public PacketProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp, String name) {
-		super(name);
+	public PacketProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp, String name, int core) {
+		super(core, name);
 		this.ps = new ArrayList<PacketSender>();
 		this.pf = new ArrayList<PacketFreeer>();
 		this.rp = new ArrayList<ReceivePoller>();
@@ -21,22 +21,22 @@ public abstract class PacketProcessor extends CoreThread {
 		this.rp.add(rp);
 	}
 	
-	public PacketProcessor(String name) {
-		super(name);
+	public PacketProcessor(String name, int core) {
+		super(core, name);
 		this.ps = new ArrayList<PacketSender>();
 		this.pf = new ArrayList<PacketFreeer>();
 		this.rp = new ArrayList<ReceivePoller>();
 	}
 	
-	public PacketProcessor(List<PacketSender> ps, List<PacketFreeer> pf, List<ReceivePoller> rp, String name) {
-		super(name);
+	public PacketProcessor(List<PacketSender> ps, List<PacketFreeer> pf, List<ReceivePoller> rp, String name, int core) {
+		super(core, name);
 		this.ps = ps;
 		this.pf = pf;
 		this.rp = rp;
 	}
 	
-	public PacketProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp) {
-		super();
+	public PacketProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp, int core) {
+		super(core);
 		this.ps = new ArrayList<PacketSender>();
 		this.pf = new ArrayList<PacketFreeer>();
 		this.rp = new ArrayList<ReceivePoller>();
@@ -45,15 +45,15 @@ public abstract class PacketProcessor extends CoreThread {
 		this.rp.add(rp);
 	}
 	
-	public PacketProcessor() {
-		super();
+	public PacketProcessor(int core) {
+		super(core);
 		this.ps = new ArrayList<PacketSender>();
 		this.pf = new ArrayList<PacketFreeer>();
 		this.rp = new ArrayList<ReceivePoller>();
 	}
 	
-	public PacketProcessor(List<PacketSender> ps, List<PacketFreeer> pf, List<ReceivePoller> rp) {
-		super();
+	public PacketProcessor(List<PacketSender> ps, List<PacketFreeer> pf, List<ReceivePoller> rp, int core) {
+		super(core);
 		this.ps = ps;
 		this.pf = pf;
 		this.rp = rp;
