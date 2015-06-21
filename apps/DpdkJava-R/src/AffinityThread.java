@@ -19,6 +19,12 @@ public class AffinityThread extends Thread {
 		this.avail = avail;
 	}
 	
+	public AffinityThread(Runnable r, String name, int core, int avail) {
+		super(r, name);
+		worked = DpdkAccess.set_thread_affinity(core, avail) == SUCCESS;
+		this.avail = avail;
+	}
+	
 	/*
 	 * core: core value to run thread on (eg. 1 to run on 2nd core)
 	 */

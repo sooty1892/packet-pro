@@ -11,7 +11,32 @@ public abstract class PacketProcessor extends CoreThread {
 	List<PacketFreeer> pf;
 	List<ReceivePoller> rp;
 	
+	public PacketProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp, String name) {
+		super(name);
+		this.ps = new ArrayList<PacketSender>();
+		this.pf = new ArrayList<PacketFreeer>();
+		this.rp = new ArrayList<ReceivePoller>();
+		this.ps.add(ps);
+		this.pf.add(pf);
+		this.rp.add(rp);
+	}
+	
+	public PacketProcessor(String name) {
+		super(name);
+		this.ps = new ArrayList<PacketSender>();
+		this.pf = new ArrayList<PacketFreeer>();
+		this.rp = new ArrayList<ReceivePoller>();
+	}
+	
+	public PacketProcessor(List<PacketSender> ps, List<PacketFreeer> pf, List<ReceivePoller> rp, String name) {
+		super(name);
+		this.ps = ps;
+		this.pf = pf;
+		this.rp = rp;
+	}
+	
 	public PacketProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp) {
+		super();
 		this.ps = new ArrayList<PacketSender>();
 		this.pf = new ArrayList<PacketFreeer>();
 		this.rp = new ArrayList<ReceivePoller>();
@@ -21,12 +46,14 @@ public abstract class PacketProcessor extends CoreThread {
 	}
 	
 	public PacketProcessor() {
+		super();
 		this.ps = new ArrayList<PacketSender>();
 		this.pf = new ArrayList<PacketFreeer>();
 		this.rp = new ArrayList<ReceivePoller>();
 	}
 	
 	public PacketProcessor(List<PacketSender> ps, List<PacketFreeer> pf, List<ReceivePoller> rp) {
+		super();
 		this.ps = ps;
 		this.pf = pf;
 		this.rp = rp;

@@ -56,7 +56,7 @@ public class ApplicationStarter {
 		}
 		int core = 1;
 		for (CoreThread ct : threads) {
-			AffinityThread af = new AffinityThread(ct, core, num_available_cores);
+			AffinityThread af = new AffinityThread(ct, ct.getName(), core, num_available_cores);
 			if (!af.ifWorked()) {
 				System.out.println("-----Affinity thread creation failed on core assignment");
 				working = false;

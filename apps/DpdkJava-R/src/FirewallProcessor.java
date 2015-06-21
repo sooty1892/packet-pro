@@ -28,6 +28,16 @@ public class FirewallProcessor extends PacketProcessor {
 		rp_ind = rp;
 		ps_ind = ps;
 	}
+	
+	public FirewallProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp, String name) {
+		super(ps, pf, rp, name);
+		blacklist = new HashSet<Long>();
+		readBlacklist();
+		//printBlacklist();
+		pf_ind = pf;
+		rp_ind = rp;
+		ps_ind = ps;
+	}
 
 	private boolean inspect(Packet currentPacket) {
 		int version = currentPacket.whichIP();
@@ -87,6 +97,7 @@ public class FirewallProcessor extends PacketProcessor {
 		while (true) {
 			PacketList packets = rp_ind.getBurst();
 			if (packets != null) {
+				System.out.println(this.getName() + " GOT " + packets.size());
 				for (Packet p : packets) {
 					inspect(p);
 				}
