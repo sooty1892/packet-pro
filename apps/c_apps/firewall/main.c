@@ -27,9 +27,9 @@
 
 #define MAX_PKT_SIZE (2*1024 + sizeof(struct rte_mbuf) + RTE_PKTMBUF_HEADROOM)
 
-#define NB_RX_QUEUE 1
+#define NB_RX_QUEUE 2
 
-#define NB_TX_QUEUE 1
+#define NB_TX_QUEUE 2
 
 #define	NB_RX_DESC 256
 
@@ -48,12 +48,12 @@ static struct rte_eth_conf eth_conf = {
         .jumbo_frame = 0,
         .hw_strip_crc = 0, 
     }, 
-    .rx_adv_conf = {
+/*    .rx_adv_conf = {
         .rss_conf = {
             .rss_key = NULL,
             .rss_hf = ETH_RSS_IP,
         },
-    },
+    },*/
     .txmode = { 
         .mq_mode = ETH_MQ_TX_NONE, 
     }, 
@@ -160,8 +160,11 @@ int main_loop(__attribute__ ((unused)) void *arg) {
     int recv_cnt, i, ifidx = 0;
     struct ipv4_hdr *iphdr;
     struct rte_mbuf *m;
+    int id = rte_lcore_id();
+    printf("Core %i starting\n", id);
+    fflush(stdout);
     while(1) {
-        recv_cnt = rte_eth_rx_burst(ifidx, 0, rx_mbufs, MAX_PKT_BURST);
+        recv_cnt = rte_eth_rx_burst(ifidx, id-1, rx_mbufs, MAX_PKT_BURST);
         if (recv_cnt < 0) {
             if (errno != EAGAIN && errno != EINTR) {
                 perror("rte_eth_rx_burst()");
@@ -173,7 +176,7 @@ int main_loop(__attribute__ ((unused)) void *arg) {
             for (i = 0 ; i < recv_cnt; i++) {
                 m = rx_mbufs[i];
                 iphdr = (struct ipv4_hdr *)rte_pktmbuf_adj(m, (uint16_t)sizeof(struct ether_hdr));
-                RTE_MBUF_ASSERT(iphdr != NULL);
+                //RTE_MBUF_ASSERT(iphdr != NULL);
 
                 uint32_t dest_addr = rte_be_to_cpu_32(iphdr->dst_addr);
 
@@ -257,7 +260,7 @@ int main(int argc, char **argv) {
     count = rte_eth_dev_count();
     printf("# of eth ports = %d\n", count);
     //memset(&eth_conf, 0, sizeof eth_conf);
-    ret = rte_eth_dev_configure(0, 1, 1, &eth_conf);
+    ret = rte_eth_dev_configure(0, 2, 2, &eth_conf);
     if (ret < 0) {
         rte_exit(EXIT_FAILURE, "Cannot configure device: error=%d, port=%d\n", ret, 0);
     }
@@ -282,12 +285,18 @@ int main(int argc, char **argv) {
     }
     printf("If %d rte_eth_rx_queue_setup() successful\n", ifidx);
 
-/*    ret = rte_eth_rx_queue_setup(0, 1, NB_RX_DESC, socketid, &rx_conf, rx_pool);
+   ret = rte_eth_rx_queue_setup(0, 1, NB_RX_DESC, socketid, &rx_conf, rx_pool);
     if (ret < -1) {
 	rte_exit(EXIT_FAILURE, "2 probs");
-    }*/
+    }
 
     ret = rte_eth_tx_queue_setup(ifidx, 0, NB_TX_DESC, socketid, &tx_conf);
+    if (ret < 0) {
+        rte_exit(EXIT_FAILURE, "rte_eth_tx_queue_setup(): error=%d, port=%d\n", ret, ifidx);
+    }
+    printf("If %d rte_eth_tx_queue_setup() successful\n", ifidx);
+
+    ret = rte_eth_tx_queue_setup(ifidx, 1, NB_TX_DESC, socketid, &tx_conf);
     if (ret < 0) {
         rte_exit(EXIT_FAILURE, "rte_eth_tx_queue_setup(): error=%d, port=%d\n", ret, ifidx);
     }

@@ -49,6 +49,9 @@
 #include <rte_ip.h>
 #include <rte_timer.h>
 
+#define CHECK_INTERVAL 100 /* 100ms */
+#define MAX_CHECK_TIME 90 /* 9s (90 * 100ms) in total */
+
 #define ERROR -1
 #define SUCCESS 1
 #define MBUF_SIZE (2048 + sizeof(struct rte_mbuf) + RTE_PKTMBUF_HEADROOM)
@@ -114,9 +117,9 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal(JNIEnv __attribute__ ((unu
 	strcpy(argv[4], memory_channels);
 	strcpy(argv[5], "--file-prefix\0");
 	strcpy(argv[6], program_id);
-	strcpy(argv[7], "-m\0");
-	strcpy(argv[8], memory);
-
+//	strcpy(argv[7], "-m\0");
+//	strcpy(argv[8], "256,256");
+	argc = argc - 2;
 	for (i = 0; i < blacklist_count; i++) {
 		strcpy(argv[9+(i*2)], "-b");
 		strcpy(argv[9+((i*2)+1)], blacklist[i]);
