@@ -68,6 +68,7 @@ public class ReceivePoller {
 		
 		if (packet_count > 0) {
 			//packets.clear();
+			System.out.println("JAVA: GOT - " + packet_count);
 			packets.reset(packet_count, mem_pointer+2);
 			return packets;
 			/*temp += ua.getOffset();

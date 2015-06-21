@@ -307,6 +307,9 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv __attribute__ 
 	uint16_t packet_count = (uint16_t)nb_rx;
 	uint8_t *point = (uint8_t*)mem_pointer;
 
+	printf("C: GOT - %i\n", packet_count);
+	fflush();
+
 	insert16(point, offset, packet_count);
 	offset += sizeof(uint16_t);
 
