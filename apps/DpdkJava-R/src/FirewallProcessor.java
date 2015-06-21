@@ -96,8 +96,13 @@ public class FirewallProcessor extends PacketProcessor {
 	public void run() {
 		while (true) {
 			PacketList packets = rp_ind.getBurst();
+		/*	if (packets == null) {
+				System.out.println(this.getName() + " - 0");
+			} else {
+				System.out.println(this.getName() + " - " + packets.size());
+			} */
 			if (packets != null) {
-				System.out.println(this.getName() + " GOT " + packets.size());
+//			System.out.println(this.getName() + " GOT " + packets.size());
 				for (Packet p : packets) {
 					inspect(p);
 				}

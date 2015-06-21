@@ -299,6 +299,7 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1blacklist(JNIEnv *env, jclass _
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jlong mem_pointer, jint port_id, jint rx_id) {
 	struct rte_mbuf *pkts_burst[512];
+	
 
 	int offset = 0;
 
@@ -307,8 +308,10 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv __attribute__ 
 	uint16_t packet_count = (uint16_t)nb_rx;
 	uint8_t *point = (uint8_t*)mem_pointer;
 
-	printf("C: GOT - %i\n", packet_count);
-	fflush();
+/*	if (packet_count > 0) {
+		printf("C: GOT - %i\n", packet_count);
+		fflush(stdout);
+	}*/
 
 	insert16(point, offset, packet_count);
 	offset += sizeof(uint16_t);
