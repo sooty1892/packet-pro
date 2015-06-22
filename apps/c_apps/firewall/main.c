@@ -48,14 +48,14 @@ static struct rte_eth_conf eth_conf = {
         .jumbo_frame = 0,
         .hw_strip_crc = 0, 
     }, 
-/*    .rx_adv_conf = {
+    .rx_adv_conf = {
         .rss_conf = {
             .rss_key = NULL,
             .rss_hf = ETH_RSS_IP,
         },
-    },*/
+    },
     .txmode = { 
-        .mq_mode = ETH_MQ_TX_NONE, 
+        .mq_mode = ETH_MQ_TX_VMDQ_ONLY
     }, 
  }; 
 
@@ -86,6 +86,7 @@ static struct rte_eth_rxconf rx_conf = {
     .rx_drop_en = 0,
 };
 
+
 struct mbuf_list {
     unsigned len;
     struct rte_mbuf *list[MAX_PKT_BURST];
@@ -112,8 +113,13 @@ int size = 2;
 
 static void send_burst(void) {
     struct rte_mbuf **list = (struct rte_mbuf **)send_list.list;
-
-    int ret = rte_eth_tx_burst(0, 0, list, MAX_PKT_BURST);
+    int i;
+    if (rte_lcore_id() == 1) {
+      i = 0;
+    } else {
+      i = 1;
+    }
+    int ret = rte_eth_tx_burst(0, i, list, MAX_PKT_BURST);
     
     if (unlikely(ret < MAX_PKT_BURST)) {
         do {
@@ -163,8 +169,14 @@ int main_loop(__attribute__ ((unused)) void *arg) {
     int id = rte_lcore_id();
     printf("Core %i starting\n", id);
     fflush(stdout);
+    int b;
+    if (id == 1) {
+        b = 0;
+    } else {
+        b = 1;
+    }
     while(1) {
-        recv_cnt = rte_eth_rx_burst(ifidx, id-1, rx_mbufs, MAX_PKT_BURST);
+        recv_cnt = rte_eth_rx_burst(ifidx, b, rx_mbufs, MAX_PKT_BURST);
         if (recv_cnt < 0) {
             if (errno != EAGAIN && errno != EINTR) {
                 perror("rte_eth_rx_burst()");
@@ -266,37 +278,37 @@ int main(int argc, char **argv) {
     }
     printf("If %d rte_eth_dev_configure() successful\n", ifidx);
 
-    unsigned cpu = rte_lcore_id();
-    unsigned socketid = rte_lcore_to_socket_id(cpu);
+    //unsigned cpu = rte_lcore_id();
+   // unsigned socketid = rte_lcore_to_socket_id(cpu);
 
     rx_pool = rte_mempool_create("rx_pool", 16*1024, MAX_PKT_SIZE, 0,
                                 sizeof (struct rte_pktmbuf_pool_private),
                                 rte_pktmbuf_pool_init, NULL,
-                                rte_pktmbuf_init, NULL, socketid, 0);
+                                rte_pktmbuf_init, NULL, 1, 0);
 
    
     if (rx_pool == NULL) {
         rte_exit(EXIT_FAILURE, "rte_mempool_create(): error\n");
     }
 
-    ret = rte_eth_rx_queue_setup(ifidx, 0, NB_RX_DESC, socketid, &rx_conf, rx_pool);
+    ret = rte_eth_rx_queue_setup(ifidx, 0, NB_RX_DESC, 1, &rx_conf, rx_pool);
     if (ret < -1) {
         rte_exit(EXIT_FAILURE, "rte_eth_rx_dev_queue_setup(): error=%d, port=%d\n", ret, ifidx);
     }
     printf("If %d rte_eth_rx_queue_setup() successful\n", ifidx);
 
-   ret = rte_eth_rx_queue_setup(0, 1, NB_RX_DESC, socketid, &rx_conf, rx_pool);
+   ret = rte_eth_rx_queue_setup(0, 1, NB_RX_DESC, 1, &rx_conf, rx_pool);
     if (ret < -1) {
 	rte_exit(EXIT_FAILURE, "2 probs");
     }
 
-    ret = rte_eth_tx_queue_setup(ifidx, 0, NB_TX_DESC, socketid, &tx_conf);
+    ret = rte_eth_tx_queue_setup(ifidx, 0, NB_TX_DESC, 1, &tx_conf);
     if (ret < 0) {
         rte_exit(EXIT_FAILURE, "rte_eth_tx_queue_setup(): error=%d, port=%d\n", ret, ifidx);
     }
     printf("If %d rte_eth_tx_queue_setup() successful\n", ifidx);
 
-    ret = rte_eth_tx_queue_setup(ifidx, 1, NB_TX_DESC, socketid, &tx_conf);
+    ret = rte_eth_tx_queue_setup(ifidx, 1, NB_TX_DESC, 1, &tx_conf);
     if (ret < 0) {
         rte_exit(EXIT_FAILURE, "rte_eth_tx_queue_setup(): error=%d, port=%d\n", ret, ifidx);
     }
