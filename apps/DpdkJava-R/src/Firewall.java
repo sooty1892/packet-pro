@@ -30,28 +30,28 @@ public class Firewall {
 		List<CoreThread> threads = new ArrayList<CoreThread>();
 //		
 		ReceivePoller rp1 = new ReceivePoller(0, 0);
-		ReceivePoller rp2 = new ReceivePoller(0, 1);
+//		ReceivePoller rp2 = new ReceivePoller(0, 1);
 		PacketSender ps1 = new PacketSender(0, 0);
-		PacketSender ps2 = new PacketSender(0, 1);
+//		PacketSender ps2 = new PacketSender(0, 1);
 		PacketFreeer pf1 = new PacketFreeer();
-		PacketFreeer pf2 = new PacketFreeer();
+//		PacketFreeer pf2 = new PacketFreeer();
 		
 //		rps.add(rp);
 //		pss.add(ps);
 		
 		threads.add(new FirewallProcessor(ps1, pf1, rp1, "PROCESS 1", 3));
-		threads.add(new FirewallProcessor(ps2, pf2, rp2, "PROCESS 2", 5));
+//		threads.add(new FirewallProcessor(ps2, pf2, rp2, "PROCESS 2", 5));
 		
 		as.createAffinityThreads(threads);
 		
 		as.dpdk_init_eal();
 		as.dpdk_create_mempool("mbufs", 8192*4, 32, 1);
 		as.dpdk_check_ports();
-		as.dpdk_configure_dev(0, 2, 2);
+		as.dpdk_configure_dev(0, 1, 1);
 		as.dpdk_configure_rx_queue(0, 0, 1);
 		as.dpdk_configure_tx_queue(0, 0, 1);
-		as.dpdk_configure_rx_queue(0, 1, 1);
-		as.dpdk_configure_tx_queue(0, 1, 1);
+//		as.dpdk_configure_rx_queue(0, 1, 1);
+//		as.dpdk_configure_tx_queue(0, 1, 1);
 		as.dpdk_dev_start(0);
 		as.dpdk_check_ports_link_status();
 		

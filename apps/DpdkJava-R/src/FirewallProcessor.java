@@ -18,7 +18,7 @@ public class FirewallProcessor extends PacketProcessor {
 	ReceivePoller rp_ind;
 	PacketSender ps_ind;
 
-	long count = 0;
+//	long count = 0;
 	
 	public FirewallProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp, int core) {
 		super(ps, pf, rp, core);
@@ -43,10 +43,10 @@ public class FirewallProcessor extends PacketProcessor {
 	private boolean inspect(Packet currentPacket) {
 		int version = currentPacket.whichIP();
 
-		count++;
-                                if (count % 1000000 == 0) {
-                                        System.out.println("PRO: " + this.getCore() + " - " + count);
-                                }
+//		count++;
+//                                if (count % 1000000 == 0) {
+  //                                      System.out.println("PRO: " + this.getCore() + " - " + count);
+    //                            }
 
 		if (version == 4) {
 			Ipv4Packet cp = (Ipv4Packet)currentPacket;
