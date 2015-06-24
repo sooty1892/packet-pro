@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <time.h>
-#include <mach/mach_time.h>
+//#include <mach/mach_time.h>
 #include <unistd.h>
 #include <stdlib.h>
 
@@ -12,7 +12,7 @@ struct packet {
 };
 
 
-void mach_absolute_difference(uint64_t end, uint64_t start, struct timespec *tp) {
+/*void mach_absolute_difference(uint64_t end, uint64_t start, struct timespec *tp) {
         uint64_t difference = end - start;
         static mach_timebase_info_data_t info = {0,0};
 
@@ -23,7 +23,7 @@ void mach_absolute_difference(uint64_t end, uint64_t start, struct timespec *tp)
 
         tp->tv_sec = elapsednano * 1e-9;
         tp->tv_nsec = elapsednano - (tp->tv_sec * 1e9);
-}
+}*/
 
 void popPacket(struct packet *p) {
 	srand(time(NULL));
@@ -40,8 +40,8 @@ void proPacket(struct packet *p) {
 }
 
 void process_data(struct timespec *t) {
-	uint64_t start, end;
-	start = mach_absolute_time();
+//	uint64_t start, end;
+//	start = mach_absolute_time();
 	int i;
 	for (i = 0; i < NUM_PACKS; i++) {
 		struct packet p;
@@ -52,8 +52,8 @@ void process_data(struct timespec *t) {
 			printf("RESULT ERROR\n");
 		}
 	}
-	end = mach_absolute_time();
-	mach_absolute_difference(end, start, t);
+//	end = mach_absolute_time();
+//	mach_absolute_difference(end, start, t);
 }
 
 
@@ -62,8 +62,8 @@ int main(int argc, char **argv) {
 	for (i=0; i < NUM_ITER; i++) {
 		struct timespec t;
 		process_data(&t);
-		printf("%f seconds, %lu nanoseconds\n", (double)t.tv_sec, t.tv_nsec);
-		printf("%lu\n", t.tv_nsec / NUM_PACKS);
+//		printf("%f seconds, %lu nanoseconds\n", (double)t.tv_sec, t.tv_nsec);
+//		printf("%lu\n", t.tv_nsec / NUM_PACKS);
 	}
 	return 0;
 }
