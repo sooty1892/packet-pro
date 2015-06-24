@@ -1,0 +1,21 @@
+Bytes: 998748358
+Bytes: 995729472
+Bytes: 998735046
+Bytes: 998768640
+Bytes: 996549632
+Bytes: 998780928
+Bytes: 998728768
+Bytes: 996327424
+Bytes: 998739968
+Bytes: 998770688
+
+Packets: 975341
+Packets: 972393
+Packets: 975329
+Packets: 975360
+Packets: 973193
+Packets: 975372
+Packets: 975322
+Packets: 972976
+Packets: 975332
+Packets: 975361
