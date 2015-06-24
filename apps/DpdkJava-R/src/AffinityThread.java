@@ -4,7 +4,10 @@
 public class AffinityThread extends Thread {
 	
 	private boolean worked;
-	private int avail;
+	
+	// this is the specific proccesor id as set in /proc/cpuinfo
+	// and therefore is associated with a certain socket as well
+	private int core;
 	
 	private static final int SUCCESS = 1;
 
@@ -13,22 +16,32 @@ public class AffinityThread extends Thread {
 	 * core: core value to run thread on (eg. 1 to run on 2nd core)
 	 * avail: number of cores available
 	 */
-	public AffinityThread(Runnable r, int core, int avail) {
+	public AffinityThread(Runnable r, int core) {
 		super(r);
-		worked = DpdkAccess.set_thread_affinity(core, avail) == SUCCESS;
-		this.avail = avail;
+		this.core = core;
+		worked = DpdkAccess.set_thread_affinity(core) == SUCCESS;
+	}
+	
+	public AffinityThread(Runnable r, String name, int core) {
+		super(r, name);
+		this.core = core;
+		worked = DpdkAccess.set_thread_affinity(core) == SUCCESS;
 	}
 	
 	/*
 	 * core: core value to run thread on (eg. 1 to run on 2nd core)
 	 */
 	public boolean setNewAffinity(int core) {
-		worked = DpdkAccess.set_thread_affinity(core, avail) == SUCCESS;
+		worked = DpdkAccess.set_thread_affinity(core) == SUCCESS;
 		return worked;
 	}
 	
-	public boolean ifWorked() {
+	public boolean hasWorked() {
 		return worked;
+	}
+	
+	public int getCore() {
+		return core;
 	}
 	
 	@Override

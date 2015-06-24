@@ -18,10 +18,10 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal
 /*
  * Class:     DpdkAccess
  * Method:    nat_create_mempool
- * Signature: (Ljava/lang/String;II)I
+ * Signature: (Ljava/lang/String;III)I
  */
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1create_1mempool
-  (JNIEnv *, jclass, jstring, jint, jint);
+  (JNIEnv *, jclass, jstring, jint, jint, jint);
 
 /*
  * Class:     DpdkAccess
@@ -45,7 +45,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1dev
  * Signature: (II)I
  */
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue
-  (JNIEnv *, jclass, jint, jint);
+  (JNIEnv *, jclass, jint, jint, jint);
 
 /*
  * Class:     DpdkAccess
@@ -53,7 +53,7 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1rx_1queue
  * Signature: (II)I
  */
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1configure_1tx_1queue
-  (JNIEnv *, jclass, jint, jint);
+  (JNIEnv *, jclass, jint, jint, jint);
 
 /*
  * Class:     DpdkAccess
@@ -154,10 +154,10 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1blacklist
 /*
  * Class:     DpdkAccess
  * Method:    nat_set_thread_affinity
- * Signature: (II)I
+ * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity
-  (JNIEnv *, jclass, jint, jint);
+  (JNIEnv *, jclass, jint);
 
 /*
  * Class:     DpdkAccess

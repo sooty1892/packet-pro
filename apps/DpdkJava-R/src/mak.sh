@@ -5,7 +5,7 @@ make clean
 javac -XDignore.symbol.file *.java
 #rm -f sources.txt
 make
-sudo \cp ~/packet-pro/apps/java_apps/Firewall/build/lib/libnat_dpdk.so /usr/lib/x86_64-linux-gnu
+sudo \cp ~/packet-pro/apps/DpdkJava-R/src/build/lib/libnat_dpdk.so /usr/lib/x86_64-linux-gnu
 sudo ldconfig
 
 #find ./src/  -name "*.class" > classes.txt

@@ -43,8 +43,8 @@ public class ApplicationStarter {
 		working = true;
 	}
 	
-	public void start_native_stats() {
-		aff_threads.add(new AffinityThread(new NativeStats(), 0, num_available_cores));
+	public void start_native_stats(int core) {
+		aff_threads.add(new AffinityThread(new NativeStats(core), core));
 	}
 	
 	// Puts all runnables into affinity thread and assigns them a core
@@ -54,15 +54,13 @@ public class ApplicationStarter {
 			working = false;
 			return ;
 		}
-		int core = 1;
 		for (CoreThread ct : threads) {
-			AffinityThread af = new AffinityThread(ct, core, num_available_cores);
-			if (!af.ifWorked()) {
+			AffinityThread af = new AffinityThread(ct, ct.getName(), ct.getCore());
+			if (!af.hasWorked()) {
 				System.out.println("-----Affinity thread creation failed on core assignment");
 				working = false;
 			}
 			aff_threads.add(af);
-			core++;
 		}
 	}
 	
@@ -102,8 +100,8 @@ public class ApplicationStarter {
 	
 	// creates mempool
 	//TODO: currently c code only handles 1 mempool
-	public void dpdk_create_mempool(String name, int num_el, int cache_size) {
-		if (DpdkAccess.dpdk_create_mempool(name, num_el, cache_size) < 0) {
+	public void dpdk_create_mempool(String name, int num_el, int cache_size, int socket_id) {
+		if (DpdkAccess.dpdk_create_mempool(name, num_el, cache_size, socket_id) < 0) {
 			System.out.println("-----dpdk_create_mempool failed");
 			working = false;
 		} else {
@@ -133,8 +131,8 @@ public class ApplicationStarter {
 	}
 	
 	// configure rx queue for device
-	public void dpdk_configure_rx_queue(int port_id, int rx_id) {
-		if (DpdkAccess.dpdk_configure_rx_queue(port_id, rx_id) < 0) {
+	public void dpdk_configure_rx_queue(int port_id, int rx_id, int socket_id) {
+		if (DpdkAccess.dpdk_configure_rx_queue(port_id, rx_id, socket_id) < 0) {
 			System.out.println("-----dpdk_configure_rx_queue failed");
 			working = false;
 		} else {
@@ -143,8 +141,8 @@ public class ApplicationStarter {
 	}
 	
 	// configure tx queue for device
-	public void dpdk_configure_tx_queue(int port_id, int tx_id) {
-		if (DpdkAccess.dpdk_configure_tx_queue(port_id, tx_id) < 0) {
+	public void dpdk_configure_tx_queue(int port_id, int tx_id, int socket_id) {
+		if (DpdkAccess.dpdk_configure_tx_queue(port_id, tx_id, socket_id) < 0) {
 			System.out.println("-----dpdk_configure_tx_queue failed");
 			working = false;
 		} else {

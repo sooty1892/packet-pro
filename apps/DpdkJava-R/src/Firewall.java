@@ -39,19 +39,19 @@ public class Firewall {
 //		rps.add(rp);
 //		pss.add(ps);
 		
-		threads.add(new FirewallProcessor(ps1, pf1, rp1));
-//		threads.add(new FirewallProcessor(ps2, pf2, rp2));
+		threads.add(new FirewallProcessor(ps1, pf1, rp1, "PROCESS 1", 3));
+//		threads.add(new FirewallProcessor(ps2, pf2, rp2, "PROCESS 2", 5));
 		
 		as.createAffinityThreads(threads);
 		
 		as.dpdk_init_eal();
-		as.dpdk_create_mempool("mbufs", 8192*4, 32);
+		as.dpdk_create_mempool("mbufs", 8192*4, 32, 1);
 		as.dpdk_check_ports();
 		as.dpdk_configure_dev(0, 1, 1);
-		as.dpdk_configure_rx_queue(0, 0);
-		as.dpdk_configure_tx_queue(0, 0);
-//		as.dpdk_configure_rx_queue(0, 1);
-//		as.dpdk_configure_tx_queue(0, 1);
+		as.dpdk_configure_rx_queue(0, 0, 1);
+		as.dpdk_configure_tx_queue(0, 0, 1);
+//		as.dpdk_configure_rx_queue(0, 1, 1);
+//		as.dpdk_configure_tx_queue(0, 1, 1);
 		as.dpdk_dev_start(0);
 		as.dpdk_check_ports_link_status();
 		
@@ -59,7 +59,7 @@ public class Firewall {
 
 		as.dpdk_enable_pro();
 
-		as.start_native_stats();
+		as.start_native_stats(1);
 //		
 		as.dpdk_get_mac_info();
 		

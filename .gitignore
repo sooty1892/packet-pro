@@ -4,6 +4,8 @@
 *.o.cmd
 *.o.d
 
+core
+
 # java
 *.jnilib
 *.class
@@ -22,8 +24,9 @@
 # /dpdk-2.0.0
 
 # build folders
-**/build/
-**/bin/
+build/
+bin/
+app/
 
 *.so
 *.swp
@@ -52,3 +55,4 @@
 # Java DPDK app build folder
 /apps/Firewall/app/
 apps/PacketCap/app
+dpdk-2.0.0/examples/

@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /*
@@ -18,9 +17,21 @@ public class FirewallProcessor extends PacketProcessor {
 	PacketFreeer pf_ind;
 	ReceivePoller rp_ind;
 	PacketSender ps_ind;
+
+//	long count = 0;
 	
-	public FirewallProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp) {
-		super(ps, pf, rp);
+	public FirewallProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp, int core) {
+		super(ps, pf, rp, core);
+		blacklist = new HashSet<Long>();
+		readBlacklist();
+		//printBlacklist();
+		pf_ind = pf;
+		rp_ind = rp;
+		ps_ind = ps;
+	}
+	
+	public FirewallProcessor(PacketSender ps, PacketFreeer pf, ReceivePoller rp, String name, int core) {
+		super(ps, pf, rp, name, core);
 		blacklist = new HashSet<Long>();
 		readBlacklist();
 		//printBlacklist();
@@ -31,6 +42,11 @@ public class FirewallProcessor extends PacketProcessor {
 
 	private boolean inspect(Packet currentPacket) {
 		int version = currentPacket.whichIP();
+
+//		count++;
+//                                if (count % 1000000 == 0) {
+  //                                      System.out.println("PRO: " + this.getCore() + " - " + count);
+    //                            }
 
 		if (version == 4) {
 			Ipv4Packet cp = (Ipv4Packet)currentPacket;
