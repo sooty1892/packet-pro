@@ -53,10 +53,6 @@ public class PacketFreeer {
 			freeBurst();
 			past_freed = System.currentTimeMillis();
 		}
-//	/	ua.setCurrentPointer(start_pointer);	
-//		ua.putShort(1);
-//		ua.putLong(p.getMbuf_pointer());
-//		DpdkAccess.dpdk_free_packets(start_pointer);
 	}
 	
 	// frees burst of packets via dpdk library

@@ -42,12 +42,6 @@ public class FirewallProcessor extends PacketProcessor {
 
 	private boolean inspect(Packet currentPacket) {
 		int version = currentPacket.whichIP();
-
-//		count++;
-//                                if (count % 1000000 == 0) {
-  //                                      System.out.println("PRO: " + this.getCore() + " - " + count);
-    //                            }
-
 		if (version == 4) {
 			Ipv4Packet cp = (Ipv4Packet)currentPacket;
 			if (blacklist.contains(cp.getSrcAddr())) {

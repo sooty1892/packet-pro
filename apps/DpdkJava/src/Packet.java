@@ -18,8 +18,6 @@ public abstract class Packet {
 		ua = unsafe;
 		ua.setCurrentPointer(packet_pointer);
 	}
-	
-	//static methods to split packets up further
 
 	public long getMbuf_pointer() {
 		return mbuf_pointer;

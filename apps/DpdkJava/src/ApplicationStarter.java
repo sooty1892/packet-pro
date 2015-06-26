@@ -167,10 +167,12 @@ public class ApplicationStarter {
 		System.out.println(DpdkAccess.dpdk_check_ports_link_status());
 	}
 
+	// enable promiscuous mode on all ports
 	public void dpdk_enable_pro() {
 		DpdkAccess.dpdk_enable_pro();
 	}
 	
+	//  prints MAC address info of all ports
 	public void dpdk_get_mac_info() {
 		System.out.println(DpdkAccess.dpdk_get_mac_info());
 	}

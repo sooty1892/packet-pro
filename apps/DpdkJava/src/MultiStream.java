@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /*
- * Output stream to redirect printlns to 2 streams
+ * Output stream to redirect prints to any number of streams
  * Generally used for streams to console and gui
  */
 

@@ -55,8 +55,8 @@ public class ReceivePoller {
 		ua.setCurrentPointer(mem_pointer);
 		
 		int packet_count = ua.getShort();
-		//packet_all += packet_count; 
-		//packet_interval += packet_count;
+		packet_all += packet_count; 
+		packet_interval += packet_count;
 	
 		
 		if (packet_count > 0) {

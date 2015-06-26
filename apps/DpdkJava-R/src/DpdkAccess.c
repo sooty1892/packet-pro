@@ -117,8 +117,6 @@ JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1init_1eal(JNIEnv __attribute__ ((unu
 	strcpy(argv[4], memory_channels);
 	strcpy(argv[5], "--file-prefix\0");
 	strcpy(argv[6], program_id);
-//	strcpy(argv[7], "-m\0");
-//	strcpy(argv[8], "256,256");
 	argc = argc - 2;
 	for (i = 0; i < blacklist_count; i++) {
 		strcpy(argv[9+(i*2)], "-b");
@@ -210,8 +208,6 @@ JNIEXPORT jstring JNICALL Java_DpdkAccess_nat_1check_1ports_1link_1status(JNIEnv
 	for (count = 0; count <= MAX_CHECK_TIME; count++) {
 		all_ports_up = 1;
 		for (portid = 0; portid < num_ports; portid++) {
-			//if ((port_mask & (1 << portid)) == 0)
-			//	continue;
 			memset(&link, 0, sizeof(link));
 			rte_eth_link_get_nowait(portid, &link);
 			/* print link status if flag set */
@@ -263,7 +259,6 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1receive_1burst(JNIEnv __attribu
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1program_1name(JNIEnv *env, jclass __attribute__ ((unused)) class, jstring value) {
 	program_name = (*env)->GetStringUTFChars(env, value, 0);
-	//printf("INT SIZE: %zu\n", sizeof(int));
 }
 
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1memory_1channels(JNIEnv *env, jclass __attribute__ ((unused)) class, jstring value) {
@@ -287,7 +282,6 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1set_1blacklist(JNIEnv *env, jclass _
 	for (i=0; i < blacklist_count; i++) {
 		jstring string = (jstring) (*env)->GetObjectArrayElement(env, values, i);
 		blacklist[i] = (*env)->GetStringUTFChars(env, string, 0);
-		// Don't forget to call `ReleaseStringUTFChars` when you're done.
 	}
 }
 
@@ -302,11 +296,6 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv __attribute__ 
 	uint16_t packet_count = (uint16_t)nb_rx;
 	uint8_t *point = (uint8_t*)mem_pointer;
 
-/*	if (packet_count > 0) {
-		printf("C: GOT - %i\n", packet_count);
-		fflush(stdout);
-	}*/
-
 	insert16(point, offset, packet_count);
 	offset += sizeof(uint16_t);
 
@@ -315,8 +304,6 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1receive_1burst(JNIEnv __attribute__ 
 		int i;
 		for (i = 0; i < packet_count; i++) {
 			struct ipv4_hdr* ip = (struct ipv4_hdr *)(rte_pktmbuf_mtod(pkts_burst[i], unsigned char *) + sizeof(struct ether_hdr));
-			//printf("%"PRIu32"\n", ip->src_addr);
-			//fflush(stdout);
 			insert64(point, offset, (uint64_t)pkts_burst[i]);
 			offset += sizeof(uint64_t);
 			insert64(point, offset, (uint64_t)ip);
@@ -358,19 +345,6 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1send_1packets(JNIEnv __attribute__ (
 	offset += sizeof(uint16_t);
 
 	rte_eth_tx_burst(port_id, tx_id, (struct rte_mbuf**)(point+offset), packet_count);
-
-	/*if (ret < packet_count) {
-		do {
-			rte_pktmbuf_free(list[ret]);
-		} while (++ret < packet_count);
-	}*/
-	/*offset = sizeof(uint16_t);
-	int i;
-	for (i = 0; i < packet_count; i++) {
-		struct rte_mbuf *freeing = (struct rte_mbuf*)get64(point, offset);
-		rte_pktmbuf_free(freeing);
-		offset += sizeof(uint64_t);
-	}*/
 }
 
 JNIEXPORT jint JNICALL Java_DpdkAccess_nat_1set_1thread_1affinity(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class, jint core) {
@@ -428,41 +402,16 @@ JNIEXPORT void JNICALL Java_DpdkAccess_nat_1enable_1pro(JNIEnv __attribute__ ((u
 	}
 }
 
-//void timer_setup(void);
-//void do_stats(struct rte_timer *, void *);
 void do_stats(void);
-/*
-struct port_data {
-	uint64_t pre_ibytes;
-	uint64_t pre_ipackets;
-};
 
-struct port_data **pdata;
-*/
 uint64_t pre_ibytes = 0;
 uint64_t pre_ipackets = 0;
 uint64_t pre_imissed = 0;
 uint64_t pre_ierrors = 0;
 uint64_t pre_opackets = 0;
 
-//void do_stats(__attribute__ ((unused)) struct rte_timer *tim, __attribute__ ((unused)) void *arg) {
 void do_stats(void) {
-    //printf("IN STATS");
-    //fflush(stdout);
     struct rte_eth_stats stats;
-
-    //uint64_t diff_bytes = 0;
-    //uint64_t diff_packets = 0;
-
-/*    int i;
-    for (i = 0; i < num_ports; i++) {
-    	rte_eth_stats_get(i, &stats);
-    	diff_bytes += stats.ibytes - pdata[i]->pre_ibytes;
-    	pdata[i]->pre_ibytes = stats.ibytes;
-    	diff_packets += stats.ipackets - pdata[i]->pre_ipackets;
-    	pdata[i]->pre_ipackets = stats.ipackets;
-    } 
-*/
     rte_eth_stats_get(0, &stats);
     uint64_t diff_bytes = stats.ibytes - pre_ibytes;
     pre_ibytes = stats.ibytes;
@@ -470,7 +419,7 @@ void do_stats(void) {
     pre_ipackets = stats.ipackets;
     uint64_t diff_missed = stats.imissed - pre_imissed;
     pre_imissed = stats.imissed;
-//    uint64_t diff_errors = stats.ierrors - pre_ierrors;
+	uint64_t diff_errors = stats.ierrors - pre_ierrors;
     pre_ierrors = stats.ierrors;
     uint64_t diff_opackets = stats.opackets - pre_opackets;
     pre_opackets = stats.opackets;
@@ -478,42 +427,12 @@ void do_stats(void) {
     printf("Bytes: %lu\n", diff_bytes);
     printf("Packets: %lu\n", diff_packets);
     printf("Missed: %lu\n", diff_missed);
-//    printf("Errors: %lu\n", diff_errors);
+	printf("Errors: %lu\n", diff_errors);
     printf("Sent: %lu\n\n", diff_opackets);
     fflush(stdout);
 }
 
-//static struct rte_timer timer;
-
-//void timer_setup(void) {
-    //printf("ENTERED TIME\n");
-    //fflush(stdout);
-//    int lcore_id = rte_get_master_lcore();
-//    rte_timer_subsystem_init();
-   // rte_timer_init(&timer);
-    //printf("GOING INTO LOOP\n");
-    //fflush(stdout);
-/*    int ret = rte_timer_reset(&timer, rte_get_timer_hz(), PERIODICAL, 0, do_stats, NULL);
-    if (ret != 0) {
-        printf("TIMER_ERROR");
-        fflush(stdout);
-    }*/
-//}
-
 JNIEXPORT void JNICALL Java_DpdkAccess_nat_1start_1stats(JNIEnv __attribute__ ((unused)) *env, jclass __attribute__ ((unused)) class) {
-//	timer_setup();
-/*	for (;;) {
-		rte_timer_manage();
-	} */
-
-/*	pdata = malloc(sizeof(struct port_data *) * num_ports);
-	int i;
-	for (i = 0; i < num_ports; i++) {
-		pdata[i] = malloc(sizeof(struct port_data));
-		pdata[i]->pre_ibytes = 0;
-		pdata[i]->pre_ipackets = 0;
-	}*/
-
 	for(;;) {
 		sleep(1);
 		do_stats();

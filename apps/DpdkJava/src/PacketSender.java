@@ -27,10 +27,10 @@ public class PacketSender {
 	
 	public PacketSender(int port_id, int queue_id) {
 		ua = new UnsafeAccess();
-//		packet_all = 0;
-//		packet_all_size = 0;
-//		packet_interval = 0;
-//		packet_interval_size = 0;
+		packet_all = 0;
+		packet_all_size = 0;
+		packet_interval = 0;
+		packet_interval_size = 0;
 		past_sent = System.currentTimeMillis();
 		send_burst = DEFAULT_SEND_BURST;
 		this.port_id = port_id;

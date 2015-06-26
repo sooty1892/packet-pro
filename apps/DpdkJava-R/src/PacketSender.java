@@ -20,14 +20,13 @@ public class PacketSender {
 	private PacketListCreate list;
 	
 	private static final int DEFAULT_SEND_BURST = 16;
-	//private static final long MILLI_SECOND = 1000;
 	
 	public PacketSender(int port_id, int queue_id) {
 		ua = new UnsafeAccess();
-//		packet_all = 0;
-//		packet_all_size = 0;
-//		packet_interval = 0;
-//		packet_interval_size = 0;
+		packet_all = 0;
+		packet_all_size = 0;
+		packet_interval = 0;
+		packet_interval_size = 0;
 		past_sent = System.currentTimeMillis();
 		send_burst = DEFAULT_SEND_BURST;
 		this.port_id = port_id;
@@ -38,21 +37,14 @@ public class PacketSender {
 	public int getSendBurst() {
 		return send_burst;
 	}
-	
-	// checks if the given time period has occurred since last packet sending
-	// used so packets are held in memory for too long for no reason
-	/*private boolean isTimedOut() {
-		return (System.currentTimeMillis() - past_sent) >= MILLI_SECOND;
-	}*/
+
 	
 	// packet added to sends list and checks made for
 	// timeout period and list size
 	public void sendPacket(Packet p) {
 		list.add(p);
-		//if (list.size() >= send_burst || isTimedOut()) {
 		if (list.size() == send_burst) {
 			sendBurst();
-			//past_sent = System.currentTimeMillis();
 		}
 	}
 	

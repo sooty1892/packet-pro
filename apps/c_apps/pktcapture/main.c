@@ -67,11 +67,6 @@ static struct rte_eth_txconf tx_conf = {
     },
     .tx_rs_thresh = 0,
     .tx_free_thresh = 0,
-    //.txq_flags = (ETH_TXQ_FLAGS_NOMULTSEGS |
-    //		ETH_TXQ_FLAGS_NOVLANOFFL |
-    //		ETH_TXQ_FLAGS_NOXSUMSCTP |
-    //		ETH_TXQ_FLAGS_NOXSUMUDP  |
-    //		ETH_TXQ_FLAGS_NOXSUMTCP)
 };
 
 // Configures a RX ring of an Ethernet port
@@ -106,9 +101,6 @@ int main_loop(__attribute__ ((unused)) void *arg) {
             for (i = 0 ; i < recv_cnt; i++) {
                 rte_pktmbuf_free(rx_mbufs[i]);
             }
-           // if (pktcount == 10000000)
-             //   printf("Received %ld packets so far\n", pktcount); 
-            //printf("Received %ld packets\n", pktcount);
         }
     }
     return 0;
@@ -123,8 +115,6 @@ uint64_t pre_ibytes = 0;
 uint64_t pre_ipackets = 0;
 
 void do_stats(__attribute__ ((unused)) struct rte_timer *tim, __attribute__ ((unused)) void *arg) {
-    //printf("IN STATS");
-    //fflush(stdout);
     struct rte_eth_stats stats;
 
     rte_eth_stats_get(0, &stats);
@@ -169,7 +159,6 @@ int main(int argc, char **argv) {
 
     count = rte_eth_dev_count();
     printf("# of eth ports = %d\n", count);
-    //memset(&eth_conf, 0, sizeof eth_conf);
     ret = rte_eth_dev_configure(0, 1, 1, &eth_conf);
     if (ret < 0) {
         rte_exit(EXIT_FAILURE, "Cannot configure device: error=%d, port=%d\n", ret, 0);
@@ -195,11 +184,6 @@ int main(int argc, char **argv) {
     }
     printf("If %d rte_eth_rx_queue_setup() successful\n", ifidx);
 
-/*    ret = rte_eth_rx_queue_setup(0, 1, NB_RX_DESC, socketid, &rx_conf, rx_pool);
-    if (ret < -1) {
-	rte_exit(EXIT_FAILURE, "2 probs");
-    }*/
-
     ret = rte_eth_tx_queue_setup(ifidx, 0, NB_TX_DESC, socketid, &tx_conf);
     if (ret < 0) {
         rte_exit(EXIT_FAILURE, "rte_eth_tx_queue_setup(): error=%d, port=%d\n", ret, ifidx);
@@ -220,16 +204,11 @@ int main(int argc, char **argv) {
 
     rte_eth_promiscuous_enable(ifidx);
 
-	//printf("HELLO\n");
-	//fflush(stdout);
-
     struct lcore_config lc = lcore_config[0];
     printf("%i", lc.core_id);
 
     uint32_t a;
     for (a = 0; a < 32; a++) {
-	//printf("%d\n", a);
-	//fflush(stdout);
         if (a == rte_get_master_lcore() || !rte_lcore_is_enabled(a)) {
             continue;
         }
@@ -239,8 +218,6 @@ int main(int argc, char **argv) {
         }
     }
     rte_delay_ms(1000);
-    //printf("here\n");
-    //fflush(stdout);
     timer_setup();
 
     for(;;) {

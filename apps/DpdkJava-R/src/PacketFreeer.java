@@ -14,7 +14,6 @@ public class PacketFreeer {
 	private PacketListCreate list;
 	
 	private static final int DEFAULT_FREE_BURST = 16;
-	//private static final long MILLI_SECOND = 1000;
 	
 	public PacketFreeer() {
 		ua = new UnsafeAccess();
@@ -27,20 +26,12 @@ public class PacketFreeer {
 		return free_burst;
 	}
 	
-	// checks if the given time period has occurred since last packet freeing
-	// used so packets are held in memory for too long for no reason
-	/*private boolean isTimedOut() {
-		return (System.currentTimeMillis() - past_freed) >= MILLI_SECOND;
-	}*/
-	
 	// packet added to free list and checks made for
 	// timeout period and list size
 	public void freePacket(Packet p) {
 		list.add(p);
-		//if (list.size() == free_burst || isTimedOut()) {
 		if (list.size() == free_burst) {
 			freeBurst();
-			//past_freed = System.currentTimeMillis();
 		}
 	}
 	

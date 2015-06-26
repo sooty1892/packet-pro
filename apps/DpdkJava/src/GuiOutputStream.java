@@ -2,7 +2,7 @@ import java.io.OutputStream;
 import javax.swing.*;
 
 /*
- * Output stream to redirect printlns to gui console
+ * Output stream to redirect prints to gui console
  */
 
 public class GuiOutputStream extends OutputStream {

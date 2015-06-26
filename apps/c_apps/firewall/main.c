@@ -59,7 +59,6 @@ static struct rte_eth_conf eth_conf = {
     }, 
  }; 
 
-// Configures a TX ring of an Ethernet port
 static struct rte_eth_txconf tx_conf = {
     .tx_thresh = {
         .pthresh = 36,
@@ -68,14 +67,8 @@ static struct rte_eth_txconf tx_conf = {
     },
     .tx_rs_thresh = 0,
     .tx_free_thresh = 0,
-    //.txq_flags = (ETH_TXQ_FLAGS_NOMULTSEGS |
-    //		ETH_TXQ_FLAGS_NOVLANOFFL |
-    //		ETH_TXQ_FLAGS_NOXSUMSCTP |
-    //		ETH_TXQ_FLAGS_NOXSUMUDP  |
-    //		ETH_TXQ_FLAGS_NOXSUMTCP)
 };
 
-// Configures a RX ring of an Ethernet port
 static struct rte_eth_rxconf rx_conf = {
     .rx_thresh = {
         .pthresh = 8,
@@ -97,19 +90,9 @@ static struct rte_mempool *rx_pool;
 static void send_packet(struct rte_mbuf *);
 static void free_packet(struct rte_mbuf *);
 static void send_burst(void);
-//static void free_burst(void);
 
 static uint32_t blacklist[] = {0, 1};
 int size = 2;
-
-/*static void free_burst(void) {
-    struct rte_mbuf **list = (struct rte_mbuf **)free_list.list;
-
-    unsigned i;
-    for (i = 0; i < free_list.len; i++) {
-        rte_pktmbuf_free(list[i]);
-    }
-}*/
 
 static void send_burst(void) {
     struct rte_mbuf **list = (struct rte_mbuf **)send_list.list;
@@ -144,25 +127,12 @@ static void send_packet(struct rte_mbuf *m) {
 }
 
 static void free_packet(struct rte_mbuf *m) {
-
-/*    unsigned len = free_list.len;
-    free_list.list[len] = m;
-    len++;
-
-     if (unlikely(len == MAX_PKT_BURST)) {
-        free_burst();
-        len = 0;
-    }
-
-    free_list.len = len;*/
     rte_pktmbuf_free(m);
-
 }
 
 int main_loop(void *);
 
 int main_loop(__attribute__ ((unused)) void *arg) {
-  //  long pktcount = 0;
     int recv_cnt, i, ifidx = 0;
     struct ipv4_hdr *iphdr;
     struct rte_mbuf *m;
@@ -184,12 +154,9 @@ int main_loop(__attribute__ ((unused)) void *arg) {
             }
         }
         if ( recv_cnt > 0) {
-//            pktcount += recv_cnt;
             for (i = 0 ; i < recv_cnt; i++) {
                 m = rx_mbufs[i];
                 iphdr = (struct ipv4_hdr *)rte_pktmbuf_adj(m, (uint16_t)sizeof(struct ether_hdr));
-                //RTE_MBUF_ASSERT(iphdr != NULL);
-
                 uint32_t dest_addr = rte_be_to_cpu_32(iphdr->dst_addr);
 
                 int drop = 0;
@@ -208,9 +175,6 @@ int main_loop(__attribute__ ((unused)) void *arg) {
 
                 free_packet(m);
             }
-           // if (pktcount == 10000000)
-             //   printf("Received %ld packets so far\n", pktcount); 
-            //printf("Received %ld packets\n", pktcount);
         }
     }
     return 0;
@@ -225,8 +189,6 @@ uint64_t pre_ibytes = 0;
 uint64_t pre_ipackets = 0;
 
 void do_stats(__attribute__ ((unused)) struct rte_timer *tim, __attribute__ ((unused)) void *arg) {
-    //printf("IN STATS");
-    //fflush(stdout);
     struct rte_eth_stats stats;
 
     rte_eth_stats_get(0, &stats);
@@ -242,13 +204,9 @@ void do_stats(__attribute__ ((unused)) struct rte_timer *tim, __attribute__ ((un
 static struct rte_timer timer;
 
 void timer_setup(void) {
-    //printf("ENTERED TIME\n");
-    //fflush(stdout);
     int lcore_id = rte_get_master_lcore();
     rte_timer_subsystem_init();
     rte_timer_init(&timer);
-    //printf("GOING INTO LOOP\n");
-    //fflush(stdout);
     int ret = rte_timer_reset(&timer, rte_get_timer_hz(), PERIODICAL, lcore_id, do_stats, NULL);
     if (ret != 0) {
         printf("TIMER_ERROR");
@@ -258,7 +216,6 @@ void timer_setup(void) {
 
 int main(int argc, char **argv) {
     int ret, ifidx = 0;
-    //unsigned lcore_id;
     uint8_t count;
 
     struct rte_eth_link link;
@@ -277,9 +234,6 @@ int main(int argc, char **argv) {
         rte_exit(EXIT_FAILURE, "Cannot configure device: error=%d, port=%d\n", ret, 0);
     }
     printf("If %d rte_eth_dev_configure() successful\n", ifidx);
-
-    //unsigned cpu = rte_lcore_id();
-   // unsigned socketid = rte_lcore_to_socket_id(cpu);
 
     rx_pool = rte_mempool_create("rx_pool", 16*1024, MAX_PKT_SIZE, 0,
                                 sizeof (struct rte_pktmbuf_pool_private),
@@ -328,16 +282,11 @@ int main(int argc, char **argv) {
 
     rte_eth_promiscuous_enable(ifidx);
 
-	//printf("HELLO\n");
-	//fflush(stdout);
-
     struct lcore_config lc = lcore_config[0];
     printf("%i", lc.core_id);
 
     uint32_t a;
     for (a = 0; a < 32; a++) {
-	//printf("%d\n", a);
-	//fflush(stdout);
         if (a == rte_get_master_lcore() || !rte_lcore_is_enabled(a)) {
             continue;
         }
@@ -347,8 +296,6 @@ int main(int argc, char **argv) {
         }
     }
     rte_delay_ms(1000);
-    //printf("here\n");
-    //fflush(stdout);
     timer_setup();
 
     for(;;) {
