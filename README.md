@@ -1,5 +1,7 @@
 # Packet Processing in Java
 
+This is a fast packet processing framework implemented in Java based around the Data Plane Development Kit (DPDK) from Intel. It was originally developed as a final year computing project and therefore isn't been developed on.
+
 ### Repository Structure
 
 presentation.pdf - presentation
